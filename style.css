@@ -1,47 +1,56 @@
-/* style.css */
 body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(to bottom, #0d0d0d, #1a1a1a);
-  color: #fff;
+  font-family: Arial, sans-serif;
+  background: #f1f1f1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  width: 300px;
+}
+
+h2, h3 {
   text-align: center;
 }
 
-.app-container {
-  padding: 20px;
-}
-
-header h1 {
-  font-size: 28px;
-  margin-bottom: 0;
-}
-
-#doge-img {
-  width: 180px;
-  margin: 20px auto;
-  cursor: pointer;
-}
-
-.balance-box {
-  margin: 15px 0;
-  background: #222;
+input {
+  display: block;
+  width: 100%;
   padding: 10px;
-  border-radius: 12px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
 }
 
 button {
-  padding: 10px 20px;
+  width: 100%;
+  padding: 10px;
+  background: #008cff;
+  color: white;
   border: none;
-  background: #ffc107;
-  color: #000;
-  font-weight: bold;
-  border-radius: 12px;
-  cursor: pointer;
+  border-radius: 8px;
   margin-top: 10px;
+  cursor: pointer;
 }
 
-footer {
-  margin-top: 30px;
-  font-size: 14px;
+button:hover {
+  background: #006fce;
+}
+
+.form-toggle {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+#message {
+  color: red;
+  text-align: center;
+  margin-top: 10px;
 }
