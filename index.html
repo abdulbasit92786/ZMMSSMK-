@@ -1,0 +1,82 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Free ZMM – Tap to Earn</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- Header -->
+    <header class="header">
+      <h1 class="app-title">ZMM</h1>
+      <div class="balance-box">
+        <div class="balance-label">Balance</div>
+        <div class="balance-amount" id="balance">139.88</div>
+        <button id="manageBtn" class="manage-btn">Manage</button>
+      </div>
+    </header>
+
+    <!-- Daily Reward -->
+    <section class="reward-section">
+      <div class="reward-header">
+        <h2>🎁 Daily Reward</h2>
+        <span class="info-icon">ℹ️</span>
+      </div>
+      <div class="reward-details">
+        <div class="reward-amount" id="rewardAmount">+33</div>
+        <div class="next-checkin">Next Check-in: <span id="timer">04:00:00</span></div>
+      </div>
+    </section>
+
+    <!-- User Info -->
+    <section class="user-stats">
+      <div class="stat">
+        <span class="icon">👤</span>
+        <span>Level</span>
+        <strong id="userLevel">61</strong>
+      </div>
+      <div class="stat">
+        <span class="icon">⚡</span>
+        <span>Power</span>
+        <strong id="userPower">73%</strong>
+      </div>
+      <div class="stat">
+        <span class="icon">📱</span>
+        <span>Distance</span>
+        <strong id="steps">0.03 km</strong>
+      </div>
+    </section>
+
+    <!-- Manage Buttons -->
+    <section class="manage-section" id="manageSection" style="display: none;">
+      <div class="conversion">
+        <p>Your ZMM = $1.20</p>
+      </div>
+      <div class="transfer-buttons">
+        <button class="transfer-btn">Send</button>
+        <button class="receive-btn">Receive</button>
+      </div>
+      <div class="scan-qr">
+        <button class="scan-btn">🔍 Scan QR</button>
+      </div>
+    </section>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-btn active">Home</button>
+      <button class="nav-btn">🎮 Game</button>
+      <button class="nav-btn">📋 Missions</button>
+      <button class="nav-btn">👤 Profile</button>
+    </nav>
+
+  </div>
+
+  <script src="main.js"></script>
+
+</body>
+</html>
