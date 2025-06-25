@@ -3,78 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Buy NFT Plan</title>
-  <link rel="stylesheet" href="style.css" />
-  <style>
-    .nft-card {
-      border: 2px solid #ffc107;
-      border-radius: 12px;
-      padding: 15px;
-      margin: 10px;
-      background: #1a1a1a;
-      color: white;
-    }
-    .nft-card h3 {
-      margin: 5px 0;
-    }
-    .nft-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .buy-btn {
-      background-color: #ffc107;
-      color: black;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-  </style>
+  <title>NFT Plans</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="nft-body">
+<body>
   <div class="container">
-    <h2 class="section-title">🪙 NFT Plans</h2>
-    <div class="nft-container">
+    <h2 class="page-title">🪙 NFT Plans</h2>
 
-      <div class="nft-card">
-        <h3>$1 NFT Plan</h3>
-        <p>Daily Earning: 40 Tokens</p>
-        <button class="buy-btn" onclick="buyNft(1)">Buy Now</button>
-      </div>
+    <p style="text-align:center;">
+      Upgrade your earning with premium NFT Plans.
+    </p>
 
-      <div class="nft-card">
-        <h3>$5 NFT Plan</h3>
-        <p>Daily Earning: 100 Tokens</p>
-        <button class="buy-btn" onclick="buyNft(5)">Buy Now</button>
-      </div>
+    <!-- Plans will render here -->
+    <div id="nftPlans" class="plans-container"></div>
 
-      <div class="nft-card">
-        <h3>$10 NFT Plan</h3>
-        <p>Daily Earning: 150 Tokens</p>
-        <button class="buy-btn" onclick="buyNft(10)">Buy Now</button>
-      </div>
-
-      <div class="nft-card">
-        <h3>$50 NFT Plan</h3>
-        <p>Daily Earning: 300 Tokens</p>
-        <button class="buy-btn" onclick="buyNft(50)">Buy Now</button>
-      </div>
-
-      <div class="nft-card">
-        <h3>$100 NFT Plan</h3>
-        <p>Daily Earning: 400 Tokens</p>
-        <button class="buy-btn" onclick="buyNft(100)">Buy Now</button>
-      </div>
-
+    <!-- Back to Dashboard -->
+    <div style="text-align:center; margin-top: 20px;">
+      <a href="dashboard.html" class="btn">⬅️ Back to Dashboard</a>
     </div>
   </div>
 
-  <script>
-    function buyNft(price) {
-      alert("You selected $" + price + " NFT Plan.\nPayment system will be added soon.");
-    }
-  </script>
+  <!-- Scripts -->
+  <script src="main.js"></script>
+  <script src="nft-plans.js"></script>
 </body>
-  </html>
+</html>
