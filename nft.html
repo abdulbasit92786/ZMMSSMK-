@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NFT Plans</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>💎 NFT Plans</h2>
+
+    <div class="nft-plan">
+      <h4>$1 NFT Plan</h4>
+      <p>⏱ Daily: 40 Tokens</p>
+      <button onclick="activatePlan(1)">Activate</button>
+    </div>
+
+    <div class="nft-plan">
+      <h4>$10 NFT Plan</h4>
+      <p>⏱ Daily: 150 Tokens</p>
+      <button onclick="activatePlan(10)">Activate</button>
+    </div>
+
+    <div class="nft-plan">
+      <h4>$100 NFT Plan</h4>
+      <p>⏱ Daily: 400 Tokens</p>
+      <button onclick="activatePlan(100)">Activate</button>
+    </div>
+
+    <button onclick="goBack()">⬅️ Back to Dashboard</button>
+    <p id="nft-msg"></p>
+  </div>
+
+  <script>
+    function activatePlan(amount) {
+      // NFT plans will require manual admin payment or external link
+      alert(`Redirecting to buy $${amount} NFT (Coming Soon)`);
+
+      // You can replace this with external link logic
+      document.getElementById("nft-msg").innerText =
+        `💡 Please contact admin to activate $${amount} NFT plan.`;
+    }
+
+    function goBack() {
+      window.location.href = "dashboard.html";
+    }
+  </script>
+</body>
+</html>
