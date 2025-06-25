@@ -2,28 +2,59 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <title>Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>User Dashboard</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h2>📱 EarnPro Dashboard</h2>
-    <p id="welcome-msg">Welcome!</p>
+    <h2>👋 Welcome, <span id="username"></span></h2>
 
-    <p><strong>Balance:</strong> <span id="balance">0</span> tokens</p>
+    <div class="balance-box">
+      💰 Balance: <span id="balance">0</span> Tokens
+    </div>
 
-    <button onclick="claimReward()">Claim Free Token (Every 4 Hours)</button>
+    <div class="buttons">
+      <button onclick="location.href='daily-reward.html'">🎁 Daily Reward</button>
+      <button onclick="location.href='mission.html'">🎯 Missions</button>
+      <button onclick="location.href='game.html'">🎮 Game</button>
+      <button onclick="location.href='withdraw.html'">💸 Withdraw</button>
+      <button onclick="location.href='withdraw-history.html'">📜 Withdraw History</button>
+      <button onclick="location.href='nft.html'">🪙 NFT Plans</button>
+      <button onclick="location.href='profile.html'">👤 Profile</button>
+    </div>
 
-    <p><strong>Referral Code:</strong> <span id="ref-code"></span></p>
-    <p><strong>Invite Link:</strong><br><span id="ref-link"></span></p>
+    <div class="actions">
+      <h3>Send / Receive</h3>
+      <button onclick="location.href='send.html'">📤 Send Tokens</button>
+      <button onclick="location.href='receive.html'">📥 Receive Tokens</button>
+    </div>
 
-    <a href="nft.html"><button>🎁 View NFT Plans</button></a>
-    <button onclick="logout()">Logout</button>
-
-    <p id="msg"></p>
+    <div class="logout">
+      <button onclick="logout()">🚪 Logout</button>
+    </div>
   </div>
 
-  <script src="dashboard.js"></script>
+  <script>
+    function logout() {
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("user_email");
+      window.location.href = "login.html";
+    }
+
+    function loadDashboard() {
+      let email = localStorage.getItem("user_email") || "User";
+      document.getElementById("username").innerText = email.split("@")[0];
+
+      let balance = localStorage.getItem("user_balance") || "0";
+      document.getElementById("balance").innerText = balance;
+
+      // NFT daily reward logic
+      giveNFTDailyReward(); // ← from nft-reward.js
+    }
+
+    window.onload = loadDashboard;
+  </script>
+  <script src="nft-reward.js"></script>
 </body>
-</html>
+      </html> 
