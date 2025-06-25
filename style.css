@@ -1,0 +1,154 @@
+/* style.css */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: linear-gradient(to bottom right, #0d0d0d, #1f1f1f);
+  color: white;
+}
+
+.app-container {
+  max-width: 450px;
+  margin: auto;
+  padding: 15px;
+}
+
+.header {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.app-title {
+  font-size: 2em;
+  color: #ffc107;
+  margin: 0;
+}
+
+.balance-box {
+  background: #222;
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+.balance-label {
+  font-size: 0.9em;
+  color: #aaa;
+}
+
+.balance-amount {
+  font-size: 1.8em;
+  font-weight: bold;
+  margin: 5px 0;
+}
+
+.manage-btn {
+  padding: 8px 16px;
+  background-color: #ffc107;
+  color: black;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.reward-section {
+  margin-top: 20px;
+  background: #2c2c2c;
+  border-radius: 10px;
+  padding: 15px;
+}
+
+.reward-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reward-details {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.reward-amount {
+  font-size: 2em;
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.next-checkin {
+  margin-top: 5px;
+  font-size: 0.9em;
+  color: #aaa;
+}
+
+.user-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  background: #333;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.stat {
+  text-align: center;
+  flex: 1;
+}
+
+.stat .icon {
+  font-size: 1.5em;
+  display: block;
+}
+
+.manage-section {
+  background: #2b2b2b;
+  padding: 15px;
+  margin-top: 20px;
+  border-radius: 10px;
+}
+
+.transfer-buttons button {
+  margin: 5px;
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.scan-btn {
+  margin-top: 10px;
+  background-color: #6f42c1;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.bottom-nav {
+  display: flex;
+  justify-content: space-between;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #1c1c1c;
+  padding: 10px;
+  border-top: 1px solid #333;
+}
+
+.nav-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  color: #aaa;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.nav-btn.active {
+  color: #ffc107;
+}
