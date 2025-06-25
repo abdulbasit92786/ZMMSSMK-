@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>📱 EarnPro Dashboard</h2>
+    <p id="welcome-msg">Welcome!</p>
+
+    <p><strong>Balance:</strong> <span id="balance">0</span> tokens</p>
+
+    <button onclick="claimReward()">Claim Free Token (Every 4 Hours)</button>
+
+    <p><strong>Referral Code:</strong> <span id="ref-code"></span></p>
+    <p><strong>Invite Link:</strong><br><span id="ref-link"></span></p>
+
+    <a href="nft.html"><button>🎁 View NFT Plans</button></a>
+    <button onclick="logout()">Logout</button>
+
+    <p id="msg"></p>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
