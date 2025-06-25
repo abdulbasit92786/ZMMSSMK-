@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Withdraw History</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>📜 Withdraw History</h2>
+    <div id="historyList">Loading...</div>
+    <button onclick="goBack()">⬅️ Back</button>
+  </div>
+
+  <script>
+    function goBack() {
+      window.location.href = "dashboard.html";
+    }
+
+    window.onload = () => {
+      let history = JSON.parse(localStorage.getItem("withdrawals") || "[]");
+      let html = "";
+
+      if (history.length === 0) {
+        html = "<p>No withdraw history found.</p>";
+      } else {
+        html = "<ul>";
+        history.forEach((w, i) => {
+          html += `<li><strong>#${i+1}</strong> - ${w.amount} Tokens to ${w.wallet} <br/><small>${w.date}</small></li>`;
+        });
+        html += "</ul>";
+      }
+
+      document.getElementById("historyList").innerHTML = html;
+    };
+  </script>
+</body>
+</html>
