@@ -1,60 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DOGE Dashboard</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
   <div class="container">
-    <h2>👋 Welcome, <span id="username"></span></h2>
+    <h2>👤 Welcome, <span id="username">User</span></h2>
 
-    <div class="balance-box">
-      💰 Balance: <span id="balance">0</span> Tokens
+    <div id="balance-box">
+      <p><strong>💰 Balance:</strong> <span id="balance">0</span> Tokens</p>
     </div>
 
-    <div class="buttons">
-      <button onclick="location.href='daily-reward.html'">🎁 Daily Reward</button>
-      <button onclick="location.href='mission.html'">🎯 Missions</button>
-      <button onclick="location.href='game.html'">🎮 Game</button>
-      <button onclick="location.href='withdraw.html'">💸 Withdraw</button>
-      <button onclick="location.href='withdraw-history.html'">📜 Withdraw History</button>
-      <button onclick="location.href='nft.html'">🪙 NFT Plans</button>
-      <button onclick="location.href='profile.html'">👤 Profile</button>
-    </div>
+    <div id="nft-status-box" class="nft-status-section" style="margin-top: 15px;"></div>
 
-    <div class="actions">
-      <h3>Send / Receive</h3>
-      <button onclick="location.href='send.html'">📤 Send Tokens</button>
-      <button onclick="location.href='receive.html'">📥 Receive Tokens</button>
-    </div>
-
-    <div class="logout">
-      <button onclick="logout()">🚪 Logout</button>
+    <div class="nav-buttons">
+      <a href="profile.html" class="btn">👤 Profile</a>
+      <a href="referral.js" class="btn">🤝 Referral</a>
+      <a href="mission.html" class="btn">🎯 Missions</a>
+      <a href="spin.html" class="btn">🎡 Spin</a>
+      <a href="withdraw.html" class="btn">💸 Withdraw</a>
+      <a href="nft.html" class="btn">🪙 NFT Plans</a>
     </div>
   </div>
 
   <script>
-    function logout() {
-      localStorage.removeItem("isLoggedIn");
-      localStorage.removeItem("user_email");
-      window.location.href = "login.html";
+    // Dummy user balance (replace with real logic)
+    document.getElementById("username").innerText = localStorage.getItem("username") || "User";
+    document.getElementById("balance").innerText = localStorage.getItem("balance") || 0;
+
+    const nftPlans = {
+      "basic": { name: "🟢 Basic ($1)", daily: 40 },
+      "silver": { name: "🔵 Silver ($10)", daily: 100 },
+      "gold": { name: "🟡 Gold ($50)", daily: 250 },
+      "elite": { name: "🔴 Elite ($100)", daily: 400 }
+    };
+
+    function showNFTStatus() {
+      const box = document.getElementById("nft-status-box");
+      const planKey = localStorage.getItem("userNFTKey");
+
+      if (planKey && nftPlans[planKey]) {
+        const plan = nftPlans[planKey];
+        box.innerHTML = `
+          <div style="background: #f0f0f0; padding: 10px; border-radius: 8px;">
+            <strong>NFT Plan:</strong> ${plan.name}<br/>
+            <strong>Daily Reward:</strong> ${plan.daily} Tokens
+          </div>
+        `;
+      } else {
+        box.innerHTML = `
+          <div style="background: #fff0f0; padding: 10px; border-radius: 8px;">
+            ❌ No NFT plan purchased yet.
+          </div>
+        `;
+      }
     }
 
-    function loadDashboard() {
-      let email = localStorage.getItem("user_email") || "User";
-      document.getElementById("username").innerText = email.split("@")[0];
-
-      let balance = localStorage.getItem("user_balance") || "0";
-      document.getElementById("balance").innerText = balance;
-
-      // NFT daily reward logic
-      giveNFTDailyReward(); // ← from nft-reward.js
-    }
-
-    window.onload = loadDashboard;
+    window.addEventListener("load", showNFTStatus);
   </script>
-  <script src="nft-reward.js"></script>
 </body>
-      </html> 
+</html>
