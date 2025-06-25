@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profile</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="profile-body">
+  <div class="container">
+    <h2 class="section-title">👤 User Profile</h2>
+
+    <div class="profile-info">
+      <label>Name</label>
+      <input type="text" id="name" placeholder="Enter your name" />
+
+      <label>Username</label>
+      <input type="text" id="username" placeholder="@username" />
+
+      <label>Phone Number</label>
+      <input type="tel" id="phone" placeholder="+92XXXXXXXXXX" />
+
+      <label>Email</label>
+      <input type="email" id="email" placeholder="your@email.com" />
+
+      <label>Referral Code</label>
+      <input type="text" id="refcode" disabled value="ABC123" />
+
+      <button onclick="saveProfile()">💾 Save Changes</button>
+      <button onclick="logoutUser()" class="logout-btn">🚪 Logout</button>
+    </div>
+  </div>
+
+  <script>
+    function saveProfile() {
+      alert("✅ Profile Updated Successfully!");
+      // یہاں پر آپ چاہیں تو localStorage میں سیو کرو یا API call کرو
+    }
+
+    function logoutUser() {
+      alert("⚠️ Logged out!");
+      window.location.href = "login.html"; // واپس لاگ ان پیج پر بھیج دو
+    }
+  </script>
+</body>
+  </html>
