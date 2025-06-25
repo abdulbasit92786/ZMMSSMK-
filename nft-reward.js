@@ -1,56 +1,34 @@
-const userNFTKey = localStorage.getItem("userNFTKey") || null;
-const claimedToday = JSON.parse(localStorage.getItem("nftDailyClaim") || "{}");
+// Daily NFT Reward Logic
 
-function claimReward(plan) {
-  const today = new Date().toISOString().split("T")[0];
+const nftPlans = {
+  "basic": { amount: 1, daily: 40 },
+  "silver": { amount: 10, daily: 100 },
+  "gold": { amount: 50, daily: 250 },
+  "elite": { amount: 100, daily: 400 }
+};
 
-  // اگر یوزر نے کوئی NFT خریدا ہی نہیں
-  if (!userNFTKey || userNFTKey !== plan.key) {
-    alert("❌ You need to buy this NFT to claim rewards.");
+function giveNFTReward() {
+  const planKey = localStorage.getItem("userNFTKey");
+  const lastReward = localStorage.getItem("lastNFTReward");
+  const now = Date.now();
+
+  if (!planKey || !nftPlans[planKey]) {
+    console.log("No NFT Plan purchased");
     return;
   }
 
-  if (claimedToday[plan.key] === today) {
-    alert("✅ You already claimed today's reward.");
+  if (lastReward && now - parseInt(lastReward) < 24 * 60 * 60 * 1000) {
+    console.log("NFT reward already claimed today");
     return;
   }
 
-  // Add tokens to local storage
-  let tokens = parseInt(localStorage.getItem("tokens") || "0");
-  tokens += plan.dailyTokens;
-  localStorage.setItem("tokens", tokens.toString());
+  let balance = parseInt(localStorage.getItem("balance")) || 0;
+  balance += nftPlans[planKey].daily;
+  localStorage.setItem("balance", balance);
+  localStorage.setItem("lastNFTReward", now);
 
-  claimedToday[plan.key] = today;
-  localStorage.setItem("nftDailyClaim", JSON.stringify(claimedToday));
-
-  alert(`🎉 You received ${plan.dailyTokens} tokens today!`);
-  updateStatusBox();
+  alert(`🎉 NFT Daily Reward Claimed!\n+${nftPlans[planKey].daily} Tokens`);
 }
 
-function buyNFT(planKey) {
-  localStorage.setItem("userNFTKey", planKey);
-  alert(`✅ NFT Purchased: ${planKey.toUpperCase()}`);
-  updateStatusBox();
-}
-
-function updateStatusBox() {
-  const box = document.getElementById("statusBox");
-  const currentNFT = localStorage.getItem("userNFTKey");
-  if (currentNFT) {
-    box.innerText = `🔐 Your Active NFT: ${currentNFT.toUpperCase()}`;
-  } else {
-    box.innerText = `❌ You have not purchased any NFT plan yet.`;
-  }
-}
-
-// Buy button injection
-window.addEventListener("load", () => {
-  document.querySelectorAll(".plan-card").forEach((card, index) => {
-    const plan = plans[index];
-    const btn = document.createElement("button");
-    btn.innerText = "💳 Buy NFT Plan";
-    btn.onclick = () => buyNFT(plan.key);
-    card.appendChild(btn);
-  });
-  updateStatusBox();
-});
+// Call this on dashboard or app load
+giveNFTReward();
