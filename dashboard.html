@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -8,25 +7,21 @@
 </head>
 <body>
   <div class="container">
-    <h2 class="page-title">📊 User Dashboard</h2>
+    <h2 class="page-title">📊 User Dashboard</h2><div id="welcomeUser" style="text-align:center;"></div>
 
-    <div id="welcomeUser" style="text-align:center;"></div>
+<!-- NFT Plan Status -->
+<div id="nftStatus" style="margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 8px;"></div>
 
-    <!-- NFT Plan Status -->
-    <div id="nftStatus" style="margin: 20px 0; padding: 15px; background: #f9f9f9; border-radius: 8px;"></div>
+<!-- Main Dashboard Actions -->
+<div class="dashboard-actions">
+  <a href="nft.html" class="btn">🪙 NFT Plans</a>
+  <a href="withdraw.html" class="btn">💸 Withdraw</a>
+  <a href="referral.html" class="btn">👥 Referral</a>
+  <a href="profile.html" class="btn">👤 Profile</a>
+  <a href="mission.html" class="btn">🎯 Missions</a>
+</div>
 
-    <!-- Main Dashboard Actions -->
-    <div class="dashboard-actions">
-      <a href="nft.html" class="btn">🪙 NFT Plans</a>
-      <a href="withdraw.html" class="btn">💸 Withdraw</a>
-      <a href="referral.html" class="btn">👥 Referral</a>
-      <a href="profile.html" class="btn">👤 Profile</a>
-      <a href="mission.html" class="btn">🎯 Missions</a>
-    </div>
-  </div>
-
-  <!-- INLINE SCRIPT -->
-  <script>
+  </div>  <!-- INLINE SCRIPT -->  <script>
     // Show user welcome
     const username = localStorage.getItem("username") || "Guest";
     document.getElementById("welcomeUser").innerHTML = `<h3>👋 Welcome, ${username}</h3>`;
@@ -51,6 +46,5 @@
     }
 
     showNFTStatus();
-  </script>
-</body>
+  </script></body>
 </html>
