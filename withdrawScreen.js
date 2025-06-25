@@ -1,36 +1,19 @@
 // WithdrawScreen.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
 import Web3 from 'web3';
 
-// Binance Smart Chain Mainnet
 const BSC_RPC_URL = 'https://bsc-dataseed.binance.org/';
 const web3 = new Web3(new Web3.providers.HttpProvider(BSC_RPC_URL));
 
-// ZMM Token Contract Address
 const ZMM_ADDRESS = '0xB3Fa4cD2589Bf86D7A826A6584504aD2b7f2C081';
-// Minimal ABI for transfer & balanceOf
 const ZMM_ABI = [
-  {
-    constant: true,
-    name: 'balanceOf',
-    type: 'function',
-    inputs: [{ name: 'owner', type: 'address' }],
-    outputs: [{ name: 'balance', type: 'uint256' }],
-  },
-  {
-    constant: false,
-    name: 'transfer',
-    type: 'function',
-    inputs: [
-      { name: 'to', type: 'address' },
-      { name: 'value', type: 'uint256' },
-    ],
-    outputs: [{ name: '', type: 'bool' }],
-  },
+  { constant: true, name: 'balanceOf', type: 'function', inputs: [{ name: 'owner', type: 'address' }], outputs: [{ name: 'balance', type: 'uint256' }] },
+  { constant: false, name: 'transfer', type: 'function', inputs: [{ name: 'to', type: 'address' }, { name: 'value', type: 'uint256' }], outputs: [{ name: '', type: 'bool' }] },
 ];
 
-export default function WithdrawScreen({ userAddress, privateKey }) {
+export default function WithdrawScreen({ route }) {
+  const { userAddress, privateKey } = route.params;
   const [toAddress, setToAddress] = useState('');
   const [amountZMM, setAmountZMM] = useState('');
 
@@ -53,9 +36,8 @@ export default function WithdrawScreen({ userAddress, privateKey }) {
 
       const signedTx = await web3.eth.accounts.signTransaction(txObject, privateKey);
       const receipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-      Alert.alert('Success', `Transaction Hash: ${receipt.transactionHash}`);
+      Alert.alert('Success', `TX: ${receipt.transactionHash}`);
     } catch (err) {
-      console.error(err);
       Alert.alert('Error', err.message);
     }
   };
