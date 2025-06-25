@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daily Missions</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="mission-body">
+  <div class="container">
+    <h2 class="section-title">🎯 Daily Mission</h2>
+
+    <div class="mission-box">
+      <h3>📺 Watch Today’s Video</h3>
+      <video id="dailyVideo" width="100%" height="200" controls>
+        <source src="videos/today.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+      <button onclick="completeMission()">✅ Complete Mission</button>
+    </div>
+
+    <div class="mission-status">
+      <h3>📊 Mission Status</h3>
+      <p>Level: <span id="missionLevel">1</span></p>
+      <p>Completed Days: <span id="completedDays">0</span>/3</p>
+    </div>
+
+    <div class="upload-box">
+      <h3>📤 Upload Your Video (Optional)</h3>
+      <input type="file" accept="video/*" />
+      <button onclick="uploadVideo()">📎 Submit</button>
+    </div>
+  </div>
+
+  <script>
+    let completed = 0;
+    function completeMission() {
+      completed++;
+      document.getElementById("completedDays").textContent = completed;
+
+      if (completed >= 3) {
+        let level = parseInt(document.getElementById("missionLevel").textContent);
+        document.getElementById("missionLevel").textContent = level + 1;
+        completed = 0;
+        alert("🎉 Level Up! You earned +1% extra bonus!");
+      } else {
+        alert("✅ Mission Completed! Token Rewarded.");
+      }
+    }
+
+    function uploadVideo() {
+      alert("📤 Your video is submitted for review.");
+    }
+  </script>
+</body>
+</html>
