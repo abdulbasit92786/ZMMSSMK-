@@ -1,56 +1,61 @@
 body {
-  font-family: Arial, sans-serif;
-  background: #f1f1f1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(120deg, #1e1e2f, #272744);
+  color: #fff;
+  margin: 0;
+  padding: 0;
 }
 
 .container {
-  background: white;
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
-  width: 300px;
+  padding: 20px;
+  max-width: 600px;
+  margin: auto;
 }
 
-h2, h3 {
+.centered {
   text-align: center;
+  padding-top: 100px;
 }
 
-input {
-  display: block;
-  width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+.title {
+  font-size: 2em;
+  margin-bottom: 30px;
 }
 
-button {
-  width: 100%;
-  padding: 10px;
-  background: #008cff;
-  color: white;
+.btn {
+  background: #ff5e57;
+  color: #fff;
+  padding: 12px 25px;
+  margin: 10px;
   border: none;
   border-radius: 8px;
-  margin-top: 10px;
-  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
 }
 
-button:hover {
-  background: #006fce;
+.card {
+  background: #33334d;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
 }
 
-.form-toggle {
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #1a1a2e;
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 15px;
+  justify-content: space-around;
+  padding: 10px 0;
 }
 
-#message {
-  color: red;
-  text-align: center;
-  margin-top: 10px;
+.nav-item {
+  color: #fff;
+  font-size: 1.2em;
+  text-decoration: none;
+}
+.nav-item.active {
+  color: #ff5e57;
 }
