@@ -1,14 +1,12 @@
-function login() {
-  const email = document.getElementById("login-email").value;
-  const password = document.getElementById("login-password").value;
+document.getElementById("loginForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-  const savedEmail = localStorage.getItem("user_email");
-  const savedPassword = localStorage.getItem("user_password");
-
-  if (email === savedEmail && password === savedPassword) {
-    localStorage.setItem("user_logged_in", "true");
+  if (email === "test@zmm.com" && password === "123456") {
+    localStorage.setItem("zmm_logged_in", "true");
     window.location.href = "dashboard.html";
   } else {
-    document.getElementById("message").innerText = "Invalid email or password";
+    alert("❌ Invalid login details");
   }
-}
+});
