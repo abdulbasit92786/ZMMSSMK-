@@ -3,86 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NFT Plans</title>
-  <link rel="stylesheet" href="style.css">
+  <title>NFT - ZMSSMK</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h2 class="page-title">🪙 NFT Plans</h2>
+    <h2>🪙 NFT Plans</h2>
+    <p>Upgrade your ZMM earnings with premium NFT Plans.</p>
 
-    <p style="text-align:center;">
-      Upgrade your earning with premium NFT Plans.
-    </p>
-
-    <!-- Plans will render here -->
-    <div id="nftPlans" class="plans-container"></div>
-
-    <!-- Active Plan Display -->
-    <div id="activePlanDisplay" style="margin-top: 20px; text-align:center;"></div>
-
-    <!-- Back to Dashboard -->
-    <div style="text-align:center; margin-top: 20px;">
-      <a href="dashboard.html" class="btn">⬅️ Back to Dashboard</a>
-    </div>
+    <div id="nftPlans" class="card"></div>
   </div>
 
-  <!-- INLINE SCRIPT: No extra JS files -->
-  <script>
-    // Plans List
-    const plans = [
-      { id: "basic", title: "$1 Plan", daily: 40, price: 1 },
-      { id: "silver", title: "$10 Plan", daily: 100, price: 10 },
-      { id: "gold", title: "$50 Plan", daily: 250, price: 50 },
-      { id: "elite", title: "$100 Plan", daily: 400, price: 100 }
-    ];
+  <div class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">🏠 Home</a>
+    <a href="nft.html" class="nav-item active">🪙 NFT</a>
+    <a href="mission.html" class="nav-item">🎯 Missions</a>
+    <a href="profile.html" class="nav-item">👤 Profile</a>
+  </div>
 
-    // Render All NFT Plans
-    function renderPlans() {
-      const container = document.getElementById("nftPlans");
-      container.innerHTML = "";
-
-      plans.forEach(plan => {
-        const card = document.createElement("div");
-        card.className = "plan-card";
-        card.innerHTML = `
-          <h3>${plan.title}</h3>
-          <p>Daily Reward: <strong>${plan.daily} Tokens</strong></p>
-          <button onclick="purchaseNFT('${plan.id}')">Buy for $${plan.price}</button>
-        `;
-        container.appendChild(card);
-      });
-
-      displayActivePlan();
-    }
-
-    // Purchase Plan
-    function purchaseNFT(planId) {
-      const selectedPlan = plans.find(p => p.id === planId);
-      if (!selectedPlan) return;
-
-      localStorage.setItem("activeNFTPlan", JSON.stringify(selectedPlan));
-      alert(`✅ You have purchased: ${selectedPlan.title}`);
-      displayActivePlan();
-    }
-
-    // Show Active Plan
-    function displayActivePlan() {
-      const planData = localStorage.getItem("activeNFTPlan");
-      const displayDiv = document.getElementById("activePlanDisplay");
-
-      if (planData) {
-        const plan = JSON.parse(planData);
-        displayDiv.innerHTML = `
-          <h3 style="color:green;">🛡️ Active Plan: ${plan.title}</h3>
-          <p>Daily Tokens: ${plan.daily}</p>
-        `;
-      } else {
-        displayDiv.innerHTML = `<p style="color:red;">No NFT Plan Active</p>`;
-      }
-    }
-
-    // Initial Load
-    renderPlans();
-  </script>
+  <script src="nft-plans.js"></script>
 </body>
 </html>
