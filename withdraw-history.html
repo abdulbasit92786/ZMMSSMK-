@@ -3,37 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Withdraw History</title>
+  <title>Withdraw History – ZMSSMK</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
     <h2>📜 Withdraw History</h2>
-    <div id="historyList">Loading...</div>
-    <button onclick="goBack()">⬅️ Back</button>
+
+    <div class="card">
+      <p><strong>Last Withdrawals:</strong></p>
+      <ul>
+        <li>20 ZMM → Wallet: Dg123...abc ✅</li>
+        <li>15 ZMM → Wallet: Df567...xyz ✅</li>
+      </ul>
+    </div>
   </div>
 
-  <script>
-    function goBack() {
-      window.location.href = "dashboard.html";
-    }
-
-    window.onload = () => {
-      let history = JSON.parse(localStorage.getItem("withdrawals") || "[]");
-      let html = "";
-
-      if (history.length === 0) {
-        html = "<p>No withdraw history found.</p>";
-      } else {
-        html = "<ul>";
-        history.forEach((w, i) => {
-          html += `<li><strong>#${i+1}</strong> - ${w.amount} Tokens to ${w.wallet} <br/><small>${w.date}</small></li>`;
-        });
-        html += "</ul>";
-      }
-
-      document.getElementById("historyList").innerHTML = html;
-    };
-  </script>
+  <div class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">🏠 Home</a>
+    <a href="nft.html" class="nav-item">🪙 NFT</a>
+    <a href="mission.html" class="nav-item">🎯 Missions</a>
+    <a href="profile.html" class="nav-item">👤 Profile</a>
+  </div>
 </body>
 </html>
