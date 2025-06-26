@@ -1,49 +1,23 @@
-const plans = [
-  {
-    name: "💎 NFT Bronze",
-    price: 1,
-    dailyTokens: 40,
-    key: "bronze"
-  },
-  {
-    name: "🔥 NFT Silver",
-    price: 5,
-    dailyTokens: 100,
-    key: "silver"
-  },
-  {
-    name: "🚀 NFT Gold",
-    price: 10,
-    dailyTokens: 200,
-    key: "gold"
-  },
-  {
-    name: "👑 NFT Diamond",
-    price: 50,
-    dailyTokens: 350,
-    key: "diamond"
-  },
-  {
-    name: "🌌 NFT Legendary",
-    price: 100,
-    dailyTokens: 400,
-    key: "legendary"
-  }
-];
+document.addEventListener("DOMContentLoaded", () => {
+  const plans = [
+    { name: "Free NFT", daily: 10, price: 0 },
+    { name: "Starter NFT", daily: 25, price: 1 },
+    { name: "Pro NFT", daily: 60, price: 3 },
+    { name: "Ultra NFT", daily: 120, price: 5 },
+    { name: "Legendary NFT", daily: 250, price: 10 }
+  ];
 
-// Show all plans
-const plansContainer = document.getElementById("plans");
+  const plansContainer = document.getElementById("nftPlans");
 
-plans.forEach(plan => {
-  const card = document.createElement("div");
-  card.className = "plan-card";
-
-  card.innerHTML = `
-    <h3>${plan.name}</h3>
-    <p>💵 Price: $${plan.price}</p>
-    <p>🎁 Daily Reward: ${plan.dailyTokens} tokens</p>
-    <button onclick='claimReward(${JSON.stringify(plan)})'>🎉 Claim Daily</button>
-  `;
-
-  plansContainer.appendChild(card);
+  plans.forEach(plan => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <h3>${plan.name}</h3>
+      <p>Daily Earning: ${plan.daily} ZMM</p>
+      <p>Price: $${plan.price}</p>
+      <button class="btn">Activate</button>
+    `;
+    plansContainer.appendChild(div);
+  });
 });
