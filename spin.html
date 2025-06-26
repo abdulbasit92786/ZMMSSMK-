@@ -3,83 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Spin & Win</title>
+  <title>Game – ZMSSMK</title>
   <link rel="stylesheet" href="style.css" />
-  <style>
-    .spin-box {
-      text-align: center;
-      margin-top: 30px;
-    }
-    .wheel {
-      width: 200px;
-      height: 200px;
-      border: 10px solid #ffb900;
-      border-radius: 50%;
-      margin: auto;
-      position: relative;
-    }
-    .pointer {
-      position: absolute;
-      top: -30px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 0;
-      border-left: 15px solid transparent;
-      border-right: 15px solid transparent;
-      border-bottom: 30px solid red;
-    }
-    #result {
-      margin-top: 20px;
-      font-size: 18px;
-      font-weight: bold;
-      color: green;
-    }
-  </style>
 </head>
-<body class="spin-body">
+<body>
   <div class="container">
-    <h2 class="section-title">🎰 Daily Spin</h2>
+    <h2>🎰 Spin & Win</h2>
+    <p>Try your luck and earn ZMM tokens!</p>
 
-    <div class="spin-box">
-      <div class="wheel" id="wheel">
-        <div class="pointer"></div>
-      </div>
+    <button class="btn" onclick="spinNow()">🎯 Spin Now</button>
+  </div>
 
-      <p>💰 Select Your Bet:</p>
-      <select id="betAmount">
-        <option value="1">1 Token</option>
-        <option value="2">2 Tokens</option>
-        <option value="5">5 Tokens</option>
-      </select>
-
-      <button onclick="spinWheel()">🎯 Spin Now</button>
-      <div id="result"></div>
-    </div>
+  <div class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">🏠 Home</a>
+    <a href="nft.html" class="nav-item">🪙 NFT</a>
+    <a href="mission.html" class="nav-item">🎯 Missions</a>
+    <a href="profile.html" class="nav-item active">👤 Profile</a>
   </div>
 
   <script>
-    function spinWheel() {
-      let wheel = document.getElementById("wheel");
-      let result = document.getElementById("result");
-      let bet = parseInt(document.getElementById("betAmount").value);
-
-      let angle = Math.floor(Math.random() * 360);
-      wheel.style.transform = "rotate(" + angle + "deg)";
-
-      let outcomes = [-bet, 0, bet, bet * 2];
-      let reward = outcomes[Math.floor(Math.random() * outcomes.length)];
-
-      if (reward > 0) {
-        result.textContent = "🎉 You won " + reward + " tokens!";
-        result.style.color = "green";
-      } else if (reward == 0) {
-        result.textContent = "😐 No win or loss.";
-        result.style.color = "orange";
-      } else {
-        result.textContent = "💸 You lost " + (-reward) + " tokens!";
-        result.style.color = "red";
-      }
+    function spinNow() {
+      const reward = Math.floor(Math.random() * 10) + 1;
+      alert(`🎉 You won ${reward} ZMM!`);
     }
   </script>
 </body>
