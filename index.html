@@ -1,16 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ZMMSSMK App</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>ZMMSSMK - Sign Up / Login</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container centered">
-    <h1 class="title">🚀 Welcome to ZMMSSMK</h1>
-    <a href="login.html" class="btn">🔐 Login</a>
-    <a href="signup.html" class="btn">📝 Signup</a>
+  <div class="container">
+    <h2>ZMMSSMK</h2>
+    
+    <div class="form-box">
+      <h3>Create Account</h3>
+      <input type="email" id="signupEmail" placeholder="Enter your email">
+      <input type="password" id="signupPassword" placeholder="Create a password">
+      <button onclick="signup()">Sign Up</button>
+
+      <hr>
+
+      <h3>Already have an account?</h3>
+      <input type="email" id="loginEmail" placeholder="Email">
+      <input type="password" id="loginPassword" placeholder="Password">
+      <button onclick="login()">Login</button>
+    </div>
   </div>
+
+  <script src="main.js"></script>
 </body>
 </html>
