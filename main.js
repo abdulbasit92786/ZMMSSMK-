@@ -1,61 +1,48 @@
-function toggleMenu() {
-  const sidebar = document.getElementById("sidebar");
-  sidebar.style.left = (sidebar.style.left === "0px") ? "-250px" : "0px";
-}
+function signUp() {
+  const email = document.getElementById("email").value;
+  const pass = document.getElementById("password").value;
+  const ref = document.getElementById("referral").value;
 
-function signup() {
-  const email = document.getElementById("signupEmail").value;
-  const password = document.getElementById("signupPassword").value;
-
-  if (!email || !password) {
-    alert("Please enter all fields!");
+  if (!email || !pass || !ref) {
+    alert("All fields are required!");
     return;
   }
 
-  const users = JSON.parse(localStorage.getItem("users") || "[]");
-  const userExists = users.find(u => u.email === email);
-  if (userExists) {
-    alert("⚠️ Email already registered.");
-    return;
-  }
+  localStorage.setItem("signupEmail", email);
+  localStorage.setItem("signupPass", pass);
+  localStorage.setItem("refCode", ref);
 
-  users.push({ email, password, verified: false });
-  localStorage.setItem("users", JSON.stringify(users));
-  localStorage.setItem("pending_email", email);
-  localStorage.setItem("vcode", "123456"); // Fake code
+  // Simulate sending verification
+  const code = Math.floor(100000 + Math.random() * 900000);
+  localStorage.setItem("verifyCode", code);
+  alert("Verification code sent: " + code);
+
   window.location.href = "verify.html";
 }
 
-function verifyCode() {
-  const code = document.getElementById("vcode").value;
-  const vcode = localStorage.getItem("vcode");
-  const email = localStorage.getItem("pending_email");
+function confirmCode() {
+  const inputCode = document.getElementById("code").value;
+  const storedCode = localStorage.getItem("verifyCode");
 
-  if (code === vcode) {
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    const updated = users.map(u => {
-      if (u.email === email) u.verified = true;
-      return u;
-    });
-    localStorage.setItem("users", JSON.stringify(updated));
-    alert("✅ Verified successfully!");
+  if (inputCode === storedCode) {
+    alert("Account Verified!");
     window.location.href = "dashboard.html";
   } else {
-    alert("❌ Invalid Code");
+    alert("Wrong code!");
   }
 }
 
-function login() {
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPassword").value;
+function goToLogin() {
+  const email = prompt("Enter your Email:");
+  const pass = prompt("Enter your Password:");
 
-  const users = JSON.parse(localStorage.getItem("users") || "[]");
-  const user = users.find(u => u.email === email && u.password === password && u.verified);
+  const storedEmail = localStorage.getItem("signupEmail");
+  const storedPass = localStorage.getItem("signupPass");
 
-  if (user) {
-    alert("✅ Login successful!");
+  if (email === storedEmail && pass === storedPass) {
+    alert("Login Successful!");
     window.location.href = "dashboard.html";
   } else {
-    alert("❌ Invalid credentials or not verified.");
+    alert("Invalid credentials");
   }
 }
