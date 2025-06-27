@@ -7,21 +7,14 @@
 </head>
 <body>
   <div class="container">
-    <h2>ZMMSSMK</h2>
-    
-    <div class="form-box">
-      <h3>Create Account</h3>
-      <input type="email" id="signupEmail" placeholder="Enter your email">
-      <input type="password" id="signupPassword" placeholder="Create a password">
-      <button onclick="signup()">Sign Up</button>
+    <h2>Welcome to ZMMSSMK</h2>
 
-      <hr>
+    <input type="email" id="email" placeholder="Enter Email" required>
+    <input type="password" id="password" placeholder="Enter Password" required>
+    <input type="text" id="referral" placeholder="Enter Referral Code" required>
 
-      <h3>Already have an account?</h3>
-      <input type="email" id="loginEmail" placeholder="Email">
-      <input type="password" id="loginPassword" placeholder="Password">
-      <button onclick="login()">Login</button>
-    </div>
+    <button onclick="signUp()">Sign Up</button>
+    <button onclick="goToLogin()">Login</button>
   </div>
 
   <script src="main.js"></script>
