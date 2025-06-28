@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZMM Home</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+  <style>
+    .home {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: #00cc66;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: white;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    .token-box {
+      background: #f0fff0;
+      padding: 20px;
+      border-radius: 15px;
+      width: 100%;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .actions button {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="home" id="mainBox">
+      <div class="logo">ZMM</div>
+      <h2>Welcome to ZMM App</h2>
+      <div class="token-box">
+        <p><strong>Your Balance:</strong> 0 ZMM</p>
+        <p><strong>Referral Code:</strong> AB1234</p>
+      </div>
+      <div class="actions">
+        <button onclick="alert('Claimed 1 ZMM!')">🟢 Claim ZMM</button>
+        <button onclick="alert('Referral copied!')">🔗 Copy Referral Link</button>
+        <button onclick="alert('Withdraw coming soon!')">💸 Withdraw</button>
+        <button onclick="alert('More features coming soon!')">⚙️ Settings</button>
+      </div>
+    </div>
+  </div>
+</body>
+    </html>
