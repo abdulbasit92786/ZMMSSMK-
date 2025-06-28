@@ -1,1 +1,19 @@
-<!-- style.css -->body { font-family: Arial, sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; } .container, .form-box { background: white; padding: 20px 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); text-align: center; } input { display: block; width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; } button, .btn { background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; margin-top: 10px; } button:hover, .btn:hover { background-color: #0056b3; }
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to right, #00c6ff, #0072ff);
+  color: white;
+  text-align: center;
+  padding-top: 100px;
+}
+.container {
+  background-color: rgba(0,0,0,0.3);
+  padding: 40px;
+  border-radius: 15px;
+  display: inline-block;
+}
+input, button {
+  margin: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+}
