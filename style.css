@@ -1,90 +1,59 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Segoe UI', sans-serif;
-}
+/* style.css */
 
 body {
-  background: radial-gradient(#020024, #090979, #00d4ff);
-  color: #fff;
-}
-
-header {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(to bottom right, #ffffff, #e0ffe0);
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  background-color: #010f30;
-  padding: 1rem 2rem;
+  height: 100vh;
 }
 
-.logo {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: #0ff;
+.container {
+  background: #fff;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  width: 320px;
+  text-align: center;
 }
 
-nav a {
-  margin: 0 0.8rem;
+h2 {
+  margin-bottom: 25px;
+  color: #00a859;
+}
+
+input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background-color: #00cc66;
   color: white;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #00994d;
+}
+
+a {
+  display: block;
+  margin-top: 15px;
+  color: #00a859;
   text-decoration: none;
-  font-size: 1rem;
-}
-
-.btn {
-  background-color: #00c2ff;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  color: #000;
-  font-weight: bold;
-}
-
-.hero {
-  text-align: center;
-  padding: 3rem 1rem;
-}
-
-.hero h1 {
-  font-size: 2rem;
-  color: #fff;
-  margin-bottom: 1rem;
-}
-
-.hero p {
-  font-size: 1.2rem;
-  color: #ccc;
-  margin-bottom: 2rem;
-}
-
-.features {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.5rem;
-  padding: 2rem;
-  background-color: #021d4a;
-}
-
-.feature {
-  background: #032e65;
-  padding: 1rem;
-  border-radius: 12px;
-  box-shadow: 0 0 10px #00f0ff50;
-}
-
-.feature h2 {
-  margin-bottom: 0.5rem;
-  font-size: 1.2rem;
-  color: #0ff;
-}
-
-.feature p {
-  font-size: 0.95rem;
-  color: #ddd;
-}
-
-footer {
-  text-align: center;
-  padding: 2rem 1rem;
-  background-color: #010c2f;
-  font-size: 0.9rem;
+  font-size: 14px;
   }
