@@ -1,35 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Verify Email</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #222;
-      color: white;
-      text-align: center;
-      padding-top: 60px;
-    }
-    input, button {
-      margin: 10px auto;
-      display: block;
-      padding: 10px;
-      width: 200px;
-      border-radius: 6px;
-      border: none;
-    }
-    button {
-      background-color: #1abc9c;
-      color: white;
-      font-weight: bold;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>Verify Your Email</h2>
-  <p>A 6-digit code has been sent to your email. Enter it below:</p>
-  <input type="text" placeholder="Enter 6-digit code">
-  <button onclick="window.location.href='home.html'">Verify</button>
+  <div class="form-box">
+    <h2>Email Verification</h2>
+    <p>We've sent a 6-digit code to your email. Please enter it below:</p>
+    <form action="home.html">
+      <input type="text" placeholder="Enter 6-digit Code" required>
+      <button type="submit">Confirm</button>
+    </form>
+  </div>
 </body>
 </html>
