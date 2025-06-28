@@ -1,19 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Create Account</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Register</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h2>Create Account</h2>
-    <input type="email" placeholder="Enter your email" id="email">
-    <input type="text" placeholder="Enter username" id="username">
-    <input type="password" placeholder="Enter password" id="password">
-    <button onclick="sendVerificationCode()">Register</button>
+    <h2>🔐 Create Account</h2>
+    <input type="email" id="email" placeholder="Enter your email" />
+    <input type="text" id="username" placeholder="Enter your username" />
+    <input type="password" id="password" placeholder="Enter your password" />
+    <a href="#" class="btn" onclick="register()">Register</a>
+    <div class="message" id="message"></div>
   </div>
-  <script src="register.js"></script>
+
+  <script src="script.js"></script>
+  <script src="email.js"></script>
+  <script>
+    function register() {
+      const email = document.getElementById("email").value.trim();
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      if (!email || !username || !password) {
+        document.getElementById("message").innerText = "All fields required!";
+        return;
+      }
+
+      const success = saveUser(email, username, password);
+      if (!success) {
+        document.getElementById("message").innerText = "Email already registered.";
+        return;
+      }
+
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      sessionStorage.setItem("email", email);
+      sessionStorage.setItem("code", code);
+      sendCodeToEmail(email, code); // function in email.js
+      window.location.href = "verify.html";
+    }
+  </script>
 </body>
-</html>
+  </html>
