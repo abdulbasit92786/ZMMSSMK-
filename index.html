@@ -1,87 +1,35 @@
-<!-- index.html --><!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZMM</title>
-  <link rel="stylesheet" href="style.css">
+  <title>ZMM Login/Register</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: linear-gradient(to right, #1b1b1b, #2b2b2b);
+      color: white;
+      text-align: center;
+      padding-top: 80px;
+    }
+    h1 {
+      margin-bottom: 40px;
+    }
+    a {
+      display: block;
+      margin: 20px auto;
+      width: 200px;
+      padding: 15px;
+      background: #00d084;
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>ZMM</h1>
-    <button onclick="location.href='register.html'">Register</button>
-    <button onclick="location.href='login.html'">Login</button>
-  </div>
+  <h1>Welcome to ZMM</h1>
+  <a href="register.html">Create Account</a>
+  <a href="login.html">Login</a>
 </body>
-</html><!-- register.html --><!DOCTYPE html><html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="container">
-    <h2>Register Your Account</h2>
-    <input type="email" placeholder="Enter your email" required>
-    <input type="text" placeholder="Enter your username" required>
-    <input type="password" placeholder="Enter your password" required>
-    <button onclick="location.href='verify.html'">Register</button>
-  </div>
-</body>
-</html><!-- verify.html --><!DOCTYPE html><html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Verify Email</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="container">
-    <h2>Verify Your Email</h2>
-    <p>We sent a 6-digit code to your email.</p>
-    <input type="text" placeholder="Enter verification code" required>
-    <button onclick="location.href='registered.html'">Confirm</button>
-  </div>
-</body>
-</html><!-- registered.html --><!DOCTYPE html><html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Success</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="container">
-    <h2>✅ Your account has been registered!</h2>
-    <button onclick="location.href='login.html'">Go to Login</button>
-  </div>
-</body>
-</html><!-- login.html --><!DOCTYPE html><html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="container">
-    <h2>Login to ZMM</h2>
-    <input type="email" placeholder="Enter your email" required>
-    <input type="password" placeholder="Enter your password" required>
-    <button onclick="location.href='home.html'">Login</button>
-  </div>
-</body>
-</html><!-- already.html (optional) --><!DOCTYPE html><html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Already Registered</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="container">
-    <h2>⚠️ This email is already registered.</h2>
-    <button onclick="location.href='login.html'">Go to Login</button>
-  </div>
-</body>
-  </html>
+</html>
