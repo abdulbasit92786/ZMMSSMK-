@@ -1,0 +1,31 @@
+// Store user info locally (for demonstration only)
+function saveUser(email, username, password) {
+  const users = JSON.parse(localStorage.getItem("users") || "[]");
+  const exists = users.find(u => u.email === email);
+  if (exists) return false;
+  users.push({ email, username, password, verified: false });
+  localStorage.setItem("users", JSON.stringify(users));
+  return true;
+}
+
+function verifyEmail(email, code) {
+  const sentCode = sessionStorage.getItem("code");
+  if (code !== sentCode) return false;
+  const users = JSON.parse(localStorage.getItem("users") || "[]");
+  const index = users.findIndex(u => u.email === email);
+  if (index >= 0) {
+    users[index].verified = true;
+    localStorage.setItem("users", JSON.stringify(users));
+    return true;
+  }
+  return false;
+}
+
+function loginUser(email, password) {
+  const users = JSON.parse(localStorage.getItem("users") || "[]");
+  const user = users.find(u => u.email === email && u.password === password);
+  if (!user) return "not_found";
+  if (!user.verified) return "not_verified";
+  sessionStorage.setItem("loggedInUser", JSON.stringify(user));
+  return "success";
+}
