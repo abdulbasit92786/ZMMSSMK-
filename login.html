@@ -1,35 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>ZMM - Login</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #111;
-      color: white;
-      text-align: center;
-      padding-top: 60px;
-    }
-    input, button {
-      margin: 15px auto;
-      display: block;
-      padding: 10px;
-      width: 250px;
-      border-radius: 6px;
-      border: none;
-    }
-    button {
-      background-color: #3498db;
-      color: white;
-      font-weight: bold;
-    }
-  </style>
+  <title>Login</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>Login to ZMM</h2>
-  <input type="email" placeholder="Enter your email">
-  <input type="password" placeholder="Enter your password">
-  <button onclick="window.location.href='home.html'">Login</button>
+  <div class="form-box">
+    <h2>Login to Your Account</h2>
+    <form action="home.html">
+      <input type="email" placeholder="Enter your Email" required>
+      <input type="password" placeholder="Enter your Password" required>
+      <button type="submit">Login</button>
+    </form>
+  </div>
 </body>
 </html>
