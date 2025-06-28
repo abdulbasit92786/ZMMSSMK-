@@ -1,55 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ZMM – The Future of Crypto Investing</title>
+  <title>ZMM App</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
-    <div class="logo">ZMM</div>
-    <nav>
-      <a href="#">Home</a>
-      <a href="#">Investments</a>
-      <a href="#">Partners</a>
-      <a href="#">ZMM Token</a>
-      <a href="#">FAQ</a>
-      <a href="#">Login</a>
-      <a href="#" class="btn">Register</a>
-    </nav>
-  </header>
+  <div class="container">
+    <h1>ZMM App</h1><div class="auth-buttons">
+  <button onclick="showRegister()">Register</button>
+  <button onclick="showLogin()">Login</button>
+</div>
 
-  <section class="hero">
-    <h1>ZMM – The World of Automated Crypto Investing</h1>
-    <p>Achieve your financial goals with secure ZMM smart technology.</p>
-    <div class="cta">
-      <a href="#" class="btn">BONUS 100 ZMM</a>
-    </div>
-  </section>
+<div id="register-form" class="form hidden">
+  <h2>Register</h2>
+  <input type="text" placeholder="Username" id="reg-username" />
+  <input type="email" placeholder="Email" id="reg-email" />
+  <input type="password" placeholder="Password" id="reg-password" />
+  <button onclick="submitRegister()">Submit</button>
+</div>
 
-  <section class="features">
-    <div class="feature">
-      <h2>🧠 AI-Powered Investments</h2>
-      <p>Let AI manage your crypto with precision and speed.</p>
-    </div>
-    <div class="feature">
-      <h2>📈 Real-Time Earnings</h2>
-      <p>Track your profits in live time with ZMM dashboard.</p>
-    </div>
-    <div class="feature">
-      <h2>⚡ Instant Withdrawals</h2>
-      <p>No waiting — get your ZMM tokens fast and secure.</p>
-    </div>
-    <div class="feature">
-      <h2>🔐 Smart Security</h2>
-      <p>Fully encrypted vault system for maximum safety.</p>
-    </div>
-  </section>
+<div id="email-verification" class="form hidden">
+  <h2>Email Verification</h2>
+  <p>We have sent a 6-digit code to your email. Please enter it below.</p>
+  <input type="text" placeholder="Enter Code" id="verify-code" maxlength="6" />
+  <button onclick="submitVerification()">Verify</button>
+</div>
 
-  <footer>
-    <p>Smart Contract: 0xZMM1234567890ABCDEF123456789ZMM</p>
-    <p>&copy; 2025 ZMM | All Rights Reserved</p>
-  </footer>
-</body>
-      </html>
+<div id="login-form" class="form hidden">
+  <h2>Login</h2>
+  <input type="email" placeholder="Email" id="login-email" />
+  <input type="password" placeholder="Password" id="login-password" />
+  <button onclick="submitLogin()">Login</button>
+</div>
+
+<div id="home-page" class="form hidden">
+  <h2>Welcome to ZMM Dashboard</h2>
+  <p>Your account has been created or logged in successfully.</p>
+</div>
+
+<div id="message"></div>
+
+  </div>  <script src="script.js"></script></body>
+    </html>
