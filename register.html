@@ -1,18 +1,19 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Register</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="form-box">
-    <h2>Create Your Account</h2>
-    <form action="verify.html">
-      <input type="email" placeholder="Enter your Email" required>
-      <input type="text" placeholder="Enter your Username" required>
-      <input type="password" placeholder="Enter your Password" required>
-      <button type="submit">Register</button>
-    </form>
+  <div class="container">
+    <h2>Create Account</h2>
+    <input type="email" placeholder="Enter your email" id="email">
+    <input type="text" placeholder="Enter username" id="username">
+    <input type="password" placeholder="Enter password" id="password">
+    <button onclick="sendVerificationCode()">Register</button>
   </div>
+  <script src="register.js"></script>
 </body>
 </html>
