@@ -1,17 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Verify Code</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Verify Email</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h2>Enter Verification Code</h2>
-    <input type="text" placeholder="Enter 6-digit code" id="code">
-    <button onclick="verifyCode()">Confirm</button>
+    <h2>📩 Verify Your Email</h2>
+    <p>We have sent a 6-digit code to your email</p>
+    <input type="text" id="code" placeholder="Enter verification code" />
+    <a href="#" class="btn" onclick="verify()">Verify</a>
+    <div class="message" id="message"></div>
   </div>
-  <script src="verify.js"></script>
+
+  <script src="script.js"></script>
+  <script>
+    function verify() {
+      const code = document.getElementById("code").value.trim();
+      const email = sessionStorage.getItem("email");
+
+      if (!code || !email) {
+        document.getElementById("message").innerText = "Missing code or email.";
+        return;
+      }
+
+      const valid = verifyEmail(email, code);
+      if (valid) {
+        window.location.href = "login.html";
+      } else {
+        document.getElementById("message").innerText = "Invalid verification code.";
+      }
+    }
+  </script>
 </body>
 </html>
