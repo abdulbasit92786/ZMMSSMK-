@@ -1,17 +1,18 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="form-box">
-    <h2>Login to Your Account</h2>
-    <form action="home.html">
-      <input type="email" placeholder="Enter your Email" required>
-      <input type="password" placeholder="Enter your Password" required>
-      <button type="submit">Login</button>
-    </form>
+  <div class="container">
+    <h2>Login to ZMMSSMK</h2>
+    <input type="email" placeholder="Enter your email" id="login_email">
+    <input type="password" placeholder="Enter your password" id="login_pass">
+    <button onclick="login()">Login</button>
   </div>
+  <script src="login.js"></script>
 </body>
 </html>
