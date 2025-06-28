@@ -1,18 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
   <title>Login</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h2>Login to ZMMSSMK</h2>
-    <input type="email" placeholder="Enter your email" id="login_email">
-    <input type="password" placeholder="Enter your password" id="login_pass">
-    <button onclick="login()">Login</button>
+    <h2>🔐 Login to Your Account</h2>
+    <input type="email" id="email" placeholder="Enter your email" />
+    <input type="password" id="password" placeholder="Enter your password" />
+    <a href="#" class="btn" onclick="login()">Login</a>
+    <div class="message" id="message"></div>
   </div>
-  <script src="login.js"></script>
+
+  <script src="script.js"></script>
+  <script>
+    function login() {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      const result = loginUser(email, password);
+      if (result === "success") {
+        window.location.href = "dashboard.html";
+      } else if (result === "not_verified") {
+        document.getElementById("message").innerText = "Email not verified.";
+      } else {
+        document.getElementById("message").innerText = "Invalid login credentials.";
+      }
+    }
+  </script>
 </body>
 </html>
