@@ -1,12 +1,41 @@
-<!-- 7️⃣ home.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Home Dashboard</title>
+  <meta charset="UTF-8">
+  <title>ZMMK - Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <h1>Welcome to Free Doge App</h1>
-  <p>You are now logged in!</p>
+<body class="dashboard-body">
+
+  <!-- App Name -->
+  <header class="app-header">
+    <h1>ZMMK App</h1>
+  </header>
+
+  <!-- Token Info -->
+  <section class="token-section">
+    <h2>ZMM Token</h2>
+    <p>Your Balance: <strong id="token-balance">0</strong> ZMM</p>
+    <button onclick="claimReward()">Claim Daily Reward</button>
+  </section>
+
+  <!-- Referral Link -->
+  <section class="referral-section">
+    <h3>Referral Link</h3>
+    <input type="text" id="refLink" value="https://t.me/YourBot?start=USERID" readonly>
+    <button onclick="copyReferral()">Copy Link</button>
+  </section>
+
+  <!-- Bottom Nav Bar -->
+  <nav class="bottom-nav">
+    <a href="dashboard.html">🏠 Home</a>
+    <a href="mission.html">🎯 Mission</a>
+    <a href="nft.html">🪙 NFT</a>
+    <a href="wallet.html">💼 Wallet</a>
+    <a href="profile.html">👤 Profile</a>
+  </nav>
+
+  <script src="script.js"></script>
 </body>
 </html>
