@@ -1,97 +1,41 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
+  <title>ZMMK - Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZMM App Dashboard</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to bottom, #1a1a40, #3a3a7a);
-      color: white;
-    }
-    header {
-      padding: 20px;
-      text-align: center;
-      background: #2c2c6c;
-      font-size: 28px;
-      font-weight: bold;
-      color: #FFD700;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    }
-    .token-box {
-      text-align: center;
-      padding: 30px 20px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 12px;
-      margin: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    }
-    .token-name {
-      font-size: 24px;
-      margin-bottom: 10px;
-    }
-    .reward-box {
-      text-align: center;
-      margin: 20px;
-      padding: 20px;
-      background: #2f2f6f;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-    }
-    .reward-box button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      background-color: #FFD700;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      color: #000;
-      cursor: pointer;
-    }
-    .referral {
-      text-align: center;
-      margin: 20px;
-      padding: 15px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 10px;
-    }
-    footer {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-around;
-      background: #1b1b3a;
-      padding: 10px 0;
-      border-top: 1px solid #444;
-    }
-    footer button {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 14px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>  <header>ZMMSSMK ایپ</header>  <div class="token-box">
-    <div class="token-name">ZMM ٹوکن</div>
-    <div>بیلنس: 0.0000 ZMM</div>
-  </div>  <div class="reward-box">
-    <h3>🎁 ڈیلی ریوارڈ</h3>
-    <p>ہر 4 گھنٹے بعد حاصل کریں</p>
-    <button>ریوارڈ کلیم کریں</button>
-  </div>  <div class="referral">
-    <h3>🔗 ریفرل لنک</h3>
-    <p>اپنے دوستوں کو مدعو کریں اور بونس حاصل کریں</p>
-    <p><code>https://zmmapp.com/?ref=آپ_کا_نام</code></p>
-  </div>  <footer>
-    <button>🏠 ہوم</button>
-    <button>🎯 مشن</button>
-    <button>🪙 این ایف ٹی</button>
-    <button>💼 والٹ</button>
-    <button>👤 پروفائل</button>
-  </footer></body>
-  </html>
+<body class="dashboard-body">
+
+  <!-- App Name -->
+  <header class="app-header">
+    <h1>ZMMK App</h1>
+  </header>
+
+  <!-- Token Info -->
+  <section class="token-section">
+    <h2>ZMM Token</h2>
+    <p>Your Balance: <strong id="token-balance">0</strong> ZMM</p>
+    <button onclick="claimReward()">Claim Daily Reward</button>
+  </section>
+
+  <!-- Referral Link -->
+  <section class="referral-section">
+    <h3>Referral Link</h3>
+    <input type="text" id="refLink" value="https://t.me/YourBot?start=USERID" readonly>
+    <button onclick="copyReferral()">Copy Link</button>
+  </section>
+
+  <!-- Bottom Nav Bar -->
+  <nav class="bottom-nav">
+    <a href="dashboard.html">🏠 Home</a>
+    <a href="mission.html">🎯 Mission</a>
+    <a href="nft.html">🪙 NFT</a>
+    <a href="wallet.html">💼 Wallet</a>
+    <a href="profile.html">👤 Profile</a>
+  </nav>
+
+  <script src="script.js"></script>
+</body>
+      </html>
