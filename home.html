@@ -1,149 +1,157 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ZMMK Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Poppins', sans-serif;
-    }
     body {
-      background: linear-gradient(to bottom right, #0f2027, #203a43, #2c5364);
-      color: #fff;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(145deg, #d9afd9, #97d9e1);
+      color: #333;
+      text-align: center;
+    }
+
+    .container {
       padding: 20px;
     }
-    header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    header h1 {
+
+    .title {
       font-size: 24px;
-      font-weight: 600;
-      color: #00ffd5;
-    }
-    .token-info {
-      background: rgba(255,255,255,0.1);
-      padding: 15px;
-      border-radius: 10px;
-      text-align: center;
-      margin-bottom: 15px;
-    }
-    .token-info h2 {
-      font-size: 18px;
-      color: #fff;
-    }
-    .token-info p {
-      font-size: 16px;
-      color: #00ff99;
-    }
-    .referral {
-      background: rgba(255,255,255,0.08);
-      padding: 15px;
-      border-radius: 10px;
-      text-align: center;
-      margin-bottom: 15px;
-    }
-    .referral input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      margin-top: 10px;
-      font-size: 14px;
-    }
-    .reward {
-      background: rgba(255,255,255,0.08);
-      padding: 15px;
-      border-radius: 10px;
-      text-align: center;
-      margin-bottom: 70px;
-    }
-    .reward button {
-      padding: 10px 20px;
-      background: #00ff99;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      color: #000;
       font-weight: bold;
-      cursor: pointer;
-    }
-    .reward .timer {
-      font-size: 16px;
       margin-top: 10px;
-      color: #ffcc00;
     }
-    nav {
+
+    .subtitle {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+
+    .balance {
+      font-size: 16px;
+      margin: 10px 0;
+      background-color: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+
+    .referral-box {
+      margin: 15px 0;
+    }
+
+    .referral-input {
+      width: 90%;
+      padding: 8px;
+      border: 1px solid #aaa;
+      border-radius: 6px;
+      margin-top: 8px;
+    }
+
+    .btn {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #6c63ff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .btn:disabled {
+      background-color: gray;
+    }
+
+    .countdown {
+      margin-top: 10px;
+      color: red;
+      font-weight: bold;
+    }
+
+    .nav {
       position: fixed;
       bottom: 0;
-      left: 0;
-      right: 0;
+      width: 100%;
+      background-color: #fff;
       display: flex;
       justify-content: space-around;
-      background: #111;
       padding: 10px 0;
-      border-top: 2px solid #00ffd5;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
     }
-    nav a {
-      color: #fff;
-      text-decoration: none;
-      text-align: center;
+
+    .nav a {
+      color: #6c63ff;
       font-size: 14px;
+      text-decoration: none;
     }
-    nav a:hover {
-      color: #00ffd5;
+
+    .nav a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>ZMMK APP</h1>
-  </header>  <div class="token-info">
-    <h2>Token: ZMM</h2>
-    <p>Your Balance: 120.00 ZMM</p>
-  </div>  <div class="referral">
-    <h2>Your Referral Link</h2>
-    <input type="text" value="https://zmmk.app/ref?user=1234" readonly>
-  </div>  <div class="reward">
-    <h2>Daily Reward</h2>
-    <button onclick="claimReward()" id="claimBtn">Claim Reward</button>
-    <p class="timer" id="countdown"></p>
-  </div>  <nav>
+
+  <div class="container">
+    <div class="title">ZMMK App</div>
+    <div class="subtitle">ZMM Token Dashboard</div>
+
+    <div class="balance">Your Balance: <strong>0 ZMM</strong></div>
+
+    <div class="referral-box">
+      <div>Referral Link:</div>
+      <input type="text" class="referral-input" id="refLink" value="https://t.me/your_bot?start=123456" readonly />
+      <button class="btn" onclick="copyLink()">Copy Link</button>
+    </div>
+
+    <div>
+      <button class="btn" id="claimBtn" onclick="claimReward()">Claim Daily Reward</button>
+      <div id="countdown" class="countdown"></div>
+    </div>
+  </div>
+
+  <div class="nav">
     <a href="dashboard.html">🏠 Home</a>
     <a href="mission.html">🎯 Mission</a>
     <a href="nft.html">🖼 NFT</a>
     <a href="wallet.html">💼 Wallet</a>
     <a href="profile.html">👤 Profile</a>
-  </nav>  <script>
-    function claimReward() {
-      let btn = document.getElementById("claimBtn");
-      btn.disabled = true;
-      btn.innerText = "Claimed";
-      startTimer(14400); // 4 hours in seconds
+  </div>
+
+  <script>
+    function copyLink() {
+      const refLink = document.getElementById("refLink");
+      refLink.select();
+      document.execCommand("copy");
+      alert("Referral link copied!");
     }
 
-    function startTimer(duration) {
-      let timer = duration;
-      const countdown = document.getElementById("countdown");
-      const interval = setInterval(() => {
-        let hours = Math.floor(timer / 3600);
-        let minutes = Math.floor((timer % 3600) / 60);
-        let seconds = timer % 60;
+    let claimCooldown = 60 * 60 * 4; // 4 hours in seconds
+    let countdownEl = document.getElementById("countdown");
+    let claimBtn = document.getElementById("claimBtn");
 
-        countdown.innerText = `${hours}h ${minutes}m ${seconds}s left`;
+    function claimReward() {
+      claimBtn.disabled = true;
+      startCountdown(claimCooldown);
+    }
 
-        if (--timer < 0) {
+    function startCountdown(seconds) {
+      let interval = setInterval(() => {
+        let h = Math.floor(seconds / 3600);
+        let m = Math.floor((seconds % 3600) / 60);
+        let s = seconds % 60;
+
+        countdownEl.textContent = `Next claim in ${h}h ${m}m ${s}s`;
+
+        if (--seconds < 0) {
           clearInterval(interval);
-          countdown.innerText = "You can claim again!";
-          const btn = document.getElementById("claimBtn");
-          btn.disabled = false;
-          btn.innerText = "Claim Reward";
+          countdownEl.textContent = "";
+          claimBtn.disabled = false;
         }
       }, 1000);
     }
-  </script></body>
-      </html>
+  </script>
+
+</body>
+</html>
