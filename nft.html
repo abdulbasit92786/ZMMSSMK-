@@ -1,0 +1,65 @@
+<!-- nft.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NFT Plans</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="nft-page">
+  <div class="container">
+    <h2>🧩 Your Current Plan:</h2>
+    <p id="current-plan">Checking...</p>
+
+    <h3>💎 Available NFT Plans:</h3>
+
+    <div class="plan-list">
+
+      <!-- Free Plan -->
+      <div class="plan-card">
+        <h4>🆓 Free Plan</h4>
+        <p>Token Every 4h: <b>0.5</b><br>Ad Reward: <b>0</b></p>
+        <button onclick="buyPlan('free')">Active</button>
+      </div>
+
+      <!-- $10 Plan -->
+      <div class="plan-card">
+        <h4>💰 $10 Plan</h4>
+        <p>Token Every 4h: <b>2</b><br>Ad Reward: <b>2</b><br>Duration: 30 Days</p>
+        <button onclick="buyPlan('plan10')">Buy for $10</button>
+      </div>
+
+      <!-- $25 Plan -->
+      <div class="plan-card">
+        <h4>💰 $25 Plan</h4>
+        <p>Token Every 4h: <b>4</b><br>Ad Reward: <b>4</b><br>Duration: 30 Days</p>
+        <button onclick="buyPlan('plan25')">Buy for $25</button>
+      </div>
+
+      <!-- $50 Plan -->
+      <div class="plan-card">
+        <h4>💰 $50 Plan</h4>
+        <p>Token Every 4h: <b>8</b><br>Ad Reward: <b>8</b><br>Duration: 30 Days</p>
+        <button onclick="buyPlan('plan50')">Buy for $50</button>
+      </div>
+
+      <!-- $100 Plan -->
+      <div class="plan-card">
+        <h4>💰 $100 Plan</h4>
+        <p>Token Every 4h: <b>15</b><br>Ad Reward: <b>12</b><br>Duration: 30 Days</p>
+        <button onclick="buyPlan('plan100')">Buy for $100</button>
+      </div>
+
+      <!-- $500 Lifetime Plan -->
+      <div class="plan-card">
+        <h4>👑 $500 Lifetime</h4>
+        <p>Token Every 4h: <b>50</b><br>Ad Reward: <b>40</b><br>Lifetime Access</p>
+        <button onclick="buyPlan('plan500')">Buy for $500</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="nft.js"></script>
+</body>
+</html>
