@@ -9,43 +9,37 @@
   <div class="container wallet-container">
     <h2>💼 My Wallet</h2>
 
-    <div class="balances">
-      <div class="balance-box">
-        <h3>USDT</h3>
+    <div class="balances-grid">
+      <div class="balance-card">
+        <h3>💵 USDT</h3>
         <p id="usdt-balance">$0.00</p>
       </div>
-      <div class="balance-box">
-        <h3>ZMM</h3>
+      <div class="balance-card">
+        <h3>🪙 ZMM</h3>
         <p id="zmm-balance">0 Tokens</p>
       </div>
     </div>
 
     <div class="swap-section">
       <h3>🔁 Swap Tokens</h3>
+      <label for="swap-direction">Select Direction:</label>
       <select id="swap-direction">
         <option value="zmm-to-usdt">ZMM → USDT</option>
         <option value="usdt-to-zmm">USDT → ZMM</option>
       </select>
+
       <input type="number" id="swap-amount" placeholder="Enter amount">
+      <p id="conversion-result">💱 Rate: 1 ZMM = 0.05 USDT</p>
+      <p id="calculated-output">You will receive: -</p>
       <button onclick="performSwap()">Swap Now</button>
     </div>
 
-    <div class="withdraw-section">
-      <h3>📤 Withdraw</h3>
-      <input type="text" id="withdraw-address" placeholder="Enter USDT Address (BEP-20)">
-      <input type="number" id="withdraw-amount" placeholder="Enter Amount ($)">
-      <button onclick="withdrawFunds()">Withdraw</button>
-      <p class="note">🔐 Min: $10 | Max Daily: $25</p>
-    </div>
-
-    <div class="history-section">
-      <h3>📜 Withdraw History</h3>
-      <ul id="withdraw-history">
-        <li>No history yet.</li>
-      </ul>
+    <div class="action-buttons">
+      <button onclick="goToWithdrawPage()">📤 Withdraw</button>
+      <button onclick="goToDepositPage()">📥 Deposit</button>
     </div>
   </div>
 
   <script src="wallet.js"></script>
 </body>
-    </html>
+</html>
