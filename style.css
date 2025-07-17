@@ -1,4 +1,4 @@
-/* 2️⃣ style.css (Responsive for dashboard) */
+/* 2️⃣ style.css (Responsive for dashboard + missions) */
 body {
   margin: 0;
   padding: 0;
@@ -82,4 +82,48 @@ h1 {
 .bottom-nav .nav-item.active {
   font-weight: bold;
   color: #00ffcc;
+}
+
+/* ⭐ Missions page custom style */
+.mission-container {
+  width: 100%;
+  max-width: 450px;
+  padding: 20px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.video-task {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 12px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+}
+
+.video-task p {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.video-task button {
+  background: #00ffcc;
+  color: #000;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 5px 4px;
+  transition: background 0.3s ease;
+}
+
+.video-task button:hover {
+  background: #00ccaa;
+}
+
+.video-task .status {
+  font-size: 14px;
+  margin-top: 8px;
+  color: #ffff99;
 }
