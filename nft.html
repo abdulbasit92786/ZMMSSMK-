@@ -1,65 +1,115 @@
-<!-- nft.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NFT Plans</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body class="nft-page">
-  <div class="container">
-    <h2>🧩 Your Current Plan:</h2>
-    <p id="current-plan">Checking...</p>
+<body>
+  <div class="wallet-container">
+    <h1>🖼️ NFT Plans</h1>
 
-    <h3>💎 Available NFT Plans:</h3>
+    <!-- ✅ Active Plan Info -->
+    <div class="balance-card" style="margin-bottom: 20px; background: #2c2c54;">
+      <h3>✅ Your Active Plan</h3>
+      <p><strong>Type:</strong> USDT Plan</p>
+      <p><strong>Status:</strong> Active (10$ Plan)</p>
+      <p><strong>Started:</strong> 3 days ago</p>
+      <p><strong>Ends In:</strong> 27 days</p>
+      <p><strong>Tokens Claimed:</strong> 6</p>
+      <p><strong>Tokens Remaining:</strong> 24</p>
+    </div>
 
-    <div class="plan-list">
+    <!-- 🔁 Switch Between USDT / ZMM -->
+    <div class="action-buttons" style="margin-bottom: 20px;">
+      <button onclick="showUsdt()">💵 USDT Plans</button>
+      <button onclick="showZmm()">🪙 ZMM Plans</button>
+    </div>
 
-      <!-- Free Plan -->
-      <div class="plan-card">
-        <h4>🆓 Free Plan</h4>
-        <p>Token Every 4h: <b>0.5</b><br>Ad Reward: <b>0</b></p>
-        <button onclick="buyPlan('free')">Active</button>
+    <!-- 🔹 USDT Plans -->
+    <div id="usdt-plans">
+      <div class="plan-grid">
+        <div class="balance-card">
+          <h3>$10 Plan</h3>
+          <p>🕒 1 Token every 4 hours</p>
+          <p>🎥 1 Token per Ad</p>
+          <button class="submit-btn">Activate</button>
+        </div>
+        <div class="balance-card">
+          <h3>$25 Plan</h3>
+          <p>🕒 4 Tokens every 4 hours</p>
+          <p>🎥 4 Tokens per Ad</p>
+          <button class="submit-btn">Buy</button>
+        </div>
+        <div class="balance-card">
+          <h3>$50 Plan</h3>
+          <p>🕒 6 Tokens every 4 hours</p>
+          <p>🎥 6 Tokens per Ad</p>
+          <button class="submit-btn">Buy</button>
+        </div>
+        <div class="balance-card">
+          <h3>$100 Plan</h3>
+          <p>🕒 16 Tokens every 4 hours</p>
+          <p>🎥 12 Tokens per Ad</p>
+          <button class="submit-btn">Buy</button>
+        </div>
+        <div class="balance-card">
+          <h3>$500 LifeTime</h3>
+          <p>🕒 50 Tokens / 4 hr</p>
+          <p>🎥 40 Tokens / Ad</p>
+          <button class="submit-btn">Buy</button>
+        </div>
       </div>
+    </div>
 
-      <!-- $10 Plan -->
-      <div class="plan-card">
-        <h4>💰 $10 Plan</h4>
-        <p>Token Every 4h: <b>2</b><br>Ad Reward: <b>2</b><br>Duration: 30 Days</p>
-        <button onclick="buyPlan('plan10')">Buy for $10</button>
+    <!-- 🟣 ZMM Upgrade Plans -->
+    <div id="zmm-plans" style="display: none;">
+      <div class="plan-grid">
+        <div class="balance-card">
+          <h3>1K ZMM</h3>
+          <p>🕒 1 Token / 4 hr</p>
+          <p>🎥 1 Token / Ad</p>
+          <button class="submit-btn">Upgrade</button>
+        </div>
+        <div class="balance-card">
+          <h3>10K ZMM</h3>
+          <p>🕒 4 Tokens / 4 hr</p>
+          <p>🎥 4 Tokens / Ad</p>
+          <button class="submit-btn">Upgrade</button>
+        </div>
+        <div class="balance-card">
+          <h3>15K ZMM</h3>
+          <p>🕒 6 Tokens / 4 hr</p>
+          <p>🎥 6 Tokens / Ad</p>
+          <button class="submit-btn">Upgrade</button>
+        </div>
+        <div class="balance-card">
+          <h3>25K ZMM</h3>
+          <p>🕒 16 Tokens / 4 hr</p>
+          <p>🎥 12 Tokens / Ad</p>
+          <button class="submit-btn">Upgrade</button>
+        </div>
+        <div class="balance-card">
+          <h3>50K ZMM</h3>
+          <p>🕒 50 Tokens / 4 hr</p>
+          <p>🎥 40 Tokens / Ad</p>
+          <button class="submit-btn">Upgrade</button>
+        </div>
       </div>
-
-      <!-- $25 Plan -->
-      <div class="plan-card">
-        <h4>💰 $25 Plan</h4>
-        <p>Token Every 4h: <b>4</b><br>Ad Reward: <b>4</b><br>Duration: 30 Days</p>
-        <button onclick="buyPlan('plan25')">Buy for $25</button>
-      </div>
-
-      <!-- $50 Plan -->
-      <div class="plan-card">
-        <h4>💰 $50 Plan</h4>
-        <p>Token Every 4h: <b>8</b><br>Ad Reward: <b>8</b><br>Duration: 30 Days</p>
-        <button onclick="buyPlan('plan50')">Buy for $50</button>
-      </div>
-
-      <!-- $100 Plan -->
-      <div class="plan-card">
-        <h4>💰 $100 Plan</h4>
-        <p>Token Every 4h: <b>15</b><br>Ad Reward: <b>12</b><br>Duration: 30 Days</p>
-        <button onclick="buyPlan('plan100')">Buy for $100</button>
-      </div>
-
-      <!-- $500 Lifetime Plan -->
-      <div class="plan-card">
-        <h4>👑 $500 Lifetime</h4>
-        <p>Token Every 4h: <b>50</b><br>Ad Reward: <b>40</b><br>Lifetime Access</p>
-        <button onclick="buyPlan('plan500')">Buy for $500</button>
-      </div>
-
     </div>
   </div>
 
-  <script src="nft.js"></script>
+  <script>
+    function showUsdt() {
+      document.getElementById('usdt-plans').style.display = 'block';
+      document.getElementById('zmm-plans').style.display = 'none';
+    }
+
+    function showZmm() {
+      document.getElementById('usdt-plans').style.display = 'none';
+      document.getElementById('zmm-plans').style.display = 'block';
+    }
+  </script>
 </body>
-</html>
+            </html>
