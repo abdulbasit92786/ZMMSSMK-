@@ -97,7 +97,7 @@
     <div class="title">ZMMK App</div>
     <div class="subtitle">ZMM Token Dashboard</div>
 
-    <div class="balance">Your Balance: <strong>0 ZMM</strong></div>
+    <div class="balance" id="balanceBox">Your Balance: <strong id="balance">0</strong> ZMM</div>
 
     <div class="referral-box">
       <div>Referral Link:</div>
@@ -127,11 +127,38 @@
       alert("Referral link copied!");
     }
 
-    let claimCooldown = 60 * 60 * 4; // 4 hours in seconds
+    let claimCooldown = 60 * 60 * 4; // 4 hours
     let countdownEl = document.getElementById("countdown");
     let claimBtn = document.getElementById("claimBtn");
+    let balanceEl = document.getElementById("balance");
+
+    // Initialize balance if not set
+    if (localStorage.getItem("zmm_balance") === null) {
+      localStorage.setItem("zmm_balance", "0");
+    }
+
+    // Show current balance
+    balanceEl.textContent = localStorage.getItem("zmm_balance");
+
+    // Load last claim time
+    let lastClaim = localStorage.getItem("last_claim_time");
+    if (lastClaim) {
+      let elapsed = (Date.now() - parseInt(lastClaim)) / 1000;
+      if (elapsed < claimCooldown) {
+        claimBtn.disabled = true;
+        startCountdown(Math.floor(claimCooldown - elapsed));
+      }
+    }
 
     function claimReward() {
+      // Add 0.5 ZMM
+      let currentBalance = parseFloat(localStorage.getItem("zmm_balance"));
+      currentBalance += 0.5;
+      localStorage.setItem("zmm_balance", currentBalance.toFixed(2));
+      balanceEl.textContent = currentBalance.toFixed(2);
+
+      // Set new claim time
+      localStorage.setItem("last_claim_time", Date.now().toString());
       claimBtn.disabled = true;
       startCountdown(claimCooldown);
     }
@@ -154,4 +181,4 @@
   </script>
 
 </body>
-</html>
+  </html>
