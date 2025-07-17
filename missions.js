@@ -1,9 +1,51 @@
 let startTimes = {};
 
 const TASK_IDS = ['task1', 'task2', 'task3', 'task4'];
-const HIDE_DURATION_HOURS = 24; // آپ یہاں 12 بھی کر سکتے ہو
+const HIDE_DURATION_HOURS = 24;
 
-// یہ function چیک کرے گا کہ ویڈیو hide ہونی چاہیے یا نہیں
+// 🔁 جب پیج لوڈ ہو → ویڈیو visibility چیک کریں
+document.addEventListener("DOMContentLoaded", () => {
+  checkTaskVisibility();
+  initializeBalance(); // Ensure balance exists
+});
+
+// 👉 بیلنس initialize کریں اگر موجود نہیں
+function initializeBalance() {
+  if (localStorage.getItem("zmm_balance") === null) {
+    localStorage.setItem("zmm_balance", "0");
+  }
+}
+
+// ✅ ٹاسک کو کھولیں اور verify بٹن شو کریں
+function startTask(url, id) {
+  startTimes[id] = new Date().getTime();
+  window.open(url, '_blank');
+  document.getElementById("verify-" + id).style.display = "inline-block";
+}
+
+// ✅ verify کرنے پر 1 token add کریں
+function verifyTask(id) {
+  const now = new Date().getTime();
+  const elapsed = (now - startTimes[id]) / 1000;
+
+  if (elapsed >= 30) {
+    alert("✅ Success! 1 Token Added.");
+    document.getElementById("verify-" + id).style.display = "none";
+    document.getElementById(id).style.display = "none";
+
+    // hide for 24 hours
+    localStorage.setItem("watchedTime-" + id, now);
+
+    // بیلنس میں 1 ٹوکن add کریں
+    let currentBalance = parseFloat(localStorage.getItem("zmm_balance"));
+    currentBalance += 1;
+    localStorage.setItem("zmm_balance", currentBalance.toFixed(2));
+  } else {
+    alert("❌ Please watch at least 30 seconds before verifying.");
+  }
+}
+
+// ⏱️ hide/show ٹاسک depending on last watch
 function checkTaskVisibility() {
   const now = new Date().getTime();
 
@@ -12,43 +54,17 @@ function checkTaskVisibility() {
     const lastWatched = localStorage.getItem("watchedTime-" + id);
 
     if (lastWatched) {
-      const diff = now - parseInt(lastWatched); // milliseconds
-      const hoursPassed = diff / (1000 * 60 * 60); // convert to hours
+      const diff = now - parseInt(lastWatched);
+      const hoursPassed = diff / (1000 * 60 * 60);
 
       if (hoursPassed < HIDE_DURATION_HOURS) {
-        taskElement.style.display = "none"; // ابھی hide رہے گا
+        taskElement.style.display = "none";
       } else {
-        // 24 گھنٹے ہو گئے، دوبارہ show کرو اور پرانا localStorage ہٹاؤ
         taskElement.style.display = "block";
         localStorage.removeItem("watchedTime-" + id);
       }
     } else {
-      taskElement.style.display = "block"; // پہلی بار ہے یا reset ہو چکا
+      taskElement.style.display = "block";
     }
   });
-}
-
-function startTask(url, id) {
-  startTimes[id] = new Date().getTime(); // Save start time
-  window.open(url, '_blank'); // Open YouTube video
-  document.getElementById("verify-" + id).style.display = "inline-block";
-}
-
-function verifyTask(id) {
-  const now = new Date().getTime();
-  const elapsed = (now - startTimes[id]) / 1000; // time in seconds
-
-  if (elapsed >= 30) {
-    alert("✅ Success! 1 Token Added.");
-    document.getElementById("verify-" + id).style.display = "none";
-
-    // ✅ ویڈیو کو hide کریں، اور وقت save کریں
-    localStorage.setItem("watchedTime-" + id, now);
-    document.getElementById(id).style.display = "none";
-  } else {
-    alert("❌ Please watch at least 30 seconds before verifying.");
-  }
-}
-
-// جب page load ہو → ویڈیوز چیک کریں کون سی hide ہونی چاہیے
-document.addEventListener("DOMContentLoaded", checkTaskVisibility);
+      }
