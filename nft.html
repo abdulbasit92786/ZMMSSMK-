@@ -10,15 +10,17 @@
   <div class="wallet-container">
     <h1>🖼️ NFT Plans</h1>
 
+    <!-- ✅ Wallet Info -->
+    <div class="balance-card" style="margin-bottom: 20px; background: #1c1c2e;">
+      <h3>💼 Your Wallet</h3>
+      <p><strong>Balance:</strong> $<span id="wallet-balance">0</span></p>
+      <button onclick="addDummyFunds()">➕ Add Dummy $100</button>
+    </div>
+
     <!-- ✅ Active Plan Info -->
     <div class="balance-card" style="margin-bottom: 20px; background: #2c2c54;">
       <h3>✅ Your Active Plan</h3>
-      <p><strong>Type:</strong> USDT Plan</p>
-      <p><strong>Status:</strong> Active (10$ Plan)</p>
-      <p><strong>Started:</strong> 3 days ago</p>
-      <p><strong>Ends In:</strong> 27 days</p>
-      <p><strong>Tokens Claimed:</strong> 6</p>
-      <p><strong>Tokens Remaining:</strong> 24</p>
+      <p id="current-plan">Loading...</p>
     </div>
 
     <!-- 🔁 Switch Between USDT / ZMM -->
@@ -34,31 +36,31 @@
           <h3>$10 Plan</h3>
           <p>🕒 1 Token every 4 hours</p>
           <p>🎥 1 Token per Ad</p>
-          <button class="submit-btn">Activate</button>
+          <button class="submit-btn" onclick="buyPlan('plan10')">Buy</button>
         </div>
         <div class="balance-card">
           <h3>$25 Plan</h3>
           <p>🕒 4 Tokens every 4 hours</p>
           <p>🎥 4 Tokens per Ad</p>
-          <button class="submit-btn">Buy</button>
+          <button class="submit-btn" onclick="buyPlan('plan25')">Buy</button>
         </div>
         <div class="balance-card">
           <h3>$50 Plan</h3>
           <p>🕒 6 Tokens every 4 hours</p>
           <p>🎥 6 Tokens per Ad</p>
-          <button class="submit-btn">Buy</button>
+          <button class="submit-btn" onclick="buyPlan('plan50')">Buy</button>
         </div>
         <div class="balance-card">
           <h3>$100 Plan</h3>
           <p>🕒 16 Tokens every 4 hours</p>
           <p>🎥 12 Tokens per Ad</p>
-          <button class="submit-btn">Buy</button>
+          <button class="submit-btn" onclick="buyPlan('plan100')">Buy</button>
         </div>
         <div class="balance-card">
           <h3>$500 LifeTime</h3>
           <p>🕒 50 Tokens / 4 hr</p>
           <p>🎥 40 Tokens / Ad</p>
-          <button class="submit-btn">Buy</button>
+          <button class="submit-btn" onclick="buyPlan('plan500')">Buy</button>
         </div>
       </div>
     </div>
@@ -100,16 +102,6 @@
     </div>
   </div>
 
-  <script>
-    function showUsdt() {
-      document.getElementById('usdt-plans').style.display = 'block';
-      document.getElementById('zmm-plans').style.display = 'none';
-    }
-
-    function showZmm() {
-      document.getElementById('usdt-plans').style.display = 'none';
-      document.getElementById('zmm-plans').style.display = 'block';
-    }
-  </script> src="nft.js"></script>
+  <script src="nft.js"></script>
 </body>
-            </html>
+                       </html>
