@@ -15,9 +15,8 @@ function initializeBalance() {
     localStorage.setItem("zmm_balance", "0");
   }
 
-  if (localStorage.getItem("active_plan") === null) {
-    localStorage.setItem("active_plan", "free");
-  }
+  // ❌ active_plan کو overwrite نہیں کریں اگر پہلے سے موجود ہو
+  // ✅ نیچے والی لائن ہٹا دی گئی تاکہ موجودہ پلان برقرار رہے
 }
 
 // 🟢 پلان کے مطابق reward value return کریں
@@ -45,18 +44,19 @@ function getRewardForPlan(planKey) {
   }
 }
 
-// ✅ پلان نیم شو کریں
+// ✅ پلان نیم اور ریوارڈ شو کریں
 function showPlanInfo() {
   const planKey = localStorage.getItem("active_plan");
   const reward = getRewardForPlan(planKey);
   const planNameElement = document.getElementById("plan-name");
   const planRewardElement = document.getElementById("plan-reward");
 
-  if (planKey === "free") {
+  if (!planKey || planKey === "free") {
     planNameElement.textContent = "Free Plan";
   } else {
-    const type = planKey.includes("usdt") ? "USDT" : "ZMM";
-    const value = planKey.split("_")[2];
+    const parts = planKey.split("_");
+    const type = parts[1] === "nft" ? "ZMM" : parts[1].toUpperCase();
+    const value = parts[2];
     planNameElement.textContent = `${type} $${value}`;
   }
 
@@ -115,4 +115,4 @@ function checkTaskVisibility() {
       taskElement.style.display = "block";
     }
   });
-      }
+}
