@@ -111,9 +111,10 @@
       <button class="btn" id="claimToWalletBtn" onclick="claimToWallet()" disabled>Claim to Wallet</button>
     </div>
 
+    <!-- ✅ Referral Link Section -->
     <div class="referral-box">
       <div>Referral Link:</div>
-      <input type="text" class="referral-input" id="refLink" value="https://t.me/your_bot?start=123456" readonly />
+      <input type="text" class="referral-input" id="refLink" readonly />
       <button class="btn" onclick="copyLink()">Copy Link</button>
     </div>
 
@@ -123,15 +124,21 @@
     </div>
   </div>
 
+  <!-- ✅ Navigation -->
   <div class="nav">
     <a href="dashboard.html">🏠 Home</a>
     <a href="missions.html">🎯 Mission</a>
     <a href="nft.html">🖼 NFT</a>
     <a href="wallet.html">💼 Wallet</a>
+    <a href="referral.html">👥 Referral</a> <!-- ✅ New Button -->
     <a href="profile.html">👤 Profile</a>
   </div>
 
   <script>
+    // ✅ Simulate user Telegram ID for now
+    let telegramUserId = localStorage.getItem("telegram_user_id") || "123456";
+    localStorage.setItem("telegram_user_id", telegramUserId);
+
     function copyLink() {
       const refLink = document.getElementById("refLink");
       refLink.select();
@@ -139,7 +146,12 @@
       alert("Referral link copied!");
     }
 
-    let claimCooldown = 60 * 60 * 4; // 4 hours
+    // Generate referral link
+    const refLinkInput = document.getElementById("refLink");
+    refLinkInput.value = `https://yourdomain.com/dashboard.html?ref=${telegramUserId}`; // Or Telegram Bot Link
+
+    // Cooldown + reward system
+    let claimCooldown = 60 * 60 * 4;
     let countdownEl = document.getElementById("countdown");
     let claimBtn = document.getElementById("claimBtn");
     let balanceEl = document.getElementById("balance");
@@ -165,36 +177,21 @@
       }
     }
 
-    // Initialize values
-    if (localStorage.getItem("zmm_balance") === null) {
-      localStorage.setItem("zmm_balance", "0");
-    }
-    if (localStorage.getItem("total_earned") === null) {
-      localStorage.setItem("total_earned", "0");
-    }
-    if (localStorage.getItem("wallet_balance") === null) {
-      localStorage.setItem("wallet_balance", "0");
-    }
-    if (localStorage.getItem("active_plan") === null) {
-      localStorage.setItem("active_plan", "plan_nft_25");
-    }
+    if (localStorage.getItem("zmm_balance") === null) localStorage.setItem("zmm_balance", "0");
+    if (localStorage.getItem("total_earned") === null) localStorage.setItem("total_earned", "0");
+    if (localStorage.getItem("wallet_balance") === null) localStorage.setItem("wallet_balance", "0");
+    if (localStorage.getItem("active_plan") === null) localStorage.setItem("active_plan", "plan_nft_25");
 
     function updateUI() {
       const zmmBalance = parseFloat(localStorage.getItem("zmm_balance"));
       const totalEarned = parseFloat(localStorage.getItem("total_earned"));
       balanceEl.textContent = zmmBalance.toFixed(2);
       earnedEl.textContent = "Total Earned: " + totalEarned.toFixed(2) + " ZMM";
-
-      if (totalEarned >= 20) {
-        claimToWalletBtn.disabled = false;
-      } else {
-        claimToWalletBtn.disabled = true;
-      }
+      claimToWalletBtn.disabled = totalEarned < 20;
     }
 
     updateUI();
 
-    // Check cooldown
     let lastClaim = localStorage.getItem("last_claim_time");
     if (lastClaim) {
       let elapsed = (Date.now() - parseInt(lastClaim)) / 1000;
@@ -207,12 +204,10 @@
     function claimReward() {
       const planKey = localStorage.getItem("active_plan");
       const reward = getRewardForPlan(planKey);
-      let currentBalance = parseFloat(localStorage.getItem("zmm_balance"));
-      currentBalance += reward;
+      let currentBalance = parseFloat(localStorage.getItem("zmm_balance")) + reward;
       localStorage.setItem("zmm_balance", currentBalance.toFixed(2));
 
-      let totalEarned = parseFloat(localStorage.getItem("total_earned"));
-      totalEarned += reward;
+      let totalEarned = parseFloat(localStorage.getItem("total_earned")) + reward;
       localStorage.setItem("total_earned", totalEarned.toFixed(2));
 
       localStorage.setItem("last_claim_time", Date.now().toString());
