@@ -1,51 +1,14 @@
 // nft.js
 
 const nftPlans = {
-  free: {
-    name: "Free Plan",
-    price: 0,
-    tokenEvery4h: 0.5,
-    tokenPerAd: 0,
-    duration: Infinity
-  },
-  plan10: {
-    name: "$10 Plan",
-    price: 10,
-    tokenEvery4h: 2,
-    tokenPerAd: 2,
-    duration: 30
-  },
-  plan25: {
-    name: "$25 Plan",
-    price: 25,
-    tokenEvery4h: 4,
-    tokenPerAd: 4,
-    duration: 30
-  },
-  plan50: {
-    name: "$50 Plan",
-    price: 50,
-    tokenEvery4h: 8,
-    tokenPerAd: 8,
-    duration: 30
-  },
-  plan100: {
-    name: "$100 Plan",
-    price: 100,
-    tokenEvery4h: 15,
-    tokenPerAd: 12,
-    duration: 30
-  },
-  plan500: {
-    name: "$500 Lifetime Plan",
-    price: 500,
-    tokenEvery4h: 50,
-    tokenPerAd: 40,
-    duration: Infinity
-  }
+  free: { name: "Free Plan", price: 0, tokenEvery4h: 0.5, tokenPerAd: 0, duration: Infinity },
+  plan10: { name: "$10 Plan", price: 10, tokenEvery4h: 2, tokenPerAd: 2, duration: 30 },
+  plan25: { name: "$25 Plan", price: 25, tokenEvery4h: 4, tokenPerAd: 4, duration: 30 },
+  plan50: { name: "$50 Plan", price: 50, tokenEvery4h: 8, tokenPerAd: 8, duration: 30 },
+  plan100: { name: "$100 Plan", price: 100, tokenEvery4h: 15, tokenPerAd: 12, duration: 30 },
+  plan500: { name: "$500 Lifetime Plan", price: 500, tokenEvery4h: 50, tokenPerAd: 40, duration: Infinity }
 };
 
-// User data will be stored in localStorage for simulation
 let userData = JSON.parse(localStorage.getItem("userData")) || {
   walletBalance: 0,
   currentPlan: "free",
@@ -55,31 +18,29 @@ let userData = JSON.parse(localStorage.getItem("userData")) || {
 
 function updateCurrentPlanView() {
   const plan = nftPlans[userData.currentPlan];
-  document.getElementById("current-plan").innerText =
-    `${plan.name} — ${plan.duration === Infinity ? "Lifetime" : plan.duration + " days"}`;
+  const planText = `${plan.name} — ${plan.duration === Infinity ? "Lifetime Plan" : plan.duration + " days"}\nStarted: ${userData.planStart ? new Date(userData.planStart).toLocaleDateString() : "N/A"}`;
+  document.getElementById("current-plan").innerText = planText;
+  document.getElementById("wallet-balance").innerText = userData.walletBalance.toFixed(2);
 }
 
 function buyPlan(planKey) {
   const selectedPlan = nftPlans[planKey];
 
-  // Check lifetime lock
   if (userData.currentPlan === "plan500") {
-    alert("❌ You already have the Lifetime Plan. You can't buy another plan.");
+    alert("❌ Lifetime plan already active. Cannot buy new plans.");
     return;
   }
 
-  // Check wallet balance
   if (userData.walletBalance < selectedPlan.price) {
-    alert("❌ Insufficient balance. Please deposit more to buy this plan.");
+    alert("❌ Insufficient balance. Please add more funds.");
     return;
   }
 
-  // Auto replace old plan (if not free)
   if (userData.currentPlan !== "free") {
-    alert(`⚠️ ${nftPlans[userData.currentPlan].name} will be replaced.`);
+    const confirmReplace = confirm(`⚠️ You already have a plan. It will be replaced. Continue?`);
+    if (!confirmReplace) return;
   }
 
-  // Deduct balance and activate plan
   userData.walletBalance -= selectedPlan.price;
   userData.currentPlan = planKey;
   userData.planStart = Date.now();
@@ -90,5 +51,10 @@ function buyPlan(planKey) {
   alert(`✅ ${selectedPlan.name} activated successfully!`);
 }
 
-// Show current plan on page load
+function addDummyFunds() {
+  userData.walletBalance += 100;
+  localStorage.setItem("userData", JSON.stringify(userData));
+  updateCurrentPlanView();
+}
+
 document.addEventListener("DOMContentLoaded", updateCurrentPlanView);
