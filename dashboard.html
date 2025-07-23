@@ -89,6 +89,12 @@
     .nav a:hover {
       text-decoration: underline;
     }
+
+    .earned {
+      font-size: 14px;
+      margin-top: 10px;
+      color: green;
+    }
   </style>
 </head>
 <body>
@@ -98,6 +104,12 @@
     <div class="subtitle">ZMM Token Dashboard</div>
 
     <div class="balance" id="balanceBox">Your Balance: <strong id="balance">0</strong> ZMM</div>
+    <div class="earned" id="totalEarned">Total Earned: 0 ZMM</div>
+
+    <!-- ✅ Claim to Wallet Button -->
+    <div class="earned" id="walletTransferBox">
+      <button class="btn" id="claimToWalletBtn" onclick="claimToWallet()" disabled>Claim to Wallet</button>
+    </div>
 
     <div class="referral-box">
       <div>Referral Link:</div>
@@ -131,16 +143,58 @@
     let countdownEl = document.getElementById("countdown");
     let claimBtn = document.getElementById("claimBtn");
     let balanceEl = document.getElementById("balance");
+    let earnedEl = document.getElementById("totalEarned");
+    let claimToWalletBtn = document.getElementById("claimToWalletBtn");
 
-    // Initialize balance if not set
+    function getRewardForPlan(planKey) {
+      if (!planKey || planKey === "free") return 0.5;
+      const parts = planKey.split("_");
+      const amount = parseFloat(parts[2]);
+      switch (amount) {
+        case 10:
+        case 1000: return 2;
+        case 25:
+        case 2500: return 4;
+        case 50:
+        case 5000: return 6;
+        case 100:
+        case 10000: return 12;
+        case 500:
+        case 50000: return 20;
+        default: return 0.5;
+      }
+    }
+
+    // Initialize values
     if (localStorage.getItem("zmm_balance") === null) {
       localStorage.setItem("zmm_balance", "0");
     }
+    if (localStorage.getItem("total_earned") === null) {
+      localStorage.setItem("total_earned", "0");
+    }
+    if (localStorage.getItem("wallet_balance") === null) {
+      localStorage.setItem("wallet_balance", "0");
+    }
+    if (localStorage.getItem("active_plan") === null) {
+      localStorage.setItem("active_plan", "plan_nft_25");
+    }
 
-    // Show current balance
-    balanceEl.textContent = localStorage.getItem("zmm_balance");
+    function updateUI() {
+      const zmmBalance = parseFloat(localStorage.getItem("zmm_balance"));
+      const totalEarned = parseFloat(localStorage.getItem("total_earned"));
+      balanceEl.textContent = zmmBalance.toFixed(2);
+      earnedEl.textContent = "Total Earned: " + totalEarned.toFixed(2) + " ZMM";
 
-    // Load last claim time
+      if (totalEarned >= 20) {
+        claimToWalletBtn.disabled = false;
+      } else {
+        claimToWalletBtn.disabled = true;
+      }
+    }
+
+    updateUI();
+
+    // Check cooldown
     let lastClaim = localStorage.getItem("last_claim_time");
     if (lastClaim) {
       let elapsed = (Date.now() - parseInt(lastClaim)) / 1000;
@@ -151,15 +205,19 @@
     }
 
     function claimReward() {
-      // Add 0.5 ZMM
+      const planKey = localStorage.getItem("active_plan");
+      const reward = getRewardForPlan(planKey);
       let currentBalance = parseFloat(localStorage.getItem("zmm_balance"));
-      currentBalance += 0.5;
+      currentBalance += reward;
       localStorage.setItem("zmm_balance", currentBalance.toFixed(2));
-      balanceEl.textContent = currentBalance.toFixed(2);
 
-      // Set new claim time
+      let totalEarned = parseFloat(localStorage.getItem("total_earned"));
+      totalEarned += reward;
+      localStorage.setItem("total_earned", totalEarned.toFixed(2));
+
       localStorage.setItem("last_claim_time", Date.now().toString());
       claimBtn.disabled = true;
+      updateUI();
       startCountdown(claimCooldown);
     }
 
@@ -168,15 +226,36 @@
         let h = Math.floor(seconds / 3600);
         let m = Math.floor((seconds % 3600) / 60);
         let s = seconds % 60;
-
         countdownEl.textContent = `Next claim in ${h}h ${m}m ${s}s`;
-
         if (--seconds < 0) {
           clearInterval(interval);
           countdownEl.textContent = "";
           claimBtn.disabled = false;
         }
       }, 1000);
+    }
+
+    function claimToWallet() {
+      let totalEarned = parseFloat(localStorage.getItem("total_earned"));
+      if (totalEarned < 20) {
+        alert("Minimum 20 ZMM required to claim to wallet.");
+        return;
+      }
+
+      let amountToClaim = Math.min(100, totalEarned);
+      let walletBal = parseFloat(localStorage.getItem("wallet_balance"));
+      walletBal += amountToClaim;
+      localStorage.setItem("wallet_balance", walletBal.toFixed(2));
+
+      let zmmBalance = parseFloat(localStorage.getItem("zmm_balance"));
+      zmmBalance -= amountToClaim;
+      localStorage.setItem("zmm_balance", zmmBalance.toFixed(2));
+
+      totalEarned -= amountToClaim;
+      localStorage.setItem("total_earned", totalEarned.toFixed(2));
+
+      alert(`${amountToClaim} ZMM claimed to wallet!`);
+      updateUI();
     }
   </script>
 
