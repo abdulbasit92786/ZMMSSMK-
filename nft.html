@@ -12,21 +12,50 @@
       margin: 0;
       padding: 20px;
     }
-    h1, h2 {
+
+    h1 {
       text-align: center;
       margin-bottom: 10px;
     }
+
+    .balances {
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .plan-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .plan-section {
+      width: 48%;
+    }
+
+    .plan-section h2 {
+      text-align: center;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #444;
+      padding-bottom: 5px;
+    }
+
     .plan {
       background: #1a1a1a;
       border: 2px solid #333;
       border-radius: 10px;
       padding: 15px;
-      margin: 10px;
+      margin: 10px 0;
       text-align: center;
     }
+
     .plan h3 {
       margin: 0;
     }
+
     .plan button {
       padding: 10px 20px;
       margin-top: 10px;
@@ -36,31 +65,43 @@
       border-radius: 6px;
       cursor: pointer;
     }
+
     .plan button:disabled {
       background: #555;
       cursor: not-allowed;
     }
+
     .active-label {
       color: #00ffcc;
       font-weight: bold;
       margin-top: 10px;
     }
+
     .cancel-button {
       background-color: #cc3300;
       margin-top: 10px;
+    }
+
+    @media screen and (max-width: 768px) {
+      .plan-section {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
   <h1>🪙 NFT Access Plans</h1>
   <p style="text-align:center;">Buy a plan using USDT or ZMM token to activate missions and daily rewards.</p>
-  <div style="text-align:center;">
-    <p>💵 USDT Balance: <span id="usdt-balance"></span></p>
-    <p>🪙 ZMM Balance: <span id="zmm-balance"></span></p>
+
+  <div class="balances">
+    <div>💵 USDT Balance: <span id="usdt-balance"></span></div>
+    <div>🪙 ZMM Balance: <span id="zmm-balance"></span></div>
   </div>
 
-  <div id="usdt-section"></div>
-  <div id="zmm-section"></div>
+  <div class="plan-container">
+    <div class="plan-section" id="usdt-section"></div>
+    <div class="plan-section" id="zmm-section"></div>
+  </div>
 
   <script>
     let wallet = JSON.parse(localStorage.getItem("walletData")) || { usdt: 1000, zmm: 100000 };
@@ -143,10 +184,9 @@
       const plan = PLAN_CONFIG[type].find(p => p.amount === amount);
       if (!plan) return;
 
-      const balanceKey = type;
       const cost = plan.amount;
 
-      if (wallet[balanceKey] < cost) {
+      if (wallet[type] < cost) {
         alert(`❌ Not enough ${type.toUpperCase()} in wallet.`);
         return;
       }
@@ -155,15 +195,13 @@
       if (activePlans[otherType]) activePlans[otherType] = null;
       if (activePlans[type]) activePlans[type] = null;
 
-      wallet[balanceKey] -= cost;
+      wallet[type] -= cost;
       activePlans[type] = {
         id: planId,
         expiresAt: plan.duration ? new Date(Date.now() + plan.duration * 24 * 60 * 60 * 1000).toISOString() : null
       };
 
-      // ✅ Save active plan globally
       localStorage.setItem("active_plan", `plan_${type}_${amount}`);
-
       localStorage.setItem("walletData", JSON.stringify(wallet));
       localStorage.setItem("activePlans", JSON.stringify(activePlans));
 
@@ -184,4 +222,4 @@
     renderPlans();
   </script>
 </body>
-    </html>
+  </html>
