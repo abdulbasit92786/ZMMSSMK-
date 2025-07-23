@@ -80,6 +80,13 @@
     .plan button:hover {
       background: #084cd1;
     }
+
+    .active-label {
+      margin-top: 10px;
+      color: green;
+      font-weight: bold;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -92,40 +99,103 @@
 
   <!-- NFT Plans -->
   <div class="nft-container">
+
     <!-- USDT Section -->
     <div class="section">
       <h2>💵 USDT Plans</h2>
-      <div class="plan"><h3>$10 Plan</h3><p>1 Month Access</p><button onclick="buyPlan('usdt', 10)">Buy</button></div>
-      <div class="plan"><h3>$25 Plan</h3><p>1 Month Access</p><button onclick="buyPlan('usdt', 25)">Buy</button></div>
-      <div class="plan"><h3>$50 Plan</h3><p>1 Month Access</p><button onclick="buyPlan('usdt', 50)">Buy</button></div>
-      <div class="plan"><h3>$100 Plan</h3><p>1 Month Access</p><button onclick="buyPlan('usdt', 100)">Buy</button></div>
-      <div class="plan"><h3>$500 Plan</h3><p>Lifetime Access</p><button onclick="buyPlan('usdt', 500)">Buy</button></div>
+      <div class="plan" data-type="usdt" data-amount="10">
+        <h3>$10 Plan</h3><p>1 Month Access</p><button onclick="buyPlan('usdt', 10)">Buy</button>
+      </div>
+      <div class="plan" data-type="usdt" data-amount="25">
+        <h3>$25 Plan</h3><p>1 Month Access</p><button onclick="buyPlan('usdt', 25)">Buy</button>
+      </div>
+      <div class="plan" data-type="usdt" data-amount="50">
+        <h3>$50 Plan</h3><p>1 Month Access</p><button onclick="buyPlan('usdt', 50)">Buy</button>
+      </div>
+      <div class="plan" data-type="usdt" data-amount="100">
+        <h3>$100 Plan</h3><p>1 Month Access</p><button onclick="buyPlan('usdt', 100)">Buy</button>
+      </div>
+      <div class="plan" data-type="usdt" data-amount="500">
+        <h3>$500 Plan</h3><p>Lifetime Access</p><button onclick="buyPlan('usdt', 500)">Buy</button>
+      </div>
     </div>
 
     <!-- ZMM Section -->
     <div class="section">
       <h2>🪙 ZMM Token Plans</h2>
-      <div class="plan"><h3>1,000 ZMM</h3><p>1 Month Access</p><button onclick="buyPlan('zmm', 1000)">Buy</button></div>
-      <div class="plan"><h3>2,500 ZMM</h3><p>1 Month Access</p><button onclick="buyPlan('zmm', 2500)">Buy</button></div>
-      <div class="plan"><h3>5,000 ZMM</h3><p>1 Month Access</p><button onclick="buyPlan('zmm', 5000)">Buy</button></div>
-      <div class="plan"><h3>10,000 ZMM</h3><p>1 Month Access</p><button onclick="buyPlan('zmm', 10000)">Buy</button></div>
-      <div class="plan"><h3>50,000 ZMM</h3><p>Lifetime Access</p><button onclick="buyPlan('zmm', 50000)">Buy</button></div>
+      <div class="plan" data-type="zmm" data-amount="1000">
+        <h3>1,000 ZMM</h3><p>1 Month Access</p><button onclick="buyPlan('zmm', 1000)">Buy</button>
+      </div>
+      <div class="plan" data-type="zmm" data-amount="2500">
+        <h3>2,500 ZMM</h3><p>1 Month Access</p><button onclick="buyPlan('zmm', 2500)">Buy</button>
+      </div>
+      <div class="plan" data-type="zmm" data-amount="5000">
+        <h3>5,000 ZMM</h3><p>1 Month Access</p><button onclick="buyPlan('zmm', 5000)">Buy</button>
+      </div>
+      <div class="plan" data-type="zmm" data-amount="10000">
+        <h3>10,000 ZMM</h3><p>1 Month Access</p><button onclick="buyPlan('zmm', 10000)">Buy</button>
+      </div>
+      <div class="plan" data-type="zmm" data-amount="50000">
+        <h3>50,000 ZMM</h3><p>Lifetime Access</p><button onclick="buyPlan('zmm', 50000)">Buy</button>
+      </div>
     </div>
   </div>
 
   <script>
     let wallet = JSON.parse(localStorage.getItem("walletData")) || {
-      usdt: 0,
-      zmm: 0
+      usdt: 1000,
+      zmm: 100000
     };
 
-    // Show updated balances in header
+    let activePlans = JSON.parse(localStorage.getItem("activePlans")) || {
+      usdt: null,
+      zmm: null
+    };
+
     function updateBalanceUI() {
       document.getElementById("usdt-balance").textContent = wallet.usdt;
       document.getElementById("zmm-balance").textContent = wallet.zmm;
     }
 
+    function formatDaysLeft(dateString) {
+      const now = new Date();
+      const expires = new Date(dateString);
+      const diffTime = expires - now;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays <= 0 ? "Expired" : `${diffDays} days left`;
+    }
+
+    function renderPlans() {
+      document.querySelectorAll(".plan").forEach(plan => {
+        const type = plan.getAttribute("data-type");
+        const amount = parseInt(plan.getAttribute("data-amount"));
+        const planId = `${type}-${amount}`;
+        const active = activePlans[type];
+
+        const button = plan.querySelector("button");
+
+        if (active && active.id === planId) {
+          if (button) button.remove();
+          const label = document.createElement("div");
+          const isLifetime = amount === 500 || amount === 50000;
+          label.className = "active-label";
+          label.innerHTML = `✅ ${isLifetime ? "Lifetime Active" : "Active"}<br>${isLifetime ? "" : formatDaysLeft(active.expiresAt)}`;
+          plan.appendChild(label);
+        } else if (active) {
+          if (button) button.disabled = true;
+        }
+      });
+    }
+
     function buyPlan(type, amount) {
+      const planId = `${type}-${amount}`;
+      const isLifetime = (type === "usdt" && amount === 500) || (type === "zmm" && amount === 50000);
+
+      if (activePlans[type]) {
+        alert("⚠️ You already have an active plan.");
+        return;
+      }
+
       const hasEnough = type === "usdt" ? wallet.usdt >= amount : wallet.zmm >= amount;
 
       if (!hasEnough) {
@@ -133,26 +203,31 @@
         return;
       }
 
-      const confirmBuy = confirm(
-        `💡 You have ${
-          type === "usdt" ? wallet.usdt + " USDT" : wallet.zmm + " ZMM"
-        }\nDo you want to buy this plan for ${amount} ${type.toUpperCase()}?`
-      );
-
+      const confirmBuy = confirm(`Do you want to buy this plan for ${amount} ${type.toUpperCase()}?`);
       if (!confirmBuy) return;
 
-      if (type === "usdt") {
-        wallet.usdt -= amount;
-      } else {
-        wallet.zmm -= amount;
-      }
+      if (type === "usdt") wallet.usdt -= amount;
+      else wallet.zmm -= amount;
+
+      const expiresAt = isLifetime ? null : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+      activePlans[type] = {
+        id: planId,
+        expiresAt
+      };
 
       localStorage.setItem("walletData", JSON.stringify(wallet));
+      localStorage.setItem("activePlans", JSON.stringify(activePlans));
+
       updateBalanceUI();
+      renderPlans();
+
       alert("✅ Plan activated successfully!");
     }
 
     updateBalanceUI();
+    renderPlans();
   </script>
+
 </body>
-                                                                                                         </html>
+  </html>
