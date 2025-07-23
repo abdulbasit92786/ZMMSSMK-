@@ -1,114 +1,68 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>NFT Plans</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>📦 NFT Plans</title>
   <style>
     body {
-      font-family: sans-serif;
-      background: #f0f2f5;
+      font-family: Arial, sans-serif;
+      background: #0f0f0f;
+      color: #fff;
       margin: 0;
       padding: 20px;
-      color: #000;
-    }.header {
-  max-width: 1000px;
-  margin: auto;
-  margin-bottom: 20px;
-  background: #fff;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 16px;
-}
-
-.nft-container {
-  max-width: 1000px;
-  margin: auto;
-  display: flex;
-  flex-direction: row;
-  gap: 20px;
-  justify-content: space-between;
-  flex-wrap: wrap;
-}
-
-.section {
-  flex: 1;
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.section h2 {
-  margin-top: 0;
-  text-align: center;
-  color: #111;
-}
-
-.plan {
-  background: #f9f9f9;
-  padding: 15px;
-  margin: 10px 0;
-  border-radius: 12px;
-  border: 1px solid #ddd;
-  position: relative;
-}
-
-.plan h3 {
-  margin: 0 0 5px;
-  font-size: 16px;
-}
-
-.plan p {
-  margin: 0 0 10px;
-  font-size: 14px;
-}
-
-.plan button {
-  background: #0d6efd;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.plan button:hover {
-  background: #084cd1;
-}
-
-.cancel-button {
-  background: #dc3545;
-  margin-left: 8px;
-}
-
-.active-label {
-  margin-top: 10px;
-  color: green;
-  font-weight: bold;
-  font-size: 14px;
-}
-
+    }
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .plan {
+      background: #1a1a1a;
+      border: 2px solid #333;
+      border-radius: 10px;
+      padding: 15px;
+      margin: 10px;
+      text-align: center;
+    }
+    .plan h3 {
+      margin: 0;
+    }
+    .plan button {
+      padding: 10px 20px;
+      margin-top: 10px;
+      background: #00cc66;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .plan button:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+    .active-label {
+      color: #00ffcc;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .cancel-button {
+      background-color: #cc3300;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div>💵 USDT Balance: <span id="usdt-balance">0</span></div>
-    <div>🪙 ZMM Balance: <span id="zmm-balance">0</span></div>
-  </div>  <div class="nft-container">
-    <!-- USDT Section -->
-    <div class="section" id="usdt-section">
-      <h2>💵 USDT Plans</h2>
-      <!-- Plans will be inserted by JS -->
-    </div><!-- ZMM Section -->
-<div class="section" id="zmm-section">
-  <h2>🪙 ZMM Token Plans</h2>
-  <!-- Plans will be inserted by JS -->
-</div>
+  <h1>🪙 NFT Access Plans</h1>
+  <p style="text-align:center;">Buy a plan using USDT or ZMM token to activate missions and daily rewards.</p>
+  <div style="text-align:center;">
+    <p>💵 USDT Balance: <span id="usdt-balance"></span></p>
+    <p>🪙 ZMM Balance: <span id="zmm-balance"></span></p>
+  </div>
 
-  </div>  <script>
+  <div id="usdt-section"></div>
+  <div id="zmm-section"></div>
+
+  <script>
     let wallet = JSON.parse(localStorage.getItem("walletData")) || { usdt: 1000, zmm: 100000 };
     let activePlans = JSON.parse(localStorage.getItem("activePlans")) || { usdt: null, zmm: null };
 
@@ -197,11 +151,8 @@
         return;
       }
 
-      // Cancel other type's active plan
       const otherType = type === "usdt" ? "zmm" : "usdt";
       if (activePlans[otherType]) activePlans[otherType] = null;
-
-      // If another same type plan is active, cancel it
       if (activePlans[type]) activePlans[type] = null;
 
       wallet[balanceKey] -= cost;
@@ -209,6 +160,9 @@
         id: planId,
         expiresAt: plan.duration ? new Date(Date.now() + plan.duration * 24 * 60 * 60 * 1000).toISOString() : null
       };
+
+      // ✅ Save active plan globally
+      localStorage.setItem("active_plan", `plan_${type}_${amount}`);
 
       localStorage.setItem("walletData", JSON.stringify(wallet));
       localStorage.setItem("activePlans", JSON.stringify(activePlans));
@@ -228,5 +182,6 @@
 
     updateBalanceUI();
     renderPlans();
-  </script></body>
-</html>
+  </script>
+</body>
+    </html>
