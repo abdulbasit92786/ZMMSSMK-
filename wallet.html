@@ -1,3 +1,4 @@
+<!-- wallet.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,7 +30,7 @@
       </select>
 
       <input type="number" id="swap-amount" placeholder="Enter amount">
-      <p id="conversion-result">💱 Rate: 1 ZMM = 0.05 USDT</p>
+      <p id="conversion-result">💱 Rate: 1 ZMM = 0.1 USDT</p>
       <p id="calculated-output">You will receive: -</p>
       <button onclick="performSwap()">Swap Now</button>
     </div>
@@ -40,6 +41,78 @@
     </div>
   </div>
 
-  <script src="wallet.js"></script>
+  <script>
+    const ZMM_PRICE = 0.1;
+    let userWallet = JSON.parse(localStorage.getItem("walletData")) || {
+      usdt: 0,
+      zmm: 0,
+      history: [],
+      withdrawnToday: 0,
+      lastWithdrawDate: new Date().toDateString()
+    };
+
+    function updateWalletUI() {
+      document.getElementById("usdt-balance").innerText = `$${userWallet.usdt.toFixed(2)}`;
+      document.getElementById("zmm-balance").innerText = `${userWallet.zmm} Tokens`;
+    }
+
+    function performSwap() {
+      const direction = document.getElementById("swap-direction").value;
+      const amount = parseFloat(document.getElementById("swap-amount").value);
+
+      if (isNaN(amount) || amount <= 0) {
+        alert("❌ Enter valid amount.");
+        return;
+      }
+
+      if (direction === "zmm-to-usdt") {
+        if (userWallet.zmm < amount) {
+          alert("❌ Not enough ZMM.");
+          return;
+        }
+        const usdtAmount = amount * ZMM_PRICE;
+        userWallet.zmm -= amount;
+        userWallet.usdt += usdtAmount;
+      } else {
+        if (userWallet.usdt < amount) {
+          alert("❌ Not enough USDT.");
+          return;
+        }
+        const zmmAmount = amount / ZMM_PRICE;
+        userWallet.usdt -= amount;
+        userWallet.zmm += zmmAmount;
+      }
+
+      localStorage.setItem("walletData", JSON.stringify(userWallet));
+      updateWalletUI();
+      alert("✅ Swap Successful!");
+    }
+
+    document.getElementById("swap-amount").addEventListener("input", () => {
+      const direction = document.getElementById("swap-direction").value;
+      const amount = parseFloat(document.getElementById("swap-amount").value);
+      const output = document.getElementById("calculated-output");
+
+      if (isNaN(amount) || amount <= 0) {
+        output.innerText = "You will receive: -";
+        return;
+      }
+
+      let result;
+      if (direction === "zmm-to-usdt") {
+        result = amount * ZMM_PRICE;
+        output.innerText = `You will receive: $${result.toFixed(2)} USDT`;
+      } else {
+        result = amount / ZMM_PRICE;
+        output.innerText = `You will receive: ${result.toFixed(2)} ZMM`;
+      }
+    });
+
+    document.getElementById("swap-direction").addEventListener("change", () => {
+      document.getElementById("swap-amount").dispatchEvent(new Event("input"));
+    });
+
+    document.addEventListener("DOMContentLoaded", updateWalletUI);
+  </script>
 </body>
-</html>
+      </html>
