@@ -43,6 +43,29 @@
 
   <script>
     const ZMM_PRICE = 0.05;
+
+    // ✅ Sync ZMM from dashboard if transferred
+    function syncFromDashboard() {
+      const transferred = parseFloat(localStorage.getItem("wallet_balance") || "0");
+
+      let walletData = JSON.parse(localStorage.getItem("walletData")) || {
+        usdt: 0,
+        zmm: 0,
+        history: [],
+        withdrawnToday: 0,
+        lastWithdrawDate: new Date().toDateString()
+      };
+
+      if (transferred > 0) {
+        walletData.zmm += transferred;
+        localStorage.setItem("wallet_balance", "0"); // reset
+        localStorage.setItem("walletData", JSON.stringify(walletData));
+      }
+    }
+
+    syncFromDashboard();
+
+    // ✅ Load Wallet after sync
     let userWallet = JSON.parse(localStorage.getItem("walletData")) || {
       usdt: 0,
       zmm: 0,
@@ -53,7 +76,7 @@
 
     function updateWalletUI() {
       document.getElementById("usdt-balance").innerText = `$${userWallet.usdt.toFixed(2)}`;
-      document.getElementById("zmm-balance").innerText = `${userWallet.zmm} Tokens`;
+      document.getElementById("zmm-balance").innerText = `${userWallet.zmm.toFixed(2)} Tokens`;
     }
 
     function performSwap() {
@@ -114,15 +137,13 @@
 
     document.addEventListener("DOMContentLoaded", updateWalletUI);
 
-    // ✅ New: Go to Withdraw Page
     function goToWithdrawPage() {
       window.location.href = "withdraw.html";
     }
 
-    // ✅ New: Go to Deposit Page
     function goToDepositPage() {
       window.location.href = "deposit.html";
     }
   </script>
 </body>
-        </html>
+  </html>
