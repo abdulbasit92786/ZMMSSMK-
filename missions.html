@@ -10,6 +10,13 @@
   <div class="mission-container">
     <h1>🎯 Daily Missions</h1>
 
+    <!-- ✅ شو کریں پلان اور ریوارڈ -->
+    <div style="background:#f0f0f0;padding:10px;margin-bottom:15px;border-radius:8px;text-align:center;">
+      <strong>📦 Your Active Plan:</strong> <span id="plan-name">-</span><br>
+      <strong>🎁 Reward per Task:</strong> <span id="plan-reward">-</span> Token(s)
+    </div>
+
+    <!-- Tasks -->
     <div class="video-task" id="task1">
       <p>📺 Watch Video 1 (30 sec)</p>
       <button onclick="startTask('https://youtu.be/9iBwP4TbFHg?si=-spUOeZHbBEkQRnD', 'task1')">▶️ Watch</button>
@@ -38,7 +45,7 @@
       <div class="status" id="status-task4">⏳ Not Verified</div>
     </div>
   </div>
-  
+
   <script src="missions.js"></script>
 </body>
-  </html>
+      </html>
