@@ -1,91 +1,113 @@
 <!-- nft.html --><!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>NFT Plans</title>
+  <title>🧬 NFT Plans</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .plan-section {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .plan-box {
+      width: 48%;
+      padding: 15px;
+      border-radius: 10px;
+      background-color: #f3f3f3;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .plan-box h2 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .plans-list button {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      font-weight: bold;
+      border-radius: 8px;
+      border: none;
+      background-color: #ffd700;
+      cursor: pointer;
+    }
+    .plans-list button:hover {
+      background-color: #ffc400;
+    }
+    .balance-display {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h2>🖼️ NFT Earnings & Plans</h2><!-- Earnings Section -->
-<div class="earning-section">
-  <div class="balance-card">
-    <h3>💵 USDT Balance</h3>
-    <p id="usdt-balance">$0.00</p>
-  </div>
-  <div class="balance-card">
-    <h3>🪙 ZMM Balance</h3>
-    <p id="zmm-balance">0 Tokens</p>
-  </div>
-</div>
-
-<!-- Plan Upgrade Section -->
-<div class="plans">
-  <h3>📈 Upgrade Plan</h3>
-
-  <div class="plan-row">
-    <div class="plan">
-      <h4>ZMM Plan</h4>
-      <p>🔹 1,000 ZMM = Basic Plan</p>
-      <button onclick="upgradeWithZMM(1000)">Buy with ZMM</button>
-    </div>
-    <div class="plan">
-      <h4>USDT Plan</h4>
-      <p>💲10 = Basic Plan</p>
-      <button onclick="upgradeWithUSDT(10)">Buy with USDT</button>
+    <h2 style="text-align:center">📦 Choose Your Plan</h2>
+    <div class="balance-display">
+      <p><strong>USDT Balance:</strong> $<span id="usdt-balance">0.00</span></p>
+      <p><strong>ZMM Tokens:</strong> <span id="zmm-balance">0</span> Tokens</p>
+    </div><div class="plan-section">
+  <!-- USDT Plans -->
+  <div class="plan-box">
+    <h2>💵 USDT Plans</h2>
+    <div class="plans-list">
+      <button onclick="buyPlan('usdt', 10)">$10 - 1 Month</button>
+      <button onclick="buyPlan('usdt', 25)">$25 - 1 Month</button>
+      <button onclick="buyPlan('usdt', 50)">$50 - 1 Month</button>
+      <button onclick="buyPlan('usdt', 100)">$100 - 1 Month</button>
+      <button onclick="buyPlan('usdt', 500)">$500 - Lifetime</button>
     </div>
   </div>
 
-  <div class="plan-row">
-    <div class="plan">
-      <p>🔹 2,500 ZMM = Pro Plan</p>
-      <button onclick="upgradeWithZMM(2500)">Buy with ZMM</button>
-    </div>
-    <div class="plan">
-      <p>💲25 = Pro Plan</p>
-      <button onclick="upgradeWithUSDT(25)">Buy with USDT</button>
+  <!-- ZMM Plans -->
+  <div class="plan-box">
+    <h2>🪙 ZMM Token Plans</h2>
+    <div class="plans-list">
+      <button onclick="buyPlan('zmm', 1000)">1,000 ZMM - 1 Month</button>
+      <button onclick="buyPlan('zmm', 2500)">2,500 ZMM - 1 Month</button>
+      <button onclick="buyPlan('zmm', 5000)">5,000 ZMM - 1 Month</button>
+      <button onclick="buyPlan('zmm', 10000)">10,000 ZMM - 1 Month</button>
+      <button onclick="buyPlan('zmm', 50000)">50,000 ZMM - Lifetime</button>
     </div>
   </div>
-
 </div>
 
   </div>  <script>
-    const ZMM_PRICE = 0.01; // 1 ZMM = $0.01 (means 1000 ZMM = $10)
-
     let wallet = JSON.parse(localStorage.getItem("walletData")) || {
       usdt: 0,
       zmm: 0,
-      plan: "Free"
+      plan: null
     };
 
-    function updateUI() {
-      document.getElementById("usdt-balance").innerText = `$${wallet.usdt.toFixed(2)}`;
-      document.getElementById("zmm-balance").innerText = `${wallet.zmm} Tokens`;
+    function updateBalances() {
+      document.getElementById("usdt-balance").innerText = wallet.usdt.toFixed(2);
+      document.getElementById("zmm-balance").innerText = wallet.zmm;
     }
 
-    function upgradeWithZMM(requiredZMM) {
-      if (wallet.zmm < requiredZMM) {
-        alert("❌ Not enough ZMM tokens.");
-        return;
+    function buyPlan(type, amount) {
+      let confirmBuy = confirm(`⚠️ This will deduct ${type === 'usdt' ? '$' + amount : amount + ' ZMM'} from your wallet. Continue?`);
+      if (!confirmBuy) return;
+
+      if (type === 'usdt') {
+        if (wallet.usdt < amount) {
+          alert("❌ Not enough USDT.");
+          return;
+        }
+        wallet.usdt -= amount;
+        wallet.plan = { type: "USDT", value: `$${amount}` };
+      } else {
+        if (wallet.zmm < amount) {
+          alert("❌ Not enough ZMM tokens.");
+          return;
+        }
+        wallet.zmm -= amount;
+        wallet.plan = { type: "ZMM", value: `${amount} Tokens` };
       }
-      wallet.zmm -= requiredZMM;
-      wallet.plan = `${requiredZMM} ZMM Plan`;
+
       localStorage.setItem("walletData", JSON.stringify(wallet));
-      updateUI();
-      alert("✅ Plan purchased with ZMM!");
+      updateBalances();
+      alert("✅ Plan Activated Successfully!");
     }
 
-    function upgradeWithUSDT(requiredUSDT) {
-      if (wallet.usdt < requiredUSDT) {
-        alert("❌ Not enough USDT.");
-        return;
-      }
-      wallet.usdt -= requiredUSDT;
-      wallet.plan = `${requiredUSDT} USDT Plan`;
-      localStorage.setItem("walletData", JSON.stringify(wallet));
-      updateUI();
-      alert("✅ Plan purchased with USDT!");
-    }
-
-    document.addEventListener("DOMContentLoaded", updateUI);
+    document.addEventListener("DOMContentLoaded", updateBalances);
   </script></body>
-  </html>
+</html>
