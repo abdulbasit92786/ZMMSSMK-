@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <title>NFT Plans</title>
-  <link rel="stylesheet" href="style.css" />
   <style>
     body {
       font-family: sans-serif;
@@ -12,6 +11,21 @@
       padding: 20px;
       color: #000;
     }
+
+    .header {
+      max-width: 1000px;
+      margin: auto;
+      margin-bottom: 20px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 16px;
+    }
+
     .nft-container {
       max-width: 1000px;
       margin: auto;
@@ -69,77 +83,50 @@
   </style>
 </head>
 <body>
+
+  <!-- Balance Header -->
+  <div class="header">
+    <div>💵 USDT Balance: <span id="usdt-balance">0</span></div>
+    <div>🪙 ZMM Balance: <span id="zmm-balance">0</span></div>
+  </div>
+
+  <!-- NFT Plans -->
   <div class="nft-container">
     <!-- USDT Section -->
     <div class="section">
       <h2>💵 USDT Plans</h2>
-      <div class="plan">
-        <h3>$10 Plan</h3>
-        <p>1 Month Access</p>
-        <button onclick="buyPlan('usdt', 10)">Buy</button>
-      </div>
-      <div class="plan">
-        <h3>$25 Plan</h3>
-        <p>1 Month Access</p>
-        <button onclick="buyPlan('usdt', 25)">Buy</button>
-      </div>
-      <div class="plan">
-        <h3>$50 Plan</h3>
-        <p>1 Month Access</p>
-        <button onclick="buyPlan('usdt', 50)">Buy</button>
-      </div>
-      <div class="plan">
-        <h3>$100 Plan</h3>
-        <p>1 Month Access</p>
-        <button onclick="buyPlan('usdt', 100)">Buy</button>
-      </div>
-      <div class="plan">
-        <h3>$500 Plan</h3>
-        <p>Lifetime Access</p>
-        <button onclick="buyPlan('usdt', 500)">Buy</button>
-      </div>
+      <div class="plan"><h3>$10 Plan</h3><p>1 Month Access</p><button onclick="buyPlan('usdt', 10)">Buy</button></div>
+      <div class="plan"><h3>$25 Plan</h3><p>1 Month Access</p><button onclick="buyPlan('usdt', 25)">Buy</button></div>
+      <div class="plan"><h3>$50 Plan</h3><p>1 Month Access</p><button onclick="buyPlan('usdt', 50)">Buy</button></div>
+      <div class="plan"><h3>$100 Plan</h3><p>1 Month Access</p><button onclick="buyPlan('usdt', 100)">Buy</button></div>
+      <div class="plan"><h3>$500 Plan</h3><p>Lifetime Access</p><button onclick="buyPlan('usdt', 500)">Buy</button></div>
     </div>
 
     <!-- ZMM Section -->
     <div class="section">
       <h2>🪙 ZMM Token Plans</h2>
-      <div class="plan">
-        <h3>1,000 ZMM</h3>
-        <p>1 Month Access</p>
-        <button onclick="buyPlan('zmm', 1000)">Buy</button>
-      </div>
-      <div class="plan">
-        <h3>2,500 ZMM</h3>
-        <p>1 Month Access</p>
-        <button onclick="buyPlan('zmm', 2500)">Buy</button>
-      </div>
-      <div class="plan">
-        <h3>5,000 ZMM</h3>
-        <p>1 Month Access</p>
-        <button onclick="buyPlan('zmm', 5000)">Buy</button>
-      </div>
-      <div class="plan">
-        <h3>10,000 ZMM</h3>
-        <p>1 Month Access</p>
-        <button onclick="buyPlan('zmm', 10000)">Buy</button>
-      </div>
-      <div class="plan">
-        <h3>50,000 ZMM</h3>
-        <p>Lifetime Access</p>
-        <button onclick="buyPlan('zmm', 50000)">Buy</button>
-      </div>
+      <div class="plan"><h3>1,000 ZMM</h3><p>1 Month Access</p><button onclick="buyPlan('zmm', 1000)">Buy</button></div>
+      <div class="plan"><h3>2,500 ZMM</h3><p>1 Month Access</p><button onclick="buyPlan('zmm', 2500)">Buy</button></div>
+      <div class="plan"><h3>5,000 ZMM</h3><p>1 Month Access</p><button onclick="buyPlan('zmm', 5000)">Buy</button></div>
+      <div class="plan"><h3>10,000 ZMM</h3><p>1 Month Access</p><button onclick="buyPlan('zmm', 10000)">Buy</button></div>
+      <div class="plan"><h3>50,000 ZMM</h3><p>Lifetime Access</p><button onclick="buyPlan('zmm', 50000)">Buy</button></div>
     </div>
   </div>
 
   <script>
     let wallet = JSON.parse(localStorage.getItem("walletData")) || {
-      usdt: 100,
-      zmm: 20000
+      usdt: 0,
+      zmm: 0
     };
 
+    // Show updated balances in header
+    function updateBalanceUI() {
+      document.getElementById("usdt-balance").textContent = wallet.usdt;
+      document.getElementById("zmm-balance").textContent = wallet.zmm;
+    }
+
     function buyPlan(type, amount) {
-      const hasEnough =
-        type === "usdt" ? wallet.usdt >= amount : wallet.zmm >= amount;
+      const hasEnough = type === "usdt" ? wallet.usdt >= amount : wallet.zmm >= amount;
 
       if (!hasEnough) {
         alert(`❌ Not enough ${type.toUpperCase()} in wallet.`);
@@ -161,8 +148,11 @@
       }
 
       localStorage.setItem("walletData", JSON.stringify(wallet));
+      updateBalanceUI();
       alert("✅ Plan activated successfully!");
     }
+
+    updateBalanceUI();
   </script>
 </body>
-        </html>
+                                                                                                         </html>
