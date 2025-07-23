@@ -6,6 +6,7 @@ const HIDE_DURATION_HOURS = 24;
 document.addEventListener("DOMContentLoaded", () => {
   checkTaskVisibility();
   initializeBalance();
+  showPlanInfo();
 });
 
 // ✅ بیلنس initialize کریں
@@ -23,14 +24,12 @@ function initializeBalance() {
 function getRewardForPlan(planKey) {
   if (!planKey || planKey === "free") return 1;
 
-  // Example planKey: "plan_usdt_25"
   const parts = planKey.split("_");
   if (parts.length !== 3) return 1;
 
   const amount = parseFloat(parts[2]);
   if (isNaN(amount)) return 1;
 
-  // Define reward by amount
   switch (amount) {
     case 10:
     case 1000: return 2;
@@ -44,6 +43,24 @@ function getRewardForPlan(planKey) {
     case 50000: return 20;
     default: return 1;
   }
+}
+
+// ✅ پلان نیم شو کریں
+function showPlanInfo() {
+  const planKey = localStorage.getItem("active_plan");
+  const reward = getRewardForPlan(planKey);
+  const planNameElement = document.getElementById("plan-name");
+  const planRewardElement = document.getElementById("plan-reward");
+
+  if (planKey === "free") {
+    planNameElement.textContent = "Free Plan";
+  } else {
+    const type = planKey.includes("usdt") ? "USDT" : "ZMM";
+    const value = planKey.split("_")[2];
+    planNameElement.textContent = `${type} $${value}`;
+  }
+
+  planRewardElement.textContent = reward;
 }
 
 // ▶️ ویڈیو سٹارٹ
@@ -98,4 +115,4 @@ function checkTaskVisibility() {
       taskElement.style.display = "block";
     }
   });
-                                    }
+      }
