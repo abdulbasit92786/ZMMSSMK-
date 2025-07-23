@@ -6,7 +6,7 @@ let userWallet = JSON.parse(localStorage.getItem("walletData")) || {
   lastWithdrawDate: new Date().toDateString()
 };
 
-const ZMM_PRICE = 0.5; // ✅ 1 ZMM = $0.5
+const ZMM_PRICE = 0.05; // ✅ 1 ZMM = $0.05
 
 function updateWalletUI() {
   document.getElementById("usdt-balance").innerText = `$${userWallet.usdt.toFixed(2)}`;
