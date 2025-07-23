@@ -6,20 +6,11 @@ let userWallet = JSON.parse(localStorage.getItem("walletData")) || {
   lastWithdrawDate: new Date().toDateString()
 };
 
-const ZMM_PRICE = 0.1; // 1 ZMM = 0.1 USDT
+const ZMM_PRICE = 0.5; // ✅ 1 ZMM = $0.5
 
 function updateWalletUI() {
   document.getElementById("usdt-balance").innerText = `$${userWallet.usdt.toFixed(2)}`;
   document.getElementById("zmm-balance").innerText = `${userWallet.zmm} Tokens`;
-
-  const historyList = document.getElementById("withdraw-history");
-  historyList.innerHTML = userWallet.history.length === 0 ? "<li>No history yet.</li>" : "";
-
-  userWallet.history.forEach((item) => {
-    const li = document.createElement("li");
-    li.innerText = `Withdraw ${item.amount} USDT → ${item.status}`;
-    historyList.appendChild(li);
-  });
 }
 
 function performSwap() {
@@ -51,54 +42,29 @@ function performSwap() {
 
   localStorage.setItem("walletData", JSON.stringify(userWallet));
   updateWalletUI();
+  updateSwapPreview(); // ✅ Recalculate after swap
   alert("✅ Swap Successful!");
 }
 
-function withdrawFunds() {
-  const addr = document.getElementById("withdraw-address").value.trim();
-  const amt = parseFloat(document.getElementById("withdraw-amount").value);
+function updateSwapPreview() {
+  const direction = document.getElementById("swap-direction").value;
+  const amount = parseFloat(document.getElementById("swap-amount").value);
 
-  if (!addr || isNaN(amt) || amt <= 0) {
-    alert("❌ Invalid input.");
-    return;
+  let result = "-";
+  if (!isNaN(amount) && amount > 0) {
+    if (direction === "zmm-to-usdt") {
+      result = `$${(amount * ZMM_PRICE).toFixed(2)}`;
+    } else {
+      result = `${(amount / ZMM_PRICE).toFixed(2)} Tokens`;
+    }
   }
-
-  // Check minimum
-  if (amt < 10) {
-    alert("❌ Minimum withdraw is $10.");
-    return;
-  }
-
-  // Check max daily
-  const today = new Date().toDateString();
-  if (userWallet.lastWithdrawDate !== today) {
-    userWallet.withdrawnToday = 0;
-    userWallet.lastWithdrawDate = today;
-  }
-
-  if ((userWallet.withdrawnToday + amt) > 25) {
-    alert("❌ Daily withdraw limit is $25.");
-    return;
-  }
-
-  if (userWallet.usdt < amt) {
-    alert("❌ Not enough USDT.");
-    return;
-  }
-
-  userWallet.usdt -= amt;
-  userWallet.withdrawnToday += amt;
-
-  userWallet.history.push({
-    amount: amt,
-    address: addr,
-    status: "Pending"
-  });
-
-  localStorage.setItem("walletData", JSON.stringify(userWallet));
-  updateWalletUI();
-
-  alert(`✅ Withdraw Request Sent.\nAddress: ${addr}\nAmount: $${amt}`);
+  document.getElementById("calculated-output").innerText = `You will receive: ${result}`;
 }
 
-document.addEventListener("DOMContentLoaded", updateWalletUI);
+document.getElementById("swap-direction").addEventListener("change", updateSwapPreview);
+document.getElementById("swap-amount").addEventListener("input", updateSwapPreview);
+
+document.addEventListener("DOMContentLoaded", () => {
+  updateWalletUI();
+  updateSwapPreview();
+});
