@@ -30,7 +30,7 @@
       </select>
 
       <input type="number" id="swap-amount" placeholder="Enter amount">
-      <p id="conversion-result">💱 Rate: 1 ZMM = 0.01 USDT</p>
+      <p id="conversion-result">💱 Rate: 1 ZMM = 0.05 USDT</p>
       <p id="calculated-output">You will receive: -</p>
       <button onclick="performSwap()">Swap Now</button>
     </div>
@@ -42,7 +42,7 @@
   </div>
 
   <script>
-    const ZMM_PRICE = 0.01;
+    const ZMM_PRICE = 0.05;
     let userWallet = JSON.parse(localStorage.getItem("walletData")) || {
       usdt: 0,
       zmm: 0,
