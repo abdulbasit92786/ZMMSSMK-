@@ -23,17 +23,21 @@
       justify-content: space-around;
       text-align: center;
       margin-bottom: 20px;
+      flex-wrap: wrap;
     }
 
     .plan-container {
       display: flex;
+      flex-direction: row;
       flex-wrap: wrap;
-      justify-content: space-between;
+      justify-content: center;
       gap: 20px;
     }
 
     .plan-section {
-      width: 48%;
+      flex: 1 1 300px;
+      max-width: 500px;
+      min-width: 300px;
     }
 
     .plan-section h2 {
@@ -80,12 +84,6 @@
     .cancel-button {
       background-color: #cc3300;
       margin-top: 10px;
-    }
-
-    @media screen and (max-width: 768px) {
-      .plan-section {
-        width: 100%;
-      }
     }
   </style>
 </head>
@@ -222,4 +220,4 @@
     renderPlans();
   </script>
 </body>
-  </html>
+</html>
