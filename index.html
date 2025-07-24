@@ -5,14 +5,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Welcome</title>
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase SDKs -->
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>🚀 Welcome to FreeDoge</h1>
+    <h1>🚀 Welcome to ZMMSSMK</h1>
     <div class="button-group">
       <a href="register.html" class="btn">Register</a>
       <a href="login.html" class="btn">Login</a>
     </div>
   </div>
+
+  <script>
+    // ✅ Firebase config from your project
+    const firebaseConfig = {
+      apiKey: "AIzaSyAL9a_aE-zpelXpMIl0iAWD4Abrxf8e_2U",
+      authDomain: "zmmssmk.firebaseapp.com",
+      databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
+      projectId: "zmmssmk",
+      storageBucket: "zmmssmk.firebasestorage.app",
+      messagingSenderId: "677420760492",
+      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09",
+      measurementId: "G-7J7BEDY8H1"
+    };
+
+    // ✅ Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+
+    // ✅ Get a reference to the Realtime Database
+    const database = firebase.database();
+
+    // ✅ Test write to database (optional)
+    database.ref("test").set({
+      message: "Firebase connected successfully!",
+      timestamp: Date.now()
+    }).then(() => {
+      console.log("Test message written to Firebase");
+    }).catch((error) => {
+      console.error("Firebase write failed:", error);
+    });
+  </script>
 </body>
 </html>
