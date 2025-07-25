@@ -1,9 +1,11 @@
-<!-- 5️⃣ login.html -->
+<!-- ✅ login.html (Updated with Firebase Realtime Database) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Login</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js" defer></script>
 </head>
 <body>
   <h2>Login</h2>
@@ -11,6 +13,67 @@
   <input type="password" id="loginPassword" placeholder="Enter your password" />
   <button id="loginBtn">Login</button>
 
-  <script src="login.js"></script>
+  <script>
+    // ✅ Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAL9a_aE-zpelXpMIl0iAWD4Abrxf8e_2U",
+      authDomain: "zmmssmk.firebaseapp.com",
+      databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
+      projectId: "zmmssmk",
+      storageBucket: "zmmssmk.appspot.com",
+      messagingSenderId: "677420760492",
+      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09",
+      measurementId: "G-7J7BEDY8H1"
+    };
+
+    let app;
+    document.addEventListener("DOMContentLoaded", function () {
+      app = firebase.initializeApp(firebaseConfig);
+    });
+
+    document.getElementById("loginBtn").addEventListener("click", function () {
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+
+      if (!email || !password) {
+        alert("Please enter both email and password.");
+        return;
+      }
+
+      const db = firebase.database();
+      const usersRef = db.ref("users");
+
+      usersRef.orderByChild("email").equalTo(email).once("value", function(snapshot) {
+        if (snapshot.exists()) {
+          let userFound = false;
+
+          snapshot.forEach(function(childSnapshot) {
+            const userData = childSnapshot.val();
+
+            if (userData.password === password) {
+              userFound = true;
+
+              // ✅ Save user info in localStorage (you can expand this)
+              localStorage.setItem("telegram_user_id", childSnapshot.key);
+              localStorage.setItem("user_email", userData.email);
+              localStorage.setItem("user_balance", userData.balance || 0);
+
+              alert("Login successful!");
+
+              // ✅ Redirect if needed
+              // window.location.href = "dashboard.html";
+            }
+          });
+
+          if (!userFound) {
+            alert("Incorrect password.");
+          }
+
+        } else {
+          alert("Email not registered.");
+        }
+      });
+    });
+  </script>
 </body>
-</html>
+  </html>
