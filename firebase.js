@@ -2,7 +2,7 @@
 // ✅ Firebase Config and Initialization (Shared)
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAL9a_aE-zpelXpMIl0iAWD4Abrxf8e_2U",
+  apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
   authDomain: "zmmssmk.firebaseapp.com",
   databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
   projectId: "zmmssmk",
