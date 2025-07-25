@@ -1,24 +1,34 @@
-// 2️⃣ register.js
-document.getElementById("registerBtn").addEventListener("click", function (e) {
-  e.preventDefault();
-  
-  const email = document.getElementById("email").value;
-  const username = document.getElementById("username").value;
-  const password = document.getElementById("password").value;
+// register.js
+
+document.getElementById("registerBtn").addEventListener("click", function () {
+  const email = document.getElementById("email").value.trim();
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
 
   if (!email || !username || !password) {
-    alert("Please fill all fields.");
+    alert("❌ All fields are required");
     return;
   }
 
-  // Store data
-  const code = Math.floor(100000 + Math.random() * 900000); // 6-digit code
-  localStorage.setItem(email + "_code", code);
-  localStorage.setItem(email, JSON.stringify({ email, username, password }));
-  sessionStorage.setItem("pendingEmail", email);
+  // Step 1: Create Firebase Auth user
+  firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+      const userId = user.uid;
 
-  // NOTE: sendCodeToEmail(email, code); ← یہ بعد میں ایمیل کنیکٹ کرتے وقت کریں گے
-  alert("Code sent (temporarily): " + code); // وقتی حل جب تک email system نہ ہو
-
-  window.location.href = "verify.html";
+      // Step 2: Save additional data to Realtime Database
+      return firebase.database().ref("users/" + userId).set({
+        email: email,
+        username: username,
+        registeredAt: Date.now()
+      });
+    })
+    .then(() => {
+      alert("✅ Registration successful!");
+      window.location.href = "login.html"; // redirect to login
+    })
+    .catch((error) => {
+      console.error("❌ Error:", error);
+      alert("❌ " + error.message);
+    });
 });
