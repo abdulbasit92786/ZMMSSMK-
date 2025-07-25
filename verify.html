@@ -1,15 +1,86 @@
-<!-- 3️⃣ verify.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Verify Email</title>
+  <style>
+    body {
+      background: #0f0f0f;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+    input {
+      padding: 10px;
+      font-size: 16px;
+      width: 100%;
+      max-width: 300px;
+      margin: 10px auto;
+      display: block;
+      text-align: center;
+    }
+    button {
+      padding: 10px 20px;
+      background: #00cc66;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #00b359;
+    }
+  </style>
+  <!-- ✅ Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
 </head>
 <body>
   <h2>Enter the 6-digit code sent to your email</h2>
-  <input type="text" id="verifyCode" placeholder="Enter code" />
+  <input type="text" id="verifyCode" placeholder="Enter code" maxlength="6" />
   <button id="verifyBtn">Verify</button>
 
-  <script src="verify.js"></script>
+  <script>
+    document.getElementById("verifyBtn").addEventListener("click", function () {
+      const enteredCode = document.getElementById("verifyCode").value.trim();
+      const userId = localStorage.getItem("telegram_user_id") || "user_" + Date.now();
+
+      if (!enteredCode) {
+        alert("❌ Please enter the code.");
+        return;
+      }
+
+      const userRef = firebase.database().ref("users/" + userId + "/verificationCode");
+
+      userRef.once("value").then((snapshot) => {
+        const correctCode = snapshot.val();
+
+        if (enteredCode === correctCode) {
+          alert("✅ Email verified successfully!");
+          firebase.database().ref("users/" + userId).update({ verified: true });
+        } else {
+          alert("❌ Incorrect code. Try again.");
+        }
+      }).catch((err) => {
+        console.error("Verification error:", err);
+        alert("❌ Something went wrong.");
+      });
+    });
+  </script>
 </body>
 </html>
