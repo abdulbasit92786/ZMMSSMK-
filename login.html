@@ -1,4 +1,4 @@
-<!-- ✅ login.html (Updated with Firebase Realtime Database) -->
+<!-- ✅ login.html (Updated and working) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53,27 +53,27 @@
             if (userData.password === password) {
               userFound = true;
 
-              // ✅ Save user info in localStorage (you can expand this)
+              // ✅ Save user info in localStorage
               localStorage.setItem("telegram_user_id", childSnapshot.key);
               localStorage.setItem("user_email", userData.email);
               localStorage.setItem("user_balance", userData.balance || 0);
 
-              alert("Login successful!");
+              alert("✅ Login successful!");
 
-              // ✅ Redirect if needed
-              // window.location.href = "dashboard.html";
+              // ✅ Redirect to wallet or dashboard
+              window.location.href = "wallet.html";
             }
           });
 
           if (!userFound) {
-            alert("Incorrect password.");
+            alert("❌ Incorrect password.");
           }
 
         } else {
-          alert("Email not registered.");
+          alert("❌ Email not registered.");
         }
       });
     });
   </script>
 </body>
-  </html>
+</html>
