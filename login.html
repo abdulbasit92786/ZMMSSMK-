@@ -3,9 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <title>Login</title>
+
+  <!-- ✅ Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+  <!-- ✅ Firebase config external -->
+  <script src="firebase.js"></script>
 </head>
 <body>
   <h2>Login</h2>
@@ -14,19 +19,6 @@
   <button id="loginBtn">Login</button>
 
   <script>
-    // ✅ Firebase Config
-    const firebaseConfig = {
-      apiKey: "AIzaSyAL9a_aE-zpelXpMIl0iAWD4Abrxf8e_2U",
-      authDomain: "zmmssmk.firebaseapp.com",
-      databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
-      projectId: "zmmssmk",
-      storageBucket: "zmmssmk.appspot.com",
-      messagingSenderId: "677420760492",
-      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-
     // ✅ Login logic using Firebase Auth
     document.getElementById("loginBtn").addEventListener("click", function () {
       const email = document.getElementById("loginEmail").value.trim();
