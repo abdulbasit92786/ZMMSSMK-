@@ -1,11 +1,13 @@
-<!-- ✅ login.html (Updated and working) -->
+<!-- ✅ login.html (Firebase v9 compat version) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Login</title>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js" defer></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js" defer></script>
+
+  <!-- ✅ Firebase compat version (same as dashboard.html) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
   <h2>Login</h2>
@@ -14,7 +16,7 @@
   <button id="loginBtn">Login</button>
 
   <script>
-    // ✅ Initialize Firebase
+    // ✅ Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyAL9a_aE-zpelXpMIl0iAWD4Abrxf8e_2U",
       authDomain: "zmmssmk.firebaseapp.com",
@@ -26,12 +28,12 @@
       measurementId: "G-7J7BEDY8H1"
     };
 
-    let app;
-    document.addEventListener("DOMContentLoaded", function () {
-      app = firebase.initializeApp(firebaseConfig);
-    });
+    // ✅ Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    document.getElementById("loginBtn").addEventListener("click", function () {
+    // ✅ Login logic
+    document.getElementById("loginBtn").addEventListener("click", async () => {
       const email = document.getElementById("loginEmail").value.trim();
       const password = document.getElementById("loginPassword").value.trim();
 
@@ -40,28 +42,28 @@
         return;
       }
 
-      const db = firebase.database();
-      const usersRef = db.ref("users");
+      try {
+        const snapshot = await db.ref("users").orderByChild("email").equalTo(email).once("value");
 
-      usersRef.orderByChild("email").equalTo(email).once("value", function(snapshot) {
         if (snapshot.exists()) {
           let userFound = false;
 
-          snapshot.forEach(function(childSnapshot) {
+          snapshot.forEach((childSnapshot) => {
             const userData = childSnapshot.val();
-
             if (userData.password === password) {
               userFound = true;
 
-              // ✅ Save user info in localStorage
+              // ✅ Save login session
               localStorage.setItem("telegram_user_id", childSnapshot.key);
               localStorage.setItem("user_email", userData.email);
               localStorage.setItem("user_balance", userData.balance || 0);
 
               alert("✅ Login successful!");
 
-              // ✅ Redirect to dashboard
-              window.location.href = "dashboard.html";
+              // ✅ Redirect after delay
+              setTimeout(() => {
+                window.location.href = "dashboard.html";
+              }, 500);
             }
           });
 
@@ -72,7 +74,11 @@
         } else {
           alert("❌ Email not registered.");
         }
-      });
+
+      } catch (error) {
+        console.error("Login Error:", error);
+        alert("⚠️ Something went wrong. Please try again.");
+      }
     });
   </script>
 </body>
