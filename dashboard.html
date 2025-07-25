@@ -12,7 +12,6 @@
       color: #333;
       text-align: center;
     }
-
     .container { padding: 20px; }
     .title { font-size: 24px; font-weight: bold; margin-top: 10px; }
     .subtitle { font-size: 18px; margin: 10px 0; }
@@ -24,7 +23,6 @@
       border-radius: 10px;
       display: inline-block;
     }
-
     .referral-box { margin: 15px 0; }
     .referral-input {
       width: 90%;
@@ -33,7 +31,6 @@
       border-radius: 6px;
       margin-top: 8px;
     }
-
     .btn {
       margin-top: 10px;
       padding: 10px 20px;
@@ -43,7 +40,6 @@
       border-radius: 8px;
       font-size: 16px;
     }
-
     .btn:disabled { background-color: gray; }
     .countdown { margin-top: 10px; color: red; font-weight: bold; }
     .nav {
@@ -56,18 +52,15 @@
       padding: 10px 0;
       box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
     }
-
     .nav a {
       color: #6c63ff;
       font-size: 14px;
       text-decoration: none;
     }
-
     .nav a:hover { text-decoration: underline; }
     .earned { font-size: 14px; margin-top: 10px; color: green; }
   </style>
 
-  <!-- ✅ Firebase CDN Scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
@@ -96,7 +89,6 @@
     </div>
   </div>
 
-  <!-- ✅ Navigation -->
   <div class="nav">
     <a href="dashboard.html">🏠 Home</a>
     <a href="missions.html">🎯 Mission</a>
@@ -107,13 +99,12 @@
   </div>
 
   <script>
-    // ✅ Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
       authDomain: "zmmssmk.firebaseapp.com",
       databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
       projectId: "zmmssmk",
-      storageBucket: "zmmssmk.firebasestorage.app",
+      storageBucket: "zmmssmk.appspot.com",
       messagingSenderId: "677420760492",
       appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09",
       measurementId: "G-7J7BEDY8H1"
@@ -122,8 +113,36 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const telegramUserId = localStorage.getItem("telegram_user_id") || "123456";
-    localStorage.setItem("telegram_user_id", telegramUserId);
+    let telegramUserId = localStorage.getItem("telegram_user_id");
+    const urlParams = new URLSearchParams(window.location.search);
+    const refId = urlParams.get("ref");
+
+    if (!telegramUserId) {
+      telegramUserId = "user_" + Math.floor(Math.random() * 100000000);
+      localStorage.setItem("telegram_user_id", telegramUserId);
+
+      db.ref("users/" + telegramUserId).set({
+        balance: 0,
+        totalEarned: 0,
+        wallet: 0,
+        lastClaim: 0,
+        plan: "free",
+        referredBy: refId || null
+      });
+
+      // Reward referrer
+      if (refId) {
+        const refUser = db.ref("users/" + refId);
+        refUser.once("value", (snap) => {
+          if (snap.exists()) {
+            const data = snap.val();
+            const newBalance = (data.balance || 0) + 0.1;
+            const newEarned = (data.totalEarned || 0) + 0.1;
+            refUser.update({ balance: newBalance, totalEarned: newEarned });
+          }
+        });
+      }
+    }
 
     const balanceEl = document.getElementById("balance");
     const earnedEl = document.getElementById("totalEarned");
@@ -131,7 +150,7 @@
     const claimToWalletBtn = document.getElementById("claimToWalletBtn");
     const countdownEl = document.getElementById("countdown");
     const refLinkInput = document.getElementById("refLink");
-    refLinkInput.value = `https://yourdomain.com/dashboard.html?ref=${telegramUserId}`;
+    refLinkInput.value = `${window.location.origin}${window.location.pathname}?ref=${telegramUserId}`;
 
     function copyLink() {
       refLinkInput.select();
@@ -201,7 +220,7 @@
       const userRef = db.ref("users/" + telegramUserId);
       const snapshot = await userRef.get();
       let data = snapshot.val() || {};
-      const plan = data.plan || "plan_nft_25";
+      const plan = data.plan || "free";
 
       const reward = getRewardForPlan(plan);
       const newBalance = (data.balance || 0) + reward;
@@ -243,6 +262,5 @@
 
     updateUI();
   </script>
-
 </body>
-        </html>
+  </html>
