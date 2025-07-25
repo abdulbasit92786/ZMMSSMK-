@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>📦 NFT Plans</title>
+
+  <!-- ✅ Firebase SDKs -->
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,12 +17,7 @@
       margin: 0;
       padding: 20px;
     }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 10px;
-    }
-
+    h1 { text-align: center; margin-bottom: 10px; }
     .balances {
       display: flex;
       justify-content: space-around;
@@ -25,7 +25,6 @@
       margin-bottom: 20px;
       flex-wrap: wrap;
     }
-
     .plan-container {
       display: flex;
       flex-direction: row;
@@ -33,20 +32,17 @@
       justify-content: center;
       gap: 20px;
     }
-
     .plan-section {
       flex: 1 1 300px;
       max-width: 500px;
       min-width: 300px;
     }
-
     .plan-section h2 {
       text-align: center;
       margin-bottom: 10px;
       border-bottom: 1px solid #444;
       padding-bottom: 5px;
     }
-
     .plan {
       background: #1a1a1a;
       border: 2px solid #333;
@@ -55,11 +51,7 @@
       margin: 10px 0;
       text-align: center;
     }
-
-    .plan h3 {
-      margin: 0;
-    }
-
+    .plan h3 { margin: 0; }
     .plan button {
       padding: 10px 20px;
       margin-top: 10px;
@@ -69,18 +61,12 @@
       border-radius: 6px;
       cursor: pointer;
     }
-
-    .plan button:disabled {
-      background: #555;
-      cursor: not-allowed;
-    }
-
+    .plan button:disabled { background: #555; cursor: not-allowed; }
     .active-label {
       color: #00ffcc;
       font-weight: bold;
       margin-top: 10px;
     }
-
     .cancel-button {
       background-color: #cc3300;
       margin-top: 10px;
@@ -92,8 +78,8 @@
   <p style="text-align:center;">Buy a plan using USDT or ZMM token to activate missions and daily rewards.</p>
 
   <div class="balances">
-    <div>💵 USDT Balance: <span id="usdt-balance"></span></div>
-    <div>🪙 ZMM Balance: <span id="zmm-balance"></span></div>
+    <div>💵 USDT Balance: <span id="usdt-balance">-</span></div>
+    <div>🪙 ZMM Balance: <span id="zmm-balance">-</span></div>
   </div>
 
   <div class="plan-container">
@@ -102,23 +88,40 @@
   </div>
 
   <script>
-    let wallet = JSON.parse(localStorage.getItem("walletData")) || { usdt: 1000, zmm: 100000 };
-    let activePlans = JSON.parse(localStorage.getItem("activePlans")) || { usdt: null, zmm: null };
+    // ✅ Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAL9a_aE-zpelXpMIl0iAWD4Abrxf8e_2U",
+      authDomain: "zmmssmk.firebaseapp.com",
+      databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
+      projectId: "zmmssmk",
+      storageBucket: "zmmssmk.appspot.com",
+      messagingSenderId: "677420760492",
+      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
+    };
+
+    // ✅ Init
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    const userId = localStorage.getItem("telegram_user_id") || "guest_user";
+
+    let wallet = { usdt: 0, zmm: 0 };
+    let activePlans = { usdt: null, zmm: null };
 
     const PLAN_CONFIG = {
       usdt: [
-        { amount: 10, duration: 30, hourly: 2, video: 2 },
-        { amount: 25, duration: 30, hourly: 6, video: 4 },
-        { amount: 50, duration: 30, hourly: 8, video: 6 },
-        { amount: 100, duration: 30, hourly: 16, video: 12 },
-        { amount: 500, duration: null, hourly: 25, video: 20 },
+        { amount: 10, duration: 30 },
+        { amount: 25, duration: 30 },
+        { amount: 50, duration: 30 },
+        { amount: 100, duration: 30 },
+        { amount: 500, duration: null },
       ],
       zmm: [
-        { amount: 1000, duration: 30, hourly: 2, video: 2 },
-        { amount: 2500, duration: 30, hourly: 6, video: 4 },
-        { amount: 5000, duration: 30, hourly: 8, video: 6 },
-        { amount: 10000, duration: 30, hourly: 16, video: 12 },
-        { amount: 50000, duration: null, hourly: 25, video: 20 },
+        { amount: 1000, duration: 30 },
+        { amount: 2500, duration: 30 },
+        { amount: 5000, duration: 30 },
+        { amount: 10000, duration: 30 },
+        { amount: 50000, duration: null },
       ],
     };
 
@@ -194,14 +197,19 @@
       if (activePlans[type]) activePlans[type] = null;
 
       wallet[type] -= cost;
+
       activePlans[type] = {
         id: planId,
-        expiresAt: plan.duration ? new Date(Date.now() + plan.duration * 24 * 60 * 60 * 1000).toISOString() : null
+        amount: cost,
+        expiresAt: plan.duration ? new Date(Date.now() + plan.duration * 86400000).toISOString() : null
       };
 
-      localStorage.setItem("active_plan", `plan_${type}_${amount}`);
-      localStorage.setItem("walletData", JSON.stringify(wallet));
-      localStorage.setItem("activePlans", JSON.stringify(activePlans));
+      // ✅ Save to Firebase
+      const userRef = database.ref("users/" + userId);
+      userRef.update({
+        [`wallet/${type}`]: wallet[type],
+        [`activePlans/${type}`]: activePlans[type]
+      });
 
       updateBalanceUI();
       renderPlans();
@@ -209,15 +217,22 @@
     }
 
     function cancelPlan(type) {
-      if (confirm("Are you sure you want to cancel this plan? You won't get any refund.")) {
+      if (confirm("Are you sure you want to cancel this plan?")) {
         activePlans[type] = null;
-        localStorage.setItem("activePlans", JSON.stringify(activePlans));
+        database.ref("users/" + userId + "/activePlans/" + type).remove();
         renderPlans();
       }
     }
 
-    updateBalanceUI();
-    renderPlans();
+    // ✅ Load from Firebase
+    database.ref("users/" + userId).once("value").then(snapshot => {
+      const data = snapshot.val();
+      wallet = data.wallet || { usdt: 0, zmm: 0 };
+      activePlans = data.activePlans || { usdt: null, zmm: null };
+
+      updateBalanceUI();
+      renderPlans();
+    });
   </script>
 </body>
-</html>
+                                                         </html>پ
