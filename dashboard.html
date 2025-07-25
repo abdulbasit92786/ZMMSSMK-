@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ZMMK Dashboard</title>
   <style>
+    /* آپ کا سارا CSS وہی ہے جیسا تھا */
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
@@ -61,8 +62,12 @@
     .earned { font-size: 14px; margin-top: 10px; color: green; }
   </style>
 
+  <!-- Firebase CDN Scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <!-- Firebase Config File -->
+  <script src="firebase.js"></script>
 </head>
 <body>
 
@@ -99,20 +104,6 @@
   </div>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
-      authDomain: "zmmssmk.firebaseapp.com",
-      databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
-      projectId: "zmmssmk",
-      storageBucket: "zmmssmk.appspot.com",
-      messagingSenderId: "677420760492",
-      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09",
-      measurementId: "G-7J7BEDY8H1"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
     let telegramUserId = localStorage.getItem("telegram_user_id");
     const urlParams = new URLSearchParams(window.location.search);
     const refId = urlParams.get("ref");
