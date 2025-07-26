@@ -24,6 +24,7 @@ const HIDE_DURATION_HOURS = 24;
 document.addEventListener("DOMContentLoaded", () => {
   checkTaskVisibility();
   showPlanInfo();
+  showTotalEarned(); // ✅ show total earned
 });
 
 // ✅ ریوارڈ پلان کے حساب سے نکالیں
@@ -73,6 +74,17 @@ function showPlanInfo() {
   });
 }
 
+// ✅ ٹوٹل ارننگ شو کریں
+function showTotalEarned() {
+  const earnedEl = document.getElementById("total-earned");
+  if (!earnedEl) return;
+
+  db.ref("users/" + userId + "/wallet/zmm").once("value").then(snap => {
+    const total = parseFloat(snap.val() || 0);
+    earnedEl.innerText = total.toFixed(2);
+  });
+}
+
 // ▶️ ویڈیو ٹاسک اوپن کریں
 function startTask(url, id) {
   startTimes[id] = new Date().getTime();
@@ -111,6 +123,7 @@ function verifyTask(id) {
         alert(`✅ Success! You got ${reward} Token(s).`);
         document.getElementById("verify-" + id).style.display = "none";
         document.getElementById(id).style.display = "none";
+        showTotalEarned(); // ✅ update total earned after reward
       });
     });
   });
@@ -142,4 +155,4 @@ function checkTaskVisibility() {
       }
     });
   });
-                                                                    }
+      }
