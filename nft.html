@@ -1,62 +1,26 @@
+<!-- File: nft.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🪙 NFT Access Plans</title>
-  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0f0f0f;
-      color: #fff;
-      padding: 20px;
-      margin: 0;
-    }
-    h1 {
-      text-align: center;
-    }
-    .info {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .plan-list {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-    }
-    .plan-box {
-      background: #1a1a1a;
-      border: 2px solid #333;
-      border-radius: 10px;
-      padding: 15px;
-      width: 250px;
-      text-align: center;
-    }
-    .plan-box h3 {
-      margin: 0;
-    }
-    .plan-box button {
-      margin-top: 10px;
-      padding: 8px 15px;
-      border: none;
-      background: #00cc66;
-      color: #fff;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>NFT Access Plans</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
-  <h1>🪙 NFT Access Plans</h1>
-  <div class="info">
-    <p id="current-plan">🔐 Current Plan: Loading...</p>
-    <p id="wallet-balance">💰 Wallet: - ZMM</p>
+  <div class="wallet-section">
+    <h2>💰 Wallet</h2>
+    <p>USDT: <span id="usdtBalance">Loading...</span></p>
+    <p>ZMM: <span id="zmmBalance">Loading...</span></p>
   </div>
-  <div class="plan-list" id="plans-container"></div>
 
-  <script defer src="nft.js"></script>
+  <h2 style="text-align:center;">🪙 NFT Access Plans</h2>
+
+  <div class="plans-section" id="plansContainer">
+    <!-- Plans will load here dynamically -->
+  </div>
+
+  <script src="nft.js"></script>
 </body>
 </html>
