@@ -1,55 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Missions</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-
-  <!-- ✅ Firebase SDKs -->
-  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
-</head>
+  <link rel="stylesheet" href="style.css">  <!-- ✅ Firebase SDKs -->  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script></head>
 <body>
   <div class="mission-container">
-    <h1>🎯 Daily Missions</h1>
+    <h1>🎯 Daily Missions</h1><div style="background:#222;color:#fff;padding:12px;margin-bottom:15px;border-radius:8px;text-align:center;">
+  <strong>📦 Your Active Plan:</strong> <span id="plan-name">-</span><br>
+  <strong>🎁 Reward per Task:</strong> <span id="plan-reward">-</span> Token(s)
+</div>
 
-    <div style="background:#222;color:#fff;padding:12px;margin-bottom:15px;border-radius:8px;text-align:center;">
-      <strong>📦 Your Active Plan:</strong> <span id="plan-name">-</span><br>
-      <strong>🎁 Reward per Task:</strong> <span id="plan-reward">-</span> Token(s)
-    </div>
+<div id="video-tasks"></div>
 
-    <div class="video-task" id="task1">
-      <p>📺 Watch Video 1 (30 sec)</p>
-      <button onclick="startTask('https://youtu.be/9iBwP4TbFHg?si=-spUOeZHbBEkQRnD', 'task1')">▶️ Watch</button>
-      <button id="verify-task1" onclick="verifyTask('task1')">✅ Verify</button>
-      <div class="status" id="status-task1">⏳ Not Verified</div>
-    </div>
-
-    <div class="video-task" id="task2">
-      <p>📺 Watch Video 2 (30 sec)</p>
-      <button onclick="startTask('https://youtu.be/BfTGQYxp0ec?si=zDE8CtMT12B3aEzz', 'task2')">▶️ Watch</button>
-      <button id="verify-task2" onclick="verifyTask('task2')">✅ Verify</button>
-      <div class="status" id="status-task2">⏳ Not Verified</div>
-    </div>
-
-    <div class="video-task" id="task3">
-      <p>📺 Watch Video 3 (30 sec)</p>
-      <button onclick="startTask('https://youtu.be/N4fOamB7uec?si=4timJdDmBeTlZvNG', 'task3')">▶️ Watch</button>
-      <button id="verify-task3" onclick="verifyTask('task3')">✅ Verify</button>
-      <div class="status" id="status-task3">⏳ Not Verified</div>
-    </div>
-
-    <div class="video-task" id="task4">
-      <p>📺 Watch Video 4 (30 sec)</p>
-      <button onclick="startTask('https://youtu.be/BAXgvXnaKB4?si=acuEFWXuZazv4rrB', 'task4')">▶️ Watch</button>
-      <button id="verify-task4" onclick="verifyTask('task4')">✅ Verify</button>
-      <div class="status" id="status-task4">⏳ Not Verified</div>
-    </div>
-  </div>
-
-  <script>
-    // ✅ Firebase Config
+  </div>  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
       authDomain: "zmmssmk.firebaseapp.com",
@@ -60,23 +24,53 @@
       appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
     };
 
-    // ✅ Initialize Firebase
     const app = firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-
     const userId = localStorage.getItem("telegram_user_id") || "guest_user";
 
-    // ✅ Load user's plan from database
-    firebase.database().ref("users/" + userId).once("value").then((snapshot) => {
+    const videoTasks = [
+      { id: "task1", title: "Watch Video 1", url: "https://youtu.be/9iBwP4TbFHg?si=-spUOeZHbBEkQRnD" },
+      { id: "task2", title: "Watch Video 2", url: "https://youtu.be/BfTGQYxp0ec?si=zDE8CtMT12B3aEzz" },
+      { id: "task3", title: "Watch Video 3", url: "https://youtu.be/N4fOamB7uec?si=4timJdDmBeTlZvNG" },
+      { id: "task4", title: "Watch Video 4", url: "https://youtu.be/BAXgvXnaKB4?si=acuEFWXuZazv4rrB" }
+    ];
+
+    let activeReward = 1;
+    let planName = "Free";
+
+    firebase.database().ref("users/" + userId).once("value").then(snapshot => {
       const userData = snapshot.val();
-      if (userData && userData.plan) {
-        document.getElementById("plan-name").innerText = userData.plan;
-        document.getElementById("plan-reward").innerText = userData.reward || 1;
-      } else {
-        document.getElementById("plan-name").innerText = "Free";
-        document.getElementById("plan-reward").innerText = 1;
-      }
+      planName = (userData && userData.plan) ? userData.plan : "Free";
+      activeReward = (userData && userData.reward) ? userData.reward : 1;
+      document.getElementById("plan-name").innerText = planName;
+      document.getElementById("plan-reward").innerText = activeReward;
+
+      loadTasks();
     });
+
+    function loadTasks() {
+      const tasksContainer = document.getElementById("video-tasks");
+      database.ref("tasksCompleted/" + userId).once("value").then(snapshot => {
+        const completed = snapshot.val() || {};
+        const now = Date.now();
+
+        videoTasks.forEach(task => {
+          const last = completed[task.id]?.timestamp || 0;
+          const hoursPassed = (now - last) / (1000 * 60 * 60);
+          if (hoursPassed >= 12 || !completed[task.id]) {
+            const div = document.createElement("div");
+            div.className = "video-task";
+            div.innerHTML = `
+              <p>📺 ${task.title} (30 sec)</p>
+              <button onclick="startTask('${task.url}', '${task.id}')">▶️ Watch</button>
+              <button id="verify-${task.id}" onclick="verifyTask('${task.id}')">✅ Verify</button>
+              <div class="status" id="status-${task.id}">⏳ Not Verified</div>
+            `;
+            tasksContainer.appendChild(div);
+          }
+        });
+      });
+    }
 
     function startTask(url, taskId) {
       window.open(url, "_blank");
@@ -84,30 +78,21 @@
 
     function verifyTask(taskId) {
       const statusEl = document.getElementById("status-" + taskId);
-      const rewardPerTask = parseInt(document.getElementById("plan-reward").innerText) || 1;
+      const reward = planName.toLowerCase() === "free" ? 1 : activeReward;
 
-      // ✅ Update task status on UI
       statusEl.innerText = "✅ Verified";
 
-      // ✅ Save to Firebase under completedTasks
       const taskRef = database.ref("tasksCompleted/" + userId + "/" + taskId);
-      taskRef.set({
-        verified: true,
-        timestamp: Date.now()
-      });
+      taskRef.set({ verified: true, timestamp: Date.now() });
 
-      // ✅ Update user balance
       const userRef = database.ref("users/" + userId);
       userRef.once("value").then(snapshot => {
         const userData = snapshot.val();
         const currentBalance = (userData && userData.balance) ? userData.balance : 0;
-        const newBalance = currentBalance + rewardPerTask;
+        const newBalance = currentBalance + reward;
         userRef.update({ balance: newBalance });
-
-        // Optional: Update localStorage if you're using it
         localStorage.setItem("user_balance", newBalance);
       });
     }
-  </script>
-</body>
-  </html>
+  </script></body>
+</html>
