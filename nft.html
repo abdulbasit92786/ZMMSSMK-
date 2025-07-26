@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>📦 NFT Plans</title>
 
-  <!-- ✅ Firebase SDKs -->
+  <!-- Firebase SDKs -->
   <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
 
@@ -52,6 +52,7 @@
       text-align: center;
     }
     .plan h3 { margin: 0; }
+    .plan p { margin: 8px 0; }
     .plan button {
       padding: 10px 20px;
       margin-top: 10px;
@@ -61,7 +62,10 @@
       border-radius: 6px;
       cursor: pointer;
     }
-    .plan button:disabled { background: #555; cursor: not-allowed; }
+    .plan button:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
     .active-label {
       color: #00ffcc;
       font-weight: bold;
@@ -75,7 +79,7 @@
 </head>
 <body>
   <h1>🪙 NFT Access Plans</h1>
-  <p style="text-align:center;">Buy a plan using USDT or ZMM token to activate missions and daily rewards.</p>
+  <p style="text-align:center;">Buy a plan using USDT or ZMM token to unlock daily missions and rewards.</p>
 
   <div class="balances">
     <div>💵 USDT Balance: <span id="usdt-balance">-</span></div>
@@ -88,7 +92,6 @@
   </div>
 
   <script>
-    // ✅ Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
       authDomain: "zmmssmk.firebaseapp.com",
@@ -99,10 +102,8 @@
       appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
     };
 
-    // ✅ Init
     const app = firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-
     const userId = localStorage.getItem("telegram_user_id") || "guest_user";
 
     let wallet = { usdt: 0, zmm: 0 };
@@ -153,6 +154,7 @@
           div.innerHTML = `
             <h3>${type === "usdt" ? "$" + plan.amount : plan.amount + " ZMM"}</h3>
             <p>${plan.duration ? "1 Month Access" : "Lifetime Access"}</p>
+            <p>🔓 Unlocks daily missions & rewards</p>
           `;
 
           const active = activePlans[type];
@@ -171,7 +173,7 @@
             const button = document.createElement("button");
             button.innerText = "Buy";
             button.onclick = () => buyPlan(type, plan.amount);
-            if (active) button.disabled = true;
+            if (activePlans[type]) button.disabled = true;
             div.appendChild(button);
           }
 
@@ -186,28 +188,26 @@
       if (!plan) return;
 
       const cost = plan.amount;
-
       if (wallet[type] < cost) {
         alert(`❌ Not enough ${type.toUpperCase()} in wallet.`);
         return;
       }
 
-      const otherType = type === "usdt" ? "zmm" : "usdt";
-      if (activePlans[otherType]) activePlans[otherType] = null;
-      if (activePlans[type]) activePlans[type] = null;
-
       wallet[type] -= cost;
 
+      activePlans.usdt = null;
+      activePlans.zmm = null;
       activePlans[type] = {
         id: planId,
         amount: cost,
         expiresAt: plan.duration ? new Date(Date.now() + plan.duration * 86400000).toISOString() : null
       };
 
-      // ✅ Save to Firebase
       const userRef = database.ref("users/" + userId);
       userRef.update({
         [`wallet/${type}`]: wallet[type],
+        [`activePlans/usdt`]: activePlans.usdt,
+        [`activePlans/zmm`]: activePlans.zmm,
         [`activePlans/${type}`]: activePlans[type]
       });
 
@@ -224,7 +224,6 @@
       }
     }
 
-    // ✅ Load from Firebase
     database.ref("users/" + userId).once("value").then(snapshot => {
       const data = snapshot.val();
       wallet = data.wallet || { usdt: 0, zmm: 0 };
@@ -235,4 +234,4 @@
     });
   </script>
 </body>
-                                                         </html>پ
+  </html>
