@@ -144,25 +144,21 @@
       alert("Referral link copied!");
     }
 
-    let claimCooldown = 60 * 60 * 4;
+    let claimCooldown = 60 * 60 * 4; // 4 hours in seconds
+    let countdownInterval;
 
     function getRewardForPlan(planKey) {
       if (!planKey || planKey === "free") return 0.5;
       const parts = planKey.split("_");
-      const amount = parseFloat(parts[2]);
-      switch (amount) {
-        case 10:
-        case 1000: return 2;
-        case 25:
-        case 2500: return 4;
-        case 50:
-        case 5000: return 6;
-        case 100:
-        case 10000: return 12;
-        case 500:
-        case 50000: return 20;
-        default: return 0.5;
-      }
+      const amount = parseFloat(parts[1]);
+      if (isNaN(amount)) return 0.5;
+
+      if (amount === 10 || amount === 1000) return 2;
+      if (amount === 25 || amount === 2500) return 4;
+      if (amount === 50 || amount === 5000) return 6;
+      if (amount === 100 || amount === 10000) return 12;
+      if (amount === 500 || amount === 50000) return 20;
+      return 0.5;
     }
 
     async function updateUI() {
@@ -186,17 +182,19 @@
       } else {
         claimBtn.disabled = false;
         countdownEl.textContent = "";
+        clearInterval(countdownInterval);
       }
     }
 
     function startCountdown(seconds) {
-      let interval = setInterval(() => {
+      clearInterval(countdownInterval);
+      countdownInterval = setInterval(() => {
         let h = Math.floor(seconds / 3600);
         let m = Math.floor((seconds % 3600) / 60);
         let s = seconds % 60;
         countdownEl.textContent = `Next claim in ${h}h ${m}m ${s}s`;
         if (--seconds < 0) {
-          clearInterval(interval);
+          clearInterval(countdownInterval);
           countdownEl.textContent = "";
           claimBtn.disabled = false;
         }
@@ -207,8 +205,14 @@
       const userRef = db.ref("users/" + telegramUserId);
       const snapshot = await userRef.get();
       let data = snapshot.val() || {};
-      const plan = data.plan || "free";
 
+      const now = Date.now();
+      if ((now - data.lastClaim) / 1000 < claimCooldown) {
+        alert("Please wait for 4 hours between claims.");
+        return;
+      }
+
+      const plan = data.plan || "free";
       const reward = getRewardForPlan(plan);
       const newBalance = (data.balance || 0) + reward;
       const newEarned = (data.totalEarned || 0) + reward;
@@ -216,9 +220,10 @@
       await userRef.update({
         balance: newBalance,
         totalEarned: newEarned,
-        lastClaim: Date.now()
+        lastClaim: now
       });
 
+      alert(`✅ You received ${reward} ZMM`);
       updateUI();
     }
 
@@ -250,4 +255,4 @@
     updateUI();
   </script>
 </body>
-  </html>
+</html>
