@@ -1,98 +1,28 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Missions</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">  <!-- ✅ Firebase SDKs -->  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script></head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- ✅ Firebase SDKs -->
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+  <script defer src="mission.js"></script> <!-- ✅ Updated JS will go here -->
+</head>
 <body>
   <div class="mission-container">
-    <h1>🎯 Daily Missions</h1><div style="background:#222;color:#fff;padding:12px;margin-bottom:15px;border-radius:8px;text-align:center;">
-  <strong>📦 Your Active Plan:</strong> <span id="plan-name">-</span><br>
-  <strong>🎁 Reward per Task:</strong> <span id="plan-reward">-</span> Token(s)
-</div>
+    <h1>🎯 Daily Missions</h1>
 
-<div id="video-tasks"></div>
+    <!-- ✅ Plan info section -->
+    <div style="background:#222;color:#fff;padding:12px;margin-bottom:15px;border-radius:8px;text-align:center;">
+      <strong>📦 Your Active Plan:</strong> <span id="plan-name">Loading...</span><br>
+      <strong>🎁 Reward per Task:</strong> <span id="plan-reward">0</span> Token(s)
+    </div>
 
-  </div>  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
-      authDomain: "zmmssmk.firebaseapp.com",
-      databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
-      projectId: "zmmssmk",
-      storageBucket: "zmmssmk.appspot.com",
-      messagingSenderId: "677420760492",
-      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
-    };
-
-    const app = firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    const userId = localStorage.getItem("telegram_user_id") || "guest_user";
-
-    const videoTasks = [
-      { id: "task1", title: "Watch Video 1", url: "https://youtu.be/9iBwP4TbFHg?si=-spUOeZHbBEkQRnD" },
-      { id: "task2", title: "Watch Video 2", url: "https://youtu.be/BfTGQYxp0ec?si=zDE8CtMT12B3aEzz" },
-      { id: "task3", title: "Watch Video 3", url: "https://youtu.be/N4fOamB7uec?si=4timJdDmBeTlZvNG" },
-      { id: "task4", title: "Watch Video 4", url: "https://youtu.be/BAXgvXnaKB4?si=acuEFWXuZazv4rrB" }
-    ];
-
-    let activeReward = 1;
-    let planName = "Free";
-
-    firebase.database().ref("users/" + userId).once("value").then(snapshot => {
-      const userData = snapshot.val();
-      planName = (userData && userData.plan) ? userData.plan : "Free";
-      activeReward = (userData && userData.reward) ? userData.reward : 1;
-      document.getElementById("plan-name").innerText = planName;
-      document.getElementById("plan-reward").innerText = activeReward;
-
-      loadTasks();
-    });
-
-    function loadTasks() {
-      const tasksContainer = document.getElementById("video-tasks");
-      database.ref("tasksCompleted/" + userId).once("value").then(snapshot => {
-        const completed = snapshot.val() || {};
-        const now = Date.now();
-
-        videoTasks.forEach(task => {
-          const last = completed[task.id]?.timestamp || 0;
-          const hoursPassed = (now - last) / (1000 * 60 * 60);
-          if (hoursPassed >= 12 || !completed[task.id]) {
-            const div = document.createElement("div");
-            div.className = "video-task";
-            div.innerHTML = `
-              <p>📺 ${task.title} (30 sec)</p>
-              <button onclick="startTask('${task.url}', '${task.id}')">▶️ Watch</button>
-              <button id="verify-${task.id}" onclick="verifyTask('${task.id}')">✅ Verify</button>
-              <div class="status" id="status-${task.id}">⏳ Not Verified</div>
-            `;
-            tasksContainer.appendChild(div);
-          }
-        });
-      });
-    }
-
-    function startTask(url, taskId) {
-      window.open(url, "_blank");
-    }
-
-    function verifyTask(taskId) {
-      const statusEl = document.getElementById("status-" + taskId);
-      const reward = planName.toLowerCase() === "free" ? 1 : activeReward;
-
-      statusEl.innerText = "✅ Verified";
-
-      const taskRef = database.ref("tasksCompleted/" + userId + "/" + taskId);
-      taskRef.set({ verified: true, timestamp: Date.now() });
-
-      const userRef = database.ref("users/" + userId);
-      userRef.once("value").then(snapshot => {
-        const userData = snapshot.val();
-        const currentBalance = (userData && userData.balance) ? userData.balance : 0;
-        const newBalance = currentBalance + reward;
-        userRef.update({ balance: newBalance });
-        localStorage.setItem("user_balance", newBalance);
-      });
-    }
-  </script></body>
+    <!-- ✅ Video tasks section -->
+    <div id="video-tasks"></div>
+  </div>
+</body>
 </html>
