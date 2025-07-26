@@ -1,183 +1,62 @@
-<!-- File: nft.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>📦 NFT Plans</title>
-
-  <!-- Firebase CDN -->
+  <title>🪙 NFT Access Plans</title>
   <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
-
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #0f0f0f;
       color: #fff;
       padding: 20px;
+      margin: 0;
     }
-    h1, h2 {
+    h1 {
       text-align: center;
     }
-    .balances {
-      display: flex;
-      justify-content: center;
-      gap: 30px;
+    .info {
+      text-align: center;
       margin-bottom: 20px;
     }
-    .plans {
+    .plan-list {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 20px;
     }
-    .plan-card {
+    .plan-box {
       background: #1a1a1a;
-      border: 1px solid #333;
+      border: 2px solid #333;
       border-radius: 10px;
       padding: 15px;
       width: 250px;
       text-align: center;
     }
-    .plan-card h3 {
-      margin: 0 0 10px;
+    .plan-box h3 {
+      margin: 0;
     }
-    .plan-card button {
+    .plan-box button {
       margin-top: 10px;
       padding: 8px 15px;
-      background: #00cc66;
-      color: white;
       border: none;
+      background: #00cc66;
+      color: #fff;
       border-radius: 5px;
       cursor: pointer;
-    }
-    .plan-card button:disabled {
-      background: #555;
-      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
   <h1>🪙 NFT Access Plans</h1>
-  <div class="balances">
-    <div>🔐 Current Plan: <span id="current-plan">Loading...</span></div>
-    <div>💰 Wallet: <span id="wallet-balance">-</span> ZMM</div>
+  <div class="info">
+    <p id="current-plan">🔐 Current Plan: Loading...</p>
+    <p id="wallet-balance">💰 Wallet: - ZMM</p>
   </div>
+  <div class="plan-list" id="plans-container"></div>
 
-  <h2>Choose Your Plan</h2>
-  <div class="plans" id="plans-container"></div>
-
-  <!-- Main Script -->
-  <script>
-    // ✅ Firebase Config
-    const firebaseConfig = {
-      apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
-      authDomain: "zmmssmk.firebaseapp.com",
-      databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
-      projectId: "zmmssmk",
-      storageBucket: "zmmssmk.appspot.com",
-      messagingSenderId: "677420760492",
-      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const userId = localStorage.getItem("telegram_user_id") || "guest_user";
-
-    const nftPlans = {
-      free: { name: "Free Plan", price: 0, tokenEvery4h: 0.5, tokenPerAd: 1, duration: Infinity },
-      plan10: { name: "$10 Plan", price: 10, tokenEvery4h: 2, tokenPerAd: 2, duration: 30 },
-      plan25: { name: "$25 Plan", price: 25, tokenEvery4h: 4, tokenPerAd: 4, duration: 30 },
-      plan50: { name: "$50 Plan", price: 50, tokenEvery4h: 8, tokenPerAd: 6, duration: 30 },
-      plan100: { name: "$100 Plan", price: 100, tokenEvery4h: 16, tokenPerAd: 12, duration: 30 },
-      plan500: { name: "$500 Lifetime Plan", price: 500, tokenEvery4h: 20, tokenPerAd: 24, duration: Infinity }
-    };
-
-    function renderPlans(current, balance) {
-      const container = document.getElementById("plans-container");
-      container.innerHTML = "";
-
-      Object.entries(nftPlans).forEach(([key, plan]) => {
-        const card = document.createElement("div");
-        card.className = "plan-card";
-
-        card.innerHTML = `
-          <h3>${plan.name}</h3>
-          <p>💸 Price: ${plan.price} ZMM</p>
-          <p>📅 Duration: ${plan.duration === Infinity ? "Lifetime" : plan.duration + " days"}</p>
-          <p>🕒 +${plan.tokenEvery4h} tokens every 4h</p>
-          <p>🎥 +${plan.tokenPerAd} tokens per ad</p>
-        `;
-
-        const btn = document.createElement("button");
-        btn.textContent = current === key ? "✅ Active" : "Buy";
-        btn.disabled = current === key;
-        btn.onclick = () => buyPlan(key, balance);
-        card.appendChild(btn);
-
-        container.appendChild(card);
-      });
-    }
-
-    function updateCurrentPlanView() {
-      db.ref(`users/${userId}/nftData`).once("value").then(snapshot => {
-        const data = snapshot.val() || {
-          walletBalance: 0,
-          currentPlan: "free",
-          planStart: null
-        };
-
-        const plan = nftPlans[data.currentPlan] || nftPlans.free;
-        const planText = `${plan.name} (${plan.duration === Infinity ? "Lifetime" : plan.duration + " days"})`;
-
-        document.getElementById("current-plan").innerText = planText;
-        document.getElementById("wallet-balance").innerText = data.walletBalance.toFixed(2);
-
-        renderPlans(data.currentPlan, data.walletBalance);
-      });
-    }
-
-    function buyPlan(planKey, balance) {
-      const selected = nftPlans[planKey];
-      if (!selected) return;
-
-      if (planKey === "plan500") {
-        alert("⚠️ Lifetime plan is only purchasable once.");
-      }
-
-      db.ref(`users/${userId}/nftData`).once("value").then(snapshot => {
-        const data = snapshot.val() || {
-          walletBalance: 0,
-          currentPlan: "free",
-          planStart: null
-        };
-
-        if (data.currentPlan === "plan500") {
-          alert("❌ Lifetime plan already active.");
-          return;
-        }
-
-        if (data.walletBalance < selected.price) {
-          alert("❌ Not enough balance.");
-          return;
-        }
-
-        const confirmBuy = confirm(`Buy ${selected.name} for ${selected.price} ZMM?`);
-        if (!confirmBuy) return;
-
-        db.ref(`users/${userId}/nftData`).update({
-          walletBalance: data.walletBalance - selected.price,
-          currentPlan: planKey,
-          planStart: Date.now()
-        }).then(() => {
-          alert(`✅ ${selected.name} activated.`);
-          updateCurrentPlanView();
-        });
-      });
-    }
-
-    document.addEventListener("DOMContentLoaded", updateCurrentPlanView);
-  </script>
+  <script defer src="nft.js"></script>
 </body>
-    </html>
+</html>
