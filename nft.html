@@ -1,107 +1,76 @@
-<!DOCTYPE html><html lang="en">
+<!-- File: nft.html -->
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>📦 NFT Plans</title>
+
+  <!-- Firebase CDN -->
   <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #0f0f0f;
       color: #fff;
-      margin: 0;
       padding: 20px;
     }
-    h1 {
+    h1, h2 {
       text-align: center;
-      margin-bottom: 10px;
     }
-    .balances, .wallet-type-selector {
+    .balances {
       display: flex;
       justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
+      gap: 30px;
       margin-bottom: 20px;
     }
-    .wallet-type-selector button {
-      background: #222;
-      color: white;
-      border: 1px solid #555;
-      border-radius: 6px;
-      padding: 10px 20px;
-      cursor: pointer;
-    }
-    .wallet-type-selector button.active {
-      background: #00cc66;
-    }
-    .plan-container {
+    .plans {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 20px;
     }
-    .plan-section {
-      flex: 1 1 300px;
-      max-width: 500px;
-      min-width: 300px;
-    }
-    .plan-section h2 {
-      text-align: center;
-      margin-bottom: 10px;
-      border-bottom: 1px solid #444;
-      padding-bottom: 5px;
-    }
-    .plan {
+    .plan-card {
       background: #1a1a1a;
-      border: 2px solid #333;
+      border: 1px solid #333;
       border-radius: 10px;
       padding: 15px;
-      margin: 10px 0;
+      width: 250px;
       text-align: center;
     }
-    .plan h3 {
-      margin: 0;
+    .plan-card h3 {
+      margin: 0 0 10px;
     }
-    .plan p {
-      margin: 8px 0;
-    }
-    .plan button {
-      padding: 10px 20px;
+    .plan-card button {
       margin-top: 10px;
+      padding: 8px 15px;
       background: #00cc66;
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 5px;
       cursor: pointer;
     }
-    .plan button:disabled {
+    .plan-card button:disabled {
       background: #555;
       cursor: not-allowed;
-    }
-    .active-label {
-      color: #00ffcc;
-      font-weight: bold;
-      margin-top: 10px;
-    }
-    .cancel-button {
-      background-color: #cc3300;
-      margin-top: 10px;
     }
   </style>
 </head>
 <body>
   <h1>🪙 NFT Access Plans</h1>
-  <p style="text-align:center;">Buy a plan using USDT or ZMM token to unlock daily missions and rewards.</p>  <div class="balances">
-    <div>💵 USDT Balance: <span id="usdt-balance">-</span></div>
-    <div>🪙 ZMM Balance: <span id="zmm-balance">-</span></div>
-  </div>  <div class="wallet-type-selector">
-    <button id="usdt-tab" class="active" onclick="showPlanSection('usdt')">USDT Plans</button>
-    <button id="zmm-tab" onclick="showPlanSection('zmm')">ZMM Plans</button>
-  </div>  <div class="plan-container">
-    <div class="plan-section" id="usdt-section"></div>
-    <div class="plan-section" id="zmm-section" style="display:none;"></div>
-  </div>  <script>
+  <div class="balances">
+    <div>🔐 Current Plan: <span id="current-plan">Loading...</span></div>
+    <div>💰 Wallet: <span id="wallet-balance">-</span> ZMM</div>
+  </div>
+
+  <h2>Choose Your Plan</h2>
+  <div class="plans" id="plans-container"></div>
+
+  <!-- Main Script -->
+  <script>
+    // ✅ Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
       authDomain: "zmmssmk.firebaseapp.com",
@@ -112,149 +81,103 @@
       appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
     };
 
-    const app = firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
     const userId = localStorage.getItem("telegram_user_id") || "guest_user";
 
-    let wallet = { usdt: 0, zmm: 0 };
-    let activePlans = { usdt: null, zmm: null };
-
-    const PLAN_CONFIG = {
-      usdt: [
-        { amount: 10, duration: 30 },
-        { amount: 25, duration: 30 },
-        { amount: 50, duration: 30 },
-        { amount: 100, duration: 30 },
-        { amount: 500, duration: null },
-      ],
-      zmm: [
-        { amount: 1000, duration: 30 },
-        { amount: 2500, duration: 30 },
-        { amount: 5000, duration: 30 },
-        { amount: 10000, duration: 30 },
-        { amount: 50000, duration: null },
-      ]
+    const nftPlans = {
+      free: { name: "Free Plan", price: 0, tokenEvery4h: 0.5, tokenPerAd: 1, duration: Infinity },
+      plan10: { name: "$10 Plan", price: 10, tokenEvery4h: 2, tokenPerAd: 2, duration: 30 },
+      plan25: { name: "$25 Plan", price: 25, tokenEvery4h: 4, tokenPerAd: 4, duration: 30 },
+      plan50: { name: "$50 Plan", price: 50, tokenEvery4h: 8, tokenPerAd: 6, duration: 30 },
+      plan100: { name: "$100 Plan", price: 100, tokenEvery4h: 16, tokenPerAd: 12, duration: 30 },
+      plan500: { name: "$500 Lifetime Plan", price: 500, tokenEvery4h: 20, tokenPerAd: 24, duration: Infinity }
     };
 
-    function updateBalanceUI() {
-      document.getElementById("usdt-balance").textContent = wallet.usdt;
-      document.getElementById("zmm-balance").textContent = wallet.zmm;
+    function renderPlans(current, balance) {
+      const container = document.getElementById("plans-container");
+      container.innerHTML = "";
+
+      Object.entries(nftPlans).forEach(([key, plan]) => {
+        const card = document.createElement("div");
+        card.className = "plan-card";
+
+        card.innerHTML = `
+          <h3>${plan.name}</h3>
+          <p>💸 Price: ${plan.price} ZMM</p>
+          <p>📅 Duration: ${plan.duration === Infinity ? "Lifetime" : plan.duration + " days"}</p>
+          <p>🕒 +${plan.tokenEvery4h} tokens every 4h</p>
+          <p>🎥 +${plan.tokenPerAd} tokens per ad</p>
+        `;
+
+        const btn = document.createElement("button");
+        btn.textContent = current === key ? "✅ Active" : "Buy";
+        btn.disabled = current === key;
+        btn.onclick = () => buyPlan(key, balance);
+        card.appendChild(btn);
+
+        container.appendChild(card);
+      });
     }
 
-    function formatDaysLeft(dateString) {
-      const now = new Date();
-      const expires = new Date(dateString);
-      const diffTime = expires - now;
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays <= 0 ? "Expired" : `${diffDays} days left`;
+    function updateCurrentPlanView() {
+      db.ref(`users/${userId}/nftData`).once("value").then(snapshot => {
+        const data = snapshot.val() || {
+          walletBalance: 0,
+          currentPlan: "free",
+          planStart: null
+        };
+
+        const plan = nftPlans[data.currentPlan] || nftPlans.free;
+        const planText = `${plan.name} (${plan.duration === Infinity ? "Lifetime" : plan.duration + " days"})`;
+
+        document.getElementById("current-plan").innerText = planText;
+        document.getElementById("wallet-balance").innerText = data.walletBalance.toFixed(2);
+
+        renderPlans(data.currentPlan, data.walletBalance);
+      });
     }
 
-    function showPlanSection(type) {
-      document.getElementById("usdt-section").style.display = type === "usdt" ? "block" : "none";
-      document.getElementById("zmm-section").style.display = type === "zmm" ? "block" : "none";
-      document.getElementById("usdt-tab").classList.toggle("active", type === "usdt");
-      document.getElementById("zmm-tab").classList.toggle("active", type === "zmm");
-    }
+    function buyPlan(planKey, balance) {
+      const selected = nftPlans[planKey];
+      if (!selected) return;
 
-    function renderPlans() {
-      ["usdt", "zmm"].forEach(type => {
-        const container = document.getElementById(`${type}-section`);
-        container.innerHTML = `<h2>${type === "usdt" ? "💵 USDT Plans" : "🪙 ZMM Token Plans"}</h2>`;
+      if (planKey === "plan500") {
+        alert("⚠️ Lifetime plan is only purchasable once.");
+      }
 
-        PLAN_CONFIG[type].forEach(plan => {
-          const planId = `${type}-${plan.amount}`;
-          const div = document.createElement("div");
-          div.className = "plan";
-          div.setAttribute("data-type", type);
-          div.setAttribute("data-amount", plan.amount);
+      db.ref(`users/${userId}/nftData`).once("value").then(snapshot => {
+        const data = snapshot.val() || {
+          walletBalance: 0,
+          currentPlan: "free",
+          planStart: null
+        };
 
-          div.innerHTML = `
-            <h3>${type === "usdt" ? "$" + plan.amount : plan.amount + " ZMM"}</h3>
-            <p>${plan.duration ? "1 Month Access" : "Lifetime Access"}</p>
-            <p>🔓 Unlocks daily missions & rewards</p>
-          `;
+        if (data.currentPlan === "plan500") {
+          alert("❌ Lifetime plan already active.");
+          return;
+        }
 
-          const active = activePlans[type];
-          if (active && active.id === planId) {
-            const label = document.createElement("div");
-            label.className = "active-label";
-            label.innerHTML = `✅ ${plan.duration ? "Active" : "Lifetime Active"}<br>${plan.duration ? formatDaysLeft(active.expiresAt) : ""}`;
-            div.appendChild(label);
+        if (data.walletBalance < selected.price) {
+          alert("❌ Not enough balance.");
+          return;
+        }
 
-            if (plan.duration) {
-              const cancel = document.createElement("button");
-              cancel.className = "cancel-button";
-              cancel.innerText = "Cancel";
-              cancel.onclick = () => cancelPlan(type);
-              div.appendChild(cancel);
-            }
-          } else {
-            const button = document.createElement("button");
-            button.innerText = "Buy";
-            button.onclick = () => buyPlan(type, plan.amount);
-            if (activePlans[type] && activePlans[type].id !== planId) button.disabled = true;
-            div.appendChild(button);
-          }
+        const confirmBuy = confirm(`Buy ${selected.name} for ${selected.price} ZMM?`);
+        if (!confirmBuy) return;
 
-          container.appendChild(div);
+        db.ref(`users/${userId}/nftData`).update({
+          walletBalance: data.walletBalance - selected.price,
+          currentPlan: planKey,
+          planStart: Date.now()
+        }).then(() => {
+          alert(`✅ ${selected.name} activated.`);
+          updateCurrentPlanView();
         });
       });
     }
 
-    function buyPlan(type, amount) {
-      const planId = `${type}-${amount}`;
-      const plan = PLAN_CONFIG[type].find(p => p.amount === amount);
-      if (!plan) return;
-
-      const cost = plan.amount;
-      if (wallet[type] < cost) {
-        alert(`❌ Not enough ${type.toUpperCase()} in wallet.`);
-        return;
-      }
-
-      const current = activePlans[type];
-      if (current && (!current.expiresAt || new Date(current.expiresAt) > new Date())) {
-        alert("❌ Please cancel or wait for the current plan to expire.");
-        return;
-      }
-
-      wallet[type] -= cost;
-      activePlans.usdt = null;
-      activePlans.zmm = null;
-      activePlans[type] = {
-        id: planId,
-        amount: cost,
-        expiresAt: plan.duration ? new Date(Date.now() + plan.duration * 86400000).toISOString() : null
-      };
-
-      const userRef = database.ref("users/" + userId);
-      userRef.update({
-        [`wallet/${type}`]: wallet[type],
-        [`activePlans/usdt`]: activePlans.usdt,
-        [`activePlans/zmm`]: activePlans.zmm,
-        [`activePlans/${type}`]: activePlans[type]
-      });
-
-      updateBalanceUI();
-      renderPlans();
-      alert("✅ Plan activated successfully!");
-    }
-
-    function cancelPlan(type) {
-      if (confirm("Are you sure you want to cancel this plan?")) {
-        activePlans[type] = null;
-        database.ref("users/" + userId + "/activePlans/" + type).remove();
-        renderPlans();
-      }
-    }
-
-    database.ref("users/" + userId).once("value").then(snapshot => {
-      const data = snapshot.val();
-      wallet = data.wallet || { usdt: 0, zmm: 0 };
-      activePlans = data.activePlans || { usdt: null, zmm: null };
-
-      updateBalanceUI();
-      renderPlans();
-    });
-  </script></body>
-  </html>
+    document.addEventListener("DOMContentLoaded", updateCurrentPlanView);
+  </script>
+</body>
+    </html>
