@@ -1,31 +1,53 @@
-// Store user info locally (for demonstration only)
-function saveUser(email, username, password) {
-  const users = JSON.parse(localStorage.getItem("users") || "[]");
-  const exists = users.find(u => u.email === email);
-  if (exists) return false;
-  users.push({ email, username, password, verified: false });
-  localStorage.setItem("users", JSON.stringify(users));
-  return true;
+// ✅ Save user to Firebase during registration
+function saveUserToFirebase(email, username, password) {
+  return firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then(userCredential => {
+      const userId = userCredential.user.uid;
+
+      // Save additional user data to Realtime Database
+      return firebase.database().ref("users/" + userId).set({
+        email: email,
+        username: username,
+        registeredAt: Date.now(),
+        verified: false
+      });
+    });
 }
 
-function verifyEmail(email, code) {
+// ✅ Verify user by setting verified=true in Firebase
+function verifyEmailInFirebase(email, code) {
   const sentCode = sessionStorage.getItem("code");
-  if (code !== sentCode) return false;
-  const users = JSON.parse(localStorage.getItem("users") || "[]");
-  const index = users.findIndex(u => u.email === email);
-  if (index >= 0) {
-    users[index].verified = true;
-    localStorage.setItem("users", JSON.stringify(users));
-    return true;
-  }
-  return false;
+  if (code !== sentCode) return Promise.reject("Code mismatch");
+
+  // Find user by email (simple logic — better with Firebase Queries)
+  return firebase.database().ref("users").once("value").then(snapshot => {
+    const users = snapshot.val();
+    const userId = Object.keys(users).find(key => users[key].email === email);
+
+    if (!userId) throw "User not found";
+
+    return firebase.database().ref("users/" + userId).update({
+      verified: true
+    });
+  });
 }
 
-function loginUser(email, password) {
-  const users = JSON.parse(localStorage.getItem("users") || "[]");
-  const user = users.find(u => u.email === email && u.password === password);
-  if (!user) return "not_found";
-  if (!user.verified) return "not_verified";
-  sessionStorage.setItem("loggedInUser", JSON.stringify(user));
-  return "success";
+// ✅ Login with Firebase Auth + check verification
+function loginUserFromFirebase(email, password) {
+  return firebase.auth().signInWithEmailAndPassword(email, password)
+    .then(userCredential => {
+      const userId = userCredential.user.uid;
+
+      return firebase.database().ref("users/" + userId).once("value").then(snapshot => {
+        const userData = snapshot.val();
+        if (!userData.verified) throw "not_verified";
+
+        sessionStorage.setItem("loggedInUser", JSON.stringify(userData));
+        return "success";
+      });
+    })
+    .catch(error => {
+      if (error === "not_verified") return "not_verified";
+      return "not_found";
+    });
 }
