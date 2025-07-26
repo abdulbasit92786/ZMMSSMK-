@@ -20,7 +20,20 @@ document.getElementById("registerBtn").addEventListener("click", function () {
       return firebase.database().ref("users/" + userId).set({
         email: email,
         username: username,
-        registeredAt: Date.now()
+        registeredAt: Date.now(),
+
+        // ✅ New fields added:
+        balance: 0,
+        plan: "Free",
+        referrals: 0,
+        referralBy: null,
+        tasks: {
+          task1: false,
+          task2: false,
+          task3: false,
+          task4: false
+        },
+        nft: null
       });
     })
     .then(() => {
