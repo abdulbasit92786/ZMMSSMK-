@@ -1,3 +1,21 @@
+// ✅ Firebase init
+const firebaseConfig = {
+  apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
+  authDomain: "zmmssmk.firebaseapp.com",
+  databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
+  projectId: "zmmssmk",
+  storageBucket: "zmmssmk.appspot.com",
+  messagingSenderId: "677420760492",
+  appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ✅ Get user ID from localStorage
+const userId = localStorage.getItem("telegram_user_id") || "guest_user";
+
+// ✅ Store task start times
 let startTimes = {};
 
 const TASK_IDS = ['task1', 'task2', 'task3', 'task4'];
@@ -5,21 +23,10 @@ const HIDE_DURATION_HOURS = 24;
 
 document.addEventListener("DOMContentLoaded", () => {
   checkTaskVisibility();
-  initializeBalance();
   showPlanInfo();
 });
 
-// ✅ بیلنس initialize کریں
-function initializeBalance() {
-  if (localStorage.getItem("zmm_balance") === null) {
-    localStorage.setItem("zmm_balance", "0");
-  }
-
-  // ❌ active_plan کو overwrite نہیں کریں اگر پہلے سے موجود ہو
-  // ✅ نیچے والی لائن ہٹا دی گئی تاکہ موجودہ پلان برقرار رہے
-}
-
-// 🟢 پلان کے مطابق reward value return کریں
+// ✅ ریوارڈ پلان کے حساب سے نکالیں
 function getRewardForPlan(planKey) {
   if (!planKey || planKey === "free") return 1;
 
@@ -44,75 +51,95 @@ function getRewardForPlan(planKey) {
   }
 }
 
-// ✅ پلان نیم اور ریوارڈ شو کریں
+// ✅ پلان کا نام اور ریوارڈ شو کریں
 function showPlanInfo() {
-  const planKey = localStorage.getItem("active_plan");
-  const reward = getRewardForPlan(planKey);
-  const planNameElement = document.getElementById("plan-name");
-  const planRewardElement = document.getElementById("plan-reward");
+  const planNameEl = document.getElementById("plan-name");
+  const rewardEl = document.getElementById("plan-reward");
 
-  if (!planKey || planKey === "free") {
-    planNameElement.textContent = "Free Plan";
-  } else {
-    const parts = planKey.split("_");
-    const type = parts[1] === "nft" ? "ZMM" : parts[1].toUpperCase();
-    const value = parts[2];
-    planNameElement.textContent = `${type} $${value}`;
-  }
+  db.ref("users/" + userId + "/activePlans/zmm").once("value").then(snapshot => {
+    const planKey = snapshot.val() || "free";
+    const reward = getRewardForPlan(planKey);
 
-  planRewardElement.textContent = reward;
+    if (!planKey || planKey === "free") {
+      planNameEl.textContent = "Free Plan";
+    } else {
+      const parts = planKey.split("_");
+      const type = parts[1] === "nft" ? "ZMM" : parts[1].toUpperCase();
+      const value = parts[2];
+      planNameEl.textContent = `${type} $${value}`;
+    }
+
+    rewardEl.textContent = reward;
+  });
 }
 
-// ▶️ ویڈیو سٹارٹ
+// ▶️ ویڈیو ٹاسک اوپن کریں
 function startTask(url, id) {
   startTimes[id] = new Date().getTime();
-  window.open(url, '_blank');
+  window.open(url, "_blank");
   document.getElementById("verify-" + id).style.display = "inline-block";
 }
 
-// ✅ ویریفائی کرنے پر reward دینا
+// ✅ ویریفائی پر reward دیں
 function verifyTask(id) {
   const now = new Date().getTime();
   const elapsed = (now - startTimes[id]) / 1000;
 
-  if (elapsed >= 30) {
-    const plan = localStorage.getItem("active_plan");
-    const reward = getRewardForPlan(plan);
-
-    let currentBalance = parseFloat(localStorage.getItem("zmm_balance"));
-    currentBalance += reward;
-    localStorage.setItem("zmm_balance", currentBalance.toFixed(2));
-
-    alert(`✅ Success! You got ${reward} Token(s).`);
-    document.getElementById("verify-" + id).style.display = "none";
-    document.getElementById(id).style.display = "none";
-
-    localStorage.setItem("watchedTime-" + id, now);
-  } else {
+  if (elapsed < 30) {
     alert("❌ Please watch at least 30 seconds before verifying.");
+    return;
   }
+
+  const planRef = db.ref(`users/${userId}/activePlans/zmm`);
+  const balanceRef = db.ref(`users/${userId}/wallet/zmm`);
+  const taskRef = db.ref(`users/${userId}/watchedTasks/${id}`);
+
+  planRef.once("value").then(planSnap => {
+    const planKey = planSnap.val() || "free";
+    const reward = getRewardForPlan(planKey);
+
+    balanceRef.once("value").then(balanceSnap => {
+      let currentBalance = parseFloat(balanceSnap.val() || 0);
+      currentBalance += reward;
+
+      const updates = {
+        [`users/${userId}/wallet/zmm`]: currentBalance.toFixed(2),
+        [`users/${userId}/watchedTasks/${id}`]: now
+      };
+
+      db.ref().update(updates).then(() => {
+        alert(`✅ Success! You got ${reward} Token(s).`);
+        document.getElementById("verify-" + id).style.display = "none";
+        document.getElementById(id).style.display = "none";
+      });
+    });
+  });
 }
 
-// ⏱️ hide/show ٹاسک
+// ⏱️ ٹاسک visibility چیک کریں
 function checkTaskVisibility() {
   const now = new Date().getTime();
 
-  TASK_IDS.forEach(id => {
-    const taskElement = document.getElementById(id);
-    const lastWatched = localStorage.getItem("watchedTime-" + id);
+  db.ref(`users/${userId}/watchedTasks`).once("value").then(snapshot => {
+    const watchedTasks = snapshot.val() || {};
 
-    if (lastWatched) {
-      const diff = now - parseInt(lastWatched);
-      const hoursPassed = diff / (1000 * 60 * 60);
+    TASK_IDS.forEach(id => {
+      const taskElement = document.getElementById(id);
+      const lastWatched = watchedTasks[id];
 
-      if (hoursPassed < HIDE_DURATION_HOURS) {
-        taskElement.style.display = "none";
+      if (lastWatched) {
+        const diff = now - parseInt(lastWatched);
+        const hoursPassed = diff / (1000 * 60 * 60);
+
+        if (hoursPassed < HIDE_DURATION_HOURS) {
+          taskElement.style.display = "none";
+        } else {
+          taskElement.style.display = "block";
+          db.ref(`users/${userId}/watchedTasks/${id}`).remove(); // دوبارہ دیکھنے کے لیے remove
+        }
       } else {
         taskElement.style.display = "block";
-        localStorage.removeItem("watchedTime-" + id);
       }
-    } else {
-      taskElement.style.display = "block";
-    }
+    });
   });
-}
+                                                                    }
