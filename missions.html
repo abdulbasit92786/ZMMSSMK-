@@ -1,28 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Missions</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
 
   <!-- ✅ Firebase SDKs -->
-  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
-  <script defer src="mission.js"></script> <!-- ✅ Updated JS will go here -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script>
+    // ✅ Replace with your Firebase project config
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    // ✅ Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+  </script>
 </head>
 <body>
   <div class="mission-container">
     <h1>🎯 Daily Missions</h1>
 
-    <!-- ✅ Plan info section -->
+    <!-- ✅ پلان اور ریوارڈ انفارمیشن بہتر بیک گراؤنڈ پر -->
     <div style="background:#222;color:#fff;padding:12px;margin-bottom:15px;border-radius:8px;text-align:center;">
-      <strong>📦 Your Active Plan:</strong> <span id="plan-name">Loading...</span><br>
-      <strong>🎁 Reward per Task:</strong> <span id="plan-reward">0</span> Token(s)
+      <strong>📦 Your Active Plan:</strong> <span id="plan-name">-</span><br>
+      <strong>🎁 Reward per Task:</strong> <span id="plan-reward">-</span> Token(s)
     </div>
 
-    <!-- ✅ Video tasks section -->
-    <div id="video-tasks"></div>
+    <!-- Tasks -->
+    <div class="video-task" id="task1">
+      <p>📺 Watch Video 1 (30 sec)</p>
+      <button onclick="startTask('https://youtu.be/9iBwP4TbFHg?si=-spUOeZHbBEkQRnD', 'task1')">▶️ Watch</button>
+      <button id="verify-task1" onclick="verifyTask('task1')">✅ Verify</button>
+      <div class="status" id="status-task1">⏳ Not Verified</div>
+    </div>
+
+    <div class="video-task" id="task2">
+      <p>📺 Watch Video 2 (30 sec)</p>
+      <button onclick="startTask('https://youtu.be/BfTGQYxp0ec?si=zDE8CtMT12B3aEzz', 'task2')">▶️ Watch</button>
+      <button id="verify-task2" onclick="verifyTask('task2')">✅ Verify</button>
+      <div class="status" id="status-task2">⏳ Not Verified</div>
+    </div>
+
+    <div class="video-task" id="task3">
+      <p>📺 Watch Video 3 (30 sec)</p>
+      <button onclick="startTask('https://youtu.be/N4fOamB7uec?si=4timJdDmBeTlZvNG', 'task3')">▶️ Watch</button>
+      <button id="verify-task3" onclick="verifyTask('task3')">✅ Verify</button>
+      <div class="status" id="status-task3">⏳ Not Verified</div>
+    </div>
+
+    <div class="video-task" id="task4">
+      <p>📺 Watch Video 4 (30 sec)</p>
+      <button onclick="startTask('https://youtu.be/BAXgvXnaKB4?si=acuEFWXuZazv4rrB', 'task4')">▶️ Watch</button>
+      <button id="verify-task4" onclick="verifyTask('task4')">✅ Verify</button>
+      <div class="status" id="status-task4">⏳ Not Verified</div>
+    </div>
   </div>
+
+  <!-- ✅ Mission logic -->
+  <script src="missions.js"></script>
 </body>
 </html>
