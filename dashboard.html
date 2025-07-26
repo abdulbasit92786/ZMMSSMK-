@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ZMMK Dashboard</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
     body {
       margin: 0;
@@ -58,19 +60,17 @@
       text-decoration: none;
     }
     .nav a:hover { text-decoration: underline; }
-    .earned { font-size: 14px; margin-top: 10px; color: green; }
+    .earned {
+      font-size: 14px;
+      margin-top: 10px;
+      color: green;
+    }
   </style>
-
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="firebase.js"></script>
 </head>
 <body>
-
   <div class="container">
     <div class="title">ZMMK App</div>
     <div class="subtitle">ZMM Token Dashboard</div>
-
     <div class="balance" id="balanceBox">Your Balance: <strong id="balance">0</strong> ZMM</div>
     <div class="earned" id="totalEarned">Total Earned: 0 ZMM</div>
 
@@ -80,7 +80,7 @@
 
     <div class="referral-box">
       <div>Referral Link:</div>
-      <input type="text" class="referral-input" id="refLink" readonly />
+      <input type="text" class="referral-input" id="refLink" value="https://t.me/your_bot?start=123456" readonly />
       <button class="btn" onclick="copyLink()">Copy Link</button>
     </div>
 
@@ -95,164 +95,134 @@
     <a href="missions.html">🎯 Mission</a>
     <a href="nft.html">🖼 NFT</a>
     <a href="wallet.html">💼 Wallet</a>
-    <a href="referral.html">👥 Referral</a>
     <a href="profile.html">👤 Profile</a>
   </div>
 
   <script>
-    let telegramUserId = localStorage.getItem("telegram_user_id");
-    const urlParams = new URLSearchParams(window.location.search);
-    const refId = urlParams.get("ref");
+    // ✅ Replace with your Firebase config
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      databaseURL: "YOUR_DATABASE_URL",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MSG_ID",
+      appId: "YOUR_APP_ID"
+    };
 
-    if (!telegramUserId) {
-      telegramUserId = "user_" + Math.floor(Math.random() * 100000000);
-      localStorage.setItem("telegram_user_id", telegramUserId);
+    // ✅ Firebase init
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const userId = "user123"; // 🔁 Replace with actual user ID
 
-      db.ref("users/" + telegramUserId).set({
-        balance: 0,
-        totalEarned: 0,
-        wallet: 0,
-        lastClaim: 0,
-        plan: "free",
-        referredBy: refId || null
-      });
-
-      if (refId) {
-        const refUser = db.ref("users/" + refId);
-        refUser.once("value", (snap) => {
-          if (snap.exists()) {
-            const data = snap.val();
-            const newBalance = (data.balance || 0) + 0.1;
-            const newEarned = (data.totalEarned || 0) + 0.1;
-            refUser.update({ balance: newBalance, totalEarned: newEarned });
-          }
-        });
-      }
-    }
-
+    let claimCooldown = 4 * 60 * 60;
+    const countdownEl = document.getElementById("countdown");
+    const claimBtn = document.getElementById("claimBtn");
     const balanceEl = document.getElementById("balance");
     const earnedEl = document.getElementById("totalEarned");
-    const claimBtn = document.getElementById("claimBtn");
     const claimToWalletBtn = document.getElementById("claimToWalletBtn");
-    const countdownEl = document.getElementById("countdown");
-    const refLinkInput = document.getElementById("refLink");
-    refLinkInput.value = `${window.location.origin}${window.location.pathname}?ref=${telegramUserId}`;
 
     function copyLink() {
-      refLinkInput.select();
+      const refLink = document.getElementById("refLink");
+      refLink.select();
       document.execCommand("copy");
       alert("Referral link copied!");
     }
 
-    let claimCooldown = 60 * 60 * 4; // 4 hours in seconds
-    let countdownInterval;
-
     function getRewardForPlan(planKey) {
       if (!planKey || planKey === "free") return 0.5;
       const parts = planKey.split("_");
-      const amount = parseFloat(parts[1]);
-      if (isNaN(amount)) return 0.5;
-
-      if (amount === 10 || amount === 1000) return 2;
-      if (amount === 25 || amount === 2500) return 4;
-      if (amount === 50 || amount === 5000) return 6;
-      if (amount === 100 || amount === 10000) return 12;
-      if (amount === 500 || amount === 50000) return 20;
-      return 0.5;
-    }
-
-    async function updateUI() {
-      const userRef = db.ref("users/" + telegramUserId);
-      const snapshot = await userRef.get();
-      let data = snapshot.val() || {};
-
-      if (!data.balance) data.balance = 0;
-      if (!data.totalEarned) data.totalEarned = 0;
-      if (!data.lastClaim) data.lastClaim = 0;
-
-      balanceEl.textContent = data.balance.toFixed(2);
-      earnedEl.textContent = "Total Earned: " + data.totalEarned.toFixed(2) + " ZMM";
-
-      claimToWalletBtn.disabled = data.totalEarned < 20;
-
-      let elapsed = (Date.now() - data.lastClaim) / 1000;
-      if (elapsed < claimCooldown) {
-        claimBtn.disabled = true;
-        startCountdown(Math.floor(claimCooldown - elapsed));
-      } else {
-        claimBtn.disabled = false;
-        countdownEl.textContent = "";
-        clearInterval(countdownInterval);
+      const amount = parseFloat(parts[2]);
+      switch (amount) {
+        case 10: case 1000: return 2;
+        case 25: case 2500: return 4;
+        case 50: case 5000: return 6;
+        case 100: case 10000: return 12;
+        case 500: case 50000: return 20;
+        default: return 0.5;
       }
     }
 
+    function updateUI(data) {
+      const zmmBalance = data.zmm_balance || 0;
+      const totalEarned = data.total_earned || 0;
+      balanceEl.textContent = zmmBalance.toFixed(2);
+      earnedEl.textContent = `Total Earned: ${totalEarned.toFixed(2)} ZMM`;
+      claimToWalletBtn.disabled = totalEarned < 20;
+    }
+
+    function loadUserData() {
+      db.ref("users/" + userId).once("value").then(snapshot => {
+        const data = snapshot.val() || {};
+        updateUI(data);
+        const lastClaim = data.last_claim_time || 0;
+        const now = Date.now();
+        if ((now - lastClaim) / 1000 < claimCooldown) {
+          claimBtn.disabled = true;
+          startCountdown(Math.floor(claimCooldown - (now - lastClaim) / 1000));
+        }
+      });
+    }
+
+    function claimReward() {
+      db.ref("users/" + userId).once("value").then(snapshot => {
+        const data = snapshot.val() || {};
+        const planKey = data.active_plan || "plan_nft_25";
+        const reward = getRewardForPlan(planKey);
+        const now = Date.now();
+
+        const newBalance = (data.zmm_balance || 0) + reward;
+        const newTotal = (data.total_earned || 0) + reward;
+
+        db.ref("users/" + userId).update({
+          zmm_balance: newBalance,
+          total_earned: newTotal,
+          last_claim_time: now
+        });
+
+        claimBtn.disabled = true;
+        updateUI({ zmm_balance: newBalance, total_earned: newTotal });
+        startCountdown(claimCooldown);
+      });
+    }
+
     function startCountdown(seconds) {
-      clearInterval(countdownInterval);
-      countdownInterval = setInterval(() => {
+      let interval = setInterval(() => {
         let h = Math.floor(seconds / 3600);
         let m = Math.floor((seconds % 3600) / 60);
         let s = seconds % 60;
         countdownEl.textContent = `Next claim in ${h}h ${m}m ${s}s`;
         if (--seconds < 0) {
-          clearInterval(countdownInterval);
+          clearInterval(interval);
           countdownEl.textContent = "";
           claimBtn.disabled = false;
         }
       }, 1000);
     }
 
-    async function claimReward() {
-      const userRef = db.ref("users/" + telegramUserId);
-      const snapshot = await userRef.get();
-      let data = snapshot.val() || {};
+    function claimToWallet() {
+      db.ref("users/" + userId).once("value").then(snapshot => {
+        const data = snapshot.val() || {};
+        let total = data.total_earned || 0;
+        if (total < 20) return alert("Minimum 20 ZMM required to claim to wallet.");
 
-      const now = Date.now();
-      if ((now - data.lastClaim) / 1000 < claimCooldown) {
-        alert("Please wait for 4 hours between claims.");
-        return;
-      }
+        const amountToClaim = Math.min(100, total);
+        const newWallet = (data.wallet_balance || 0) + amountToClaim;
+        const newZmm = (data.zmm_balance || 0) - amountToClaim;
+        const newTotal = total - amountToClaim;
 
-      const plan = data.plan || "free";
-      const reward = getRewardForPlan(plan);
-      const newBalance = (data.balance || 0) + reward;
-      const newEarned = (data.totalEarned || 0) + reward;
+        db.ref("users/" + userId).update({
+          wallet_balance: newWallet,
+          zmm_balance: newZmm,
+          total_earned: newTotal
+        });
 
-      await userRef.update({
-        balance: newBalance,
-        totalEarned: newEarned,
-        lastClaim: now
+        alert(`${amountToClaim} ZMM claimed to wallet!`);
+        updateUI({ zmm_balance: newZmm, total_earned: newTotal });
       });
-
-      alert(`✅ You received ${reward} ZMM`);
-      updateUI();
     }
 
-    async function claimToWallet() {
-      const userRef = db.ref("users/" + telegramUserId);
-      const snapshot = await userRef.get();
-      let data = snapshot.val() || {};
-
-      if ((data.totalEarned || 0) < 20) {
-        alert("Minimum 20 ZMM required to claim to wallet.");
-        return;
-      }
-
-      const amount = Math.min(100, data.totalEarned || 0);
-      const newWallet = (data.wallet || 0) + amount;
-      const newBalance = (data.balance || 0) - amount;
-      const newEarned = (data.totalEarned || 0) - amount;
-
-      await userRef.update({
-        wallet: newWallet,
-        balance: newBalance,
-        totalEarned: newEarned
-      });
-
-      alert(`${amount} ZMM claimed to wallet!`);
-      updateUI();
-    }
-
-    updateUI();
+    loadUserData();
   </script>
 </body>
-</html>
+                                              </html>
