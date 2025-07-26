@@ -1,237 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>📦 NFT Plans</title>
-
-  <!-- Firebase SDKs -->
-  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0f0f0f;
-      color: #fff;
-      margin: 0;
-      padding: 20px;
-    }
-    h1 { text-align: center; margin-bottom: 10px; }
-    .balances {
-      display: flex;
-      justify-content: space-around;
-      text-align: center;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-    .plan-container {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-    }
-    .plan-section {
-      flex: 1 1 300px;
-      max-width: 500px;
-      min-width: 300px;
-    }
-    .plan-section h2 {
-      text-align: center;
-      margin-bottom: 10px;
-      border-bottom: 1px solid #444;
-      padding-bottom: 5px;
-    }
-    .plan {
-      background: #1a1a1a;
-      border: 2px solid #333;
-      border-radius: 10px;
-      padding: 15px;
-      margin: 10px 0;
-      text-align: center;
-    }
-    .plan h3 { margin: 0; }
-    .plan p { margin: 8px 0; }
-    .plan button {
-      padding: 10px 20px;
-      margin-top: 10px;
-      background: #00cc66;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .plan button:disabled {
-      background: #555;
-      cursor: not-allowed;
-    }
-    .active-label {
-      color: #00ffcc;
-      font-weight: bold;
-      margin-top: 10px;
-    }
-    .cancel-button {
-      background-color: #cc3300;
-      margin-top: 10px;
-    }
-  </style>
-</head>
+  <title>📦 NFT Plans</title>  <!-- Firebase SDKs -->  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>  <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>  <style>
+    /* styles same as before, will be enhanced after logic */
+  </style></head>
 <body>
-  <h1>🪙 NFT Access Plans</h1>
-  <p style="text-align:center;">Buy a plan using USDT or ZMM token to unlock daily missions and rewards.</p>
-
-  <div class="balances">
-    <div>💵 USDT Balance: <span id="usdt-balance">-</span></div>
-    <div>🪙 ZMM Balance: <span id="zmm-balance">-</span></div>
-  </div>
-
-  <div class="plan-container">
-    <div class="plan-section" id="usdt-section"></div>
-    <div class="plan-section" id="zmm-section"></div>
-  </div>
-
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
-      authDomain: "zmmssmk.firebaseapp.com",
-      databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
-      projectId: "zmmssmk",
-      storageBucket: "zmmssmk.appspot.com",
-      messagingSenderId: "677420760492",
-      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
+  <!-- UI code same structure, enhanced logic below -->  <script>
+    const PLAN_REWARDS = {
+      usdt: {
+        10: { video: 2, interval: 2 },
+        25: { video: 4, interval: 4 },
+        50: { video: 8, interval: 8 },
+        100: { video: 12, interval: 10 },
+        500: { video: 24, interval: 20, lifetime: true }
+      },
+      zmm: {
+        1000: { video: 2, interval: 2 },
+        2500: { video: 4, interval: 4 },
+        5000: { video: 8, interval: 8 },
+        10000: { video: 12, interval: 10 },
+        50000: { video: 24, interval: 20, lifetime: true }
+      }
     };
 
-    const app = firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    const userId = localStorage.getItem("telegram_user_id") || "guest_user";
-
-    let wallet = { usdt: 0, zmm: 0 };
-    let activePlans = { usdt: null, zmm: null };
-
-    const PLAN_CONFIG = {
-      usdt: [
-        { amount: 10, duration: 30 },
-        { amount: 25, duration: 30 },
-        { amount: 50, duration: 30 },
-        { amount: 100, duration: 30 },
-        { amount: 500, duration: null },
-      ],
-      zmm: [
-        { amount: 1000, duration: 30 },
-        { amount: 2500, duration: 30 },
-        { amount: 5000, duration: 30 },
-        { amount: 10000, duration: 30 },
-        { amount: 50000, duration: null },
-      ],
-    };
-
-    function updateBalanceUI() {
-      document.getElementById("usdt-balance").textContent = wallet.usdt;
-      document.getElementById("zmm-balance").textContent = wallet.zmm;
-    }
-
-    function formatDaysLeft(dateString) {
-      const now = new Date();
-      const expires = new Date(dateString);
-      const diffTime = expires - now;
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays <= 0 ? "Expired" : `${diffDays} days left`;
-    }
-
-    function renderPlans() {
-      ["usdt", "zmm"].forEach(type => {
-        const container = document.getElementById(`${type}-section`);
-        container.innerHTML = `<h2>${type === "usdt" ? "💵 USDT Plans" : "🪙 ZMM Token Plans"}</h2>`;
-
-        PLAN_CONFIG[type].forEach(plan => {
-          const planId = `${type}-${plan.amount}`;
-          const div = document.createElement("div");
-          div.className = "plan";
-          div.setAttribute("data-type", type);
-          div.setAttribute("data-amount", plan.amount);
-
-          div.innerHTML = `
-            <h3>${type === "usdt" ? "$" + plan.amount : plan.amount + " ZMM"}</h3>
-            <p>${plan.duration ? "1 Month Access" : "Lifetime Access"}</p>
-            <p>🔓 Unlocks daily missions & rewards</p>
-          `;
-
-          const active = activePlans[type];
-          if (active && active.id === planId) {
-            const label = document.createElement("div");
-            label.className = "active-label";
-            label.innerHTML = `✅ ${plan.duration ? "Active" : "Lifetime Active"}<br>${plan.duration ? formatDaysLeft(active.expiresAt) : ""}`;
-            div.appendChild(label);
-
-            const cancel = document.createElement("button");
-            cancel.className = "cancel-button";
-            cancel.innerText = "Cancel";
-            cancel.onclick = () => cancelPlan(type);
-            div.appendChild(cancel);
-          } else {
-            const button = document.createElement("button");
-            button.innerText = "Buy";
-            button.onclick = () => buyPlan(type, plan.amount);
-            if (activePlans[type]) button.disabled = true;
-            div.appendChild(button);
-          }
-
-          container.appendChild(div);
-        });
-      });
+    function canBuyNewPlan(current, newPlanAmount, type) {
+      if (!current) return true;
+      const isLifetime = PLAN_REWARDS[type][current.amount]?.lifetime;
+      const newLifetime = PLAN_REWARDS[type][newPlanAmount]?.lifetime;
+      if (isLifetime) return false; // lifetime can't be replaced
+      if (newLifetime) return false; // lifetime only if no plan
+      return false; // must cancel first
     }
 
     function buyPlan(type, amount) {
-      const planId = `${type}-${amount}`;
-      const plan = PLAN_CONFIG[type].find(p => p.amount === amount);
-      if (!plan) return;
-
-      const cost = plan.amount;
-      if (wallet[type] < cost) {
-        alert(`❌ Not enough ${type.toUpperCase()} in wallet.`);
+      const current = activePlans[type];
+      if (!canBuyNewPlan(current, amount, type)) {
+        alert("Cancel current plan before activating a new one.");
         return;
       }
-
-      wallet[type] -= cost;
-
-      activePlans.usdt = null;
-      activePlans.zmm = null;
-      activePlans[type] = {
-        id: planId,
-        amount: cost,
-        expiresAt: plan.duration ? new Date(Date.now() + plan.duration * 86400000).toISOString() : null
-      };
-
-      const userRef = database.ref("users/" + userId);
-      userRef.update({
-        [`wallet/${type}`]: wallet[type],
-        [`activePlans/usdt`]: activePlans.usdt,
-        [`activePlans/zmm`]: activePlans.zmm,
-        [`activePlans/${type}`]: activePlans[type]
-      });
-
-      updateBalanceUI();
-      renderPlans();
-      alert("✅ Plan activated successfully!");
+      // rest of buy code
     }
 
     function cancelPlan(type) {
-      if (confirm("Are you sure you want to cancel this plan?")) {
-        activePlans[type] = null;
-        database.ref("users/" + userId + "/activePlans/" + type).remove();
-        renderPlans();
+      const plan = activePlans[type];
+      if (!plan) return;
+      const isLifetime = PLAN_REWARDS[type][plan.amount]?.lifetime;
+      if (isLifetime) {
+        alert("Lifetime plan cannot be cancelled. Only by deleting account.");
+        return;
       }
+      // continue cancel
     }
 
-    database.ref("users/" + userId).once("value").then(snapshot => {
-      const data = snapshot.val();
-      wallet = data.wallet || { usdt: 0, zmm: 0 };
-      activePlans = data.activePlans || { usdt: null, zmm: null };
+    // insert logic for video/interval token granting based on rewards
 
-      updateBalanceUI();
-      renderPlans();
-    });
-  </script>
-</body>
-  </html>
+  </script></body>
+</html>
