@@ -3,16 +3,74 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Welcome</title>
+  <title>ZMMSSMK Token</title>
   <link rel="stylesheet" href="style.css" />
 
   <!-- Firebase SDKs -->
   <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
   <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #141E30, #243B55);
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 30px;
+      color: #00FFD1;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+    }
+
+    .btn {
+      padding: 15px 30px;
+      font-size: 1.1em;
+      font-weight: bold;
+      background-color: #00FFD1;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #00bfa6;
+      color: #fff;
+    }
+
+    @media (max-width: 500px) {
+      .button-group {
+        flex-direction: column;
+        gap: 15px;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <h1>🚀 Welcome to ZMMSSMK</h1>
+    <h1>🚀 Welcome to ZMMSSMK Token</h1>
     <div class="button-group">
       <a href="register.html" class="btn">Register</a>
       <a href="login.html" class="btn">Login</a>
@@ -34,11 +92,9 @@
 
     // ✅ Initialize Firebase
     const app = firebase.initializeApp(firebaseConfig);
-
-    // ✅ Get a reference to the Realtime Database
     const database = firebase.database();
 
-    // ✅ Test write to database (optional)
+    // ✅ Optional test write
     database.ref("test").set({
       message: "Firebase connected successfully!",
       timestamp: Date.now()
