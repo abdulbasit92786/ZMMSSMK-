@@ -16,7 +16,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 // ✅ Database & Auth Instances
-const db = firebase.database();
+const database = firebase.database();
 const auth = firebase.auth();
 
 // ✅ Automatically detect login and expose user ID globally
