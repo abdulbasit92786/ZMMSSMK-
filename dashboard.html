@@ -99,24 +99,25 @@
   </div>
 
   <script>
-    // ✅ Replace with your Firebase config
+    // ✅ Your Firebase Config
     const firebaseConfig = {
-  apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
-  authDomain: "zmmssmk.firebaseapp.com",
-  databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
-  projectId: "zmmssmk",
-  storageBucket: "zmmssmk.appspot.com",
-  messagingSenderId: "677420760492",
-  appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09",
-  measurementId: "G-7J7BEDY8H1"
-};
+      apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
+      authDomain: "zmmssmk.firebaseapp.com",
+      databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
+      projectId: "zmmssmk",
+      storageBucket: "zmmssmk.appspot.com",
+      messagingSenderId: "677420760492",
+      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09",
+      measurementId: "G-7J7BEDY8H1"
+    };
 
-    // ✅ Firebase init
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const userId = "user123"; // 🔁 Replace with actual user ID
 
-    let claimCooldown = 4 * 60 * 60;
+    // ❗ Replace this with dynamic user ID (e.g., from Telegram login or localStorage)
+    const userId = "user123";
+
+    const claimCooldown = 4 * 60 * 60;
     const countdownEl = document.getElementById("countdown");
     const claimBtn = document.getElementById("claimBtn");
     const balanceEl = document.getElementById("balance");
@@ -224,9 +225,6 @@
     }
 
     loadUserData();
-  <script src="firebase.js"></script>
-<script>
-  const db = firebase.database();
-  const userId = window.currentUserId;
+  </script>
 </body>
-                                              </html>
+        </html>
