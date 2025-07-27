@@ -1,5 +1,4 @@
 let startTimes = {};
-
 const TASK_IDS = ['task1', 'task2', 'task3', 'task4'];
 const HIDE_DURATION_HOURS = 24;
 
@@ -9,23 +8,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   checkTaskVisibility();
 });
 
-// ✅ Firebase میں یوزر کا ڈیٹا initialize کریں
-async function initializeUserInFirebase() {
-  const userId = getUserId();
-
-  const userRef = firebase.database().ref('users/' + userId);
-
-  const snapshot = await userRef.get();
-
-  if (!snapshot.exists()) {
-    await userRef.set({
-      zmm_balance: 0,
-      active_plan: "plan_nft_25"
-    });
-  }
-}
-
-// 🔐 یونیک یوزر ID لیں (آپ Telegram ID یا random لے سکتے ہیں)
+// 🔐 یوزر ID: Telegram ID یا Random Local UID
 function getUserId() {
   let uid = localStorage.getItem("uid");
   if (!uid) {
@@ -35,36 +18,53 @@ function getUserId() {
   return uid;
 }
 
-// 🟢 پلان کے مطابق reward value return کریں
-function getRewardForPlan(planKey) {
-  if (!planKey || planKey === "free") return 1;
+// ✅ Firebase میں یوزر سیٹ کریں اگر نیا ہے
+async function initializeUserInFirebase() {
+  const userId = getUserId();
+  const userRef = firebase.database().ref('users/' + userId);
+  const snapshot = await userRef.get();
 
-  const parts = planKey.split("_");
-  if (parts.length !== 3) return 1;
-
-  const amount = parseFloat(parts[2]);
-  if (isNaN(amount)) return 1;
-
-  switch (amount) {
-    case 10:
-    case 1000: return 2;
-    case 25:
-    case 2500: return 4;
-    case 50:
-    case 5000: return 6;
-    case 100:
-    case 10000: return 12;
-    case 500:
-    case 50000: return 20;
-    default: return 1;
+  if (!snapshot.exists()) {
+    await userRef.set({
+      zmm_balance: 0,
+      active_plan: "plan_free", // default free plan
+      missions_completed: {},
+      total_earned: 0
+    });
   }
 }
 
-// ✅ پلان نیم اور ریوارڈ شو کریں
+// 🎁 پلان کے مطابق ریوارڈ نکالیں
+function getRewardForPlan(planKey) {
+  if (!planKey || planKey === "plan_free") return 0.25;
+
+  const parts = planKey.split("_");
+  const amount = parseFloat(parts[2]);
+
+  if (isNaN(amount)) return 0.25;
+
+  switch (amount) {
+    case 10:
+    case 1000: return 1;
+    case 25:
+    case 2500: return 2;
+    case 50:
+    case 5000: return 3;
+    case 100:
+    case 10000: return 5;
+    case 500:
+    case 50000: return 10;
+    default: return 0.25;
+  }
+}
+
+// 📦 پلان نیم اور ریوارڈ شو کریں UI میں
 async function showPlanInfo() {
   const userId = getUserId();
   const userRef = firebase.database().ref('users/' + userId);
   const snapshot = await userRef.get();
+
+  if (!snapshot.exists()) return;
 
   const userData = snapshot.val();
   const planKey = userData.active_plan;
@@ -73,11 +73,11 @@ async function showPlanInfo() {
   const planNameElement = document.getElementById("plan-name");
   const planRewardElement = document.getElementById("plan-reward");
 
-  if (!planKey || planKey === "free") {
+  if (!planKey || planKey === "plan_free") {
     planNameElement.textContent = "Free Plan";
   } else {
     const parts = planKey.split("_");
-    const type = parts[1] === "nft" ? "ZMM" : parts[1].toUpperCase();
+    const type = parts[1].toUpperCase();
     const value = parts[2];
     planNameElement.textContent = `${type} $${value}`;
   }
@@ -85,43 +85,56 @@ async function showPlanInfo() {
   planRewardElement.textContent = reward;
 }
 
-// ▶️ ویڈیو سٹارٹ
+// ▶️ ویڈیو شروع، ٹائم اسٹارٹ
 function startTask(url, id) {
   startTimes[id] = new Date().getTime();
   window.open(url, '_blank');
   document.getElementById("verify-" + id).style.display = "inline-block";
 }
 
-// ✅ ویریفائی کرنے پر reward دینا
+// ✅ Verify button پر کلک
 async function verifyTask(id) {
   const now = new Date().getTime();
   const elapsed = (now - startTimes[id]) / 1000;
 
-  if (elapsed >= 30) {
-    const userId = getUserId();
-    const userRef = firebase.database().ref('users/' + userId);
-    const snapshot = await userRef.get();
-    const userData = snapshot.val();
-
-    const plan = userData.active_plan;
-    const reward = getRewardForPlan(plan);
-
-    let currentBalance = parseFloat(userData.zmm_balance || 0);
-    currentBalance += reward;
-
-    await userRef.update({ zmm_balance: currentBalance });
-
-    alert(`✅ Success! You got ${reward} Token(s).`);
-    document.getElementById("verify-" + id).style.display = "none";
-    document.getElementById(id).style.display = "none";
-
-    localStorage.setItem("watchedTime-" + id, now);
-  } else {
+  if (elapsed < 30) {
     alert("❌ Please watch at least 30 seconds before verifying.");
+    return;
   }
+
+  const userId = getUserId();
+  const userRef = firebase.database().ref('users/' + userId);
+  const snapshot = await userRef.get();
+
+  if (!snapshot.exists()) return;
+
+  const userData = snapshot.val();
+  const reward = getRewardForPlan(userData.active_plan);
+  const completed = userData.missions_completed || {};
+
+  if (completed[id]) {
+    alert("⛔ Already verified today.");
+    return;
+  }
+
+  let newBalance = (userData.zmm_balance || 0) + reward;
+  let totalEarned = (userData.total_earned || 0) + reward;
+  completed[id] = true;
+
+  await userRef.update({
+    zmm_balance: newBalance,
+    total_earned: totalEarned,
+    missions_completed: completed
+  });
+
+  localStorage.setItem("watchedTime-" + id, now);
+  document.getElementById("verify-" + id).style.display = "none";
+  document.getElementById(id).style.display = "none";
+
+  alert(`✅ Success! You got ${reward} Token(s).`);
 }
 
-// ⏱️ hide/show ٹاسک
+// ⏳ ہر مشن کو 24 گھنٹے بعد دکھاؤ
 function checkTaskVisibility() {
   const now = new Date().getTime();
 
@@ -143,4 +156,4 @@ function checkTaskVisibility() {
       taskElement.style.display = "block";
     }
   });
-}
+                            }
