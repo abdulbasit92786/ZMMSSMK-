@@ -12,5 +12,23 @@ const firebaseConfig = {
   measurementId: "G-7J7BEDY8H1"
 };
 
+// ✅ Initialize Firebase
 firebase.initializeApp(firebaseConfig);
+
+// ✅ Database & Auth Instances
 const db = firebase.database();
+const auth = firebase.auth();
+
+// ✅ Automatically detect login and expose user ID globally
+auth.onAuthStateChanged(function (user) {
+  if (user) {
+    // User is logged in
+    window.currentUserId = user.uid;
+    console.log("✅ Logged in as:", window.currentUserId);
+  } else {
+    // Not logged in → redirect to login
+    if (!window.location.href.includes("login.html") && !window.location.href.includes("register.html")) {
+      window.location.href = "login.html";
+    }
+  }
+});
