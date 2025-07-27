@@ -10,33 +10,108 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script>
-    // ✅ Replace with your Firebase project config
     const firebaseConfig = {
-  apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
-  authDomain: "zmmssmk.firebaseapp.com",
-  databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
-  projectId: "zmmssmk",
-  storageBucket: "zmmssmk.appspot.com",
-  messagingSenderId: "677420760492",
-  appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09",
-  measurementId: "G-7J7BEDY8H1"
-};
-
-    // ✅ Initialize Firebase
+      apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
+      authDomain: "zmmssmk.firebaseapp.com",
+      databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
+      projectId: "zmmssmk",
+      storageBucket: "zmmssmk.appspot.com",
+      messagingSenderId: "677420760492",
+      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09",
+      measurementId: "G-7J7BEDY8H1"
+    };
     firebase.initializeApp(firebaseConfig);
+
+    // ✅ Set your dynamic user ID (e.g. from Telegram)
+    const userId = "user123";
+
+    function createUserIfNotExists(callback) {
+      const userRef = firebase.database().ref("users/" + userId);
+      userRef.once("value").then(snapshot => {
+        if (!snapshot.exists()) {
+          const newUser = {
+            active_plan: "plan_free",
+            zmm_balance: 0,
+            total_earned: 0,
+            missions_completed: {}
+          };
+          userRef.set(newUser).then(() => {
+            callback(newUser);
+          });
+        } else {
+          callback(snapshot.val());
+        }
+      });
+    }
+
+    function getRewardPerTask(planKey) {
+      if (!planKey) return 0.5;
+      if (planKey === "plan_free") return 0.25;
+      const parts = planKey.split("_");
+      const amount = parseFloat(parts[2]);
+      if (isNaN(amount)) return 0.5;
+      if (amount === 10) return 1;
+      if (amount === 25) return 2;
+      if (amount === 50) return 3;
+      if (amount === 100) return 5;
+      if (amount === 500) return 10;
+      return 0.5;
+    }
+
+    function updatePlanUI(planKey) {
+      const reward = getRewardPerTask(planKey);
+      document.getElementById("plan-name").innerText = planKey || "Unknown";
+      document.getElementById("plan-reward").innerText = reward;
+    }
+
+    function startTask(videoUrl, taskId) {
+      window.open(videoUrl, "_blank");
+    }
+
+    function verifyTask(taskId) {
+      const taskRef = firebase.database().ref("users/" + userId);
+      taskRef.once("value").then(snapshot => {
+        const user = snapshot.val();
+        const completed = user.missions_completed || {};
+        if (completed[taskId]) {
+          document.getElementById("status-" + taskId).innerText = "✅ Already Verified";
+          return;
+        }
+
+        const plan = user.active_plan;
+        const reward = getRewardPerTask(plan);
+        const newBalance = (user.zmm_balance || 0) + reward;
+        const newEarned = (user.total_earned || 0) + reward;
+        completed[taskId] = true;
+
+        taskRef.update({
+          zmm_balance: newBalance,
+          total_earned: newEarned,
+          missions_completed: completed
+        }).then(() => {
+          document.getElementById("status-" + taskId).innerText = "✅ Verified";
+        });
+      });
+    }
+
+    window.onload = function () {
+      createUserIfNotExists(user => {
+        updatePlanUI(user.active_plan);
+      });
+    };
   </script>
 </head>
 <body>
   <div class="mission-container">
     <h1>🎯 Daily Missions</h1>
 
-    <!-- ✅ پلان اور ریوارڈ انفارمیشن بہتر بیک گراؤنڈ پر -->
+    <!-- ✅ Plan Info -->
     <div style="background:#222;color:#fff;padding:12px;margin-bottom:15px;border-radius:8px;text-align:center;">
       <strong>📦 Your Active Plan:</strong> <span id="plan-name">-</span><br>
       <strong>🎁 Reward per Task:</strong> <span id="plan-reward">-</span> Token(s)
     </div>
 
-    <!-- Tasks -->
+    <!-- ✅ Tasks -->
     <div class="video-task" id="task1">
       <p>📺 Watch Video 1 (30 sec)</p>
       <button onclick="startTask('https://youtu.be/9iBwP4TbFHg?si=-spUOeZHbBEkQRnD', 'task1')">▶️ Watch</button>
@@ -65,8 +140,5 @@
       <div class="status" id="status-task4">⏳ Not Verified</div>
     </div>
   </div>
-
-  <!-- ✅ Mission logic -->
-  <script src="missions.js"></script>
 </body>
-</html>
+  </html>
