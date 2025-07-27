@@ -21,6 +21,12 @@ document.getElementById("registerBtn").addEventListener("click", function () {
         registeredAt: Date.now(),
 
         // ✅ Full user profile fields
+        zmm_balance: 0,
+        total_earned: 0,
+        wallet_balance: 0,
+        last_claim_time: 0,
+        active_plan: "plan_nft_25", // یا "free" اگر مفت پلان ہو
+
         balance: 0,
         withdrawn: 0,
         referrals: 0,
