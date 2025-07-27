@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -29,45 +30,44 @@
 </head>
 <body>
   <h1>🪙 NFT Access Plans</h1>
-  <p style="text-align:center;">Buy a plan using USDT or ZMM token to activate missions and daily rewards.</p>  <div class="balances">
-    <div>💵 USDT Balance: <span id="usdt-balance"></span></div>
-    <div>🪙 ZMM Balance: <span id="zmm-balance"></span></div>
-  </div>  <div class="plan-container">
+  <p style="text-align:center;">Buy a plan using USDT or ZMM token to activate missions and daily rewards.</p>
+  <div class="balances">
+    <div>💵 USDT Balance: <span id="usdt-balance">0</span></div>
+    <div>🪙 ZMM Balance: <span id="zmm-balance">0</span></div>
+  </div>
+
+  <div class="plan-container">
     <div class="plan-section" id="usdt-section"></div>
     <div class="plan-section" id="zmm-section"></div>
-  </div>  <script>
-    // Firebase Config
+  </div>
+
+  <script>
     const firebaseConfig = {
-  apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
-  authDomain: "zmmssmk.firebaseapp.com",
-  databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
-  projectId: "zmmssmk",
-  storageBucket: "zmmssmk.appspot.com",
-  messagingSenderId: "677420760492",
-  appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09",
-  measurementId: "G-7J7BEDY8H1"
-};
+      apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
+      authDomain: "zmmssmk.firebaseapp.com",
+      projectId: "zmmssmk",
+      storageBucket: "zmmssmk.appspot.com",
+      messagingSenderId: "677420760492",
+      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
+    };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    let userId = "user_123"; // Replace this with your actual user identifier (like email or UID)
+    // 🔐 Generate or get existing userId
+    function getUserId() {
+      let uid = localStorage.getItem("uid");
+      if (!uid) {
+        uid = "user_" + Math.floor(Math.random() * 1000000);
+        localStorage.setItem("uid", uid);
+      }
+      return uid;
+    }
+
+    const userId = getUserId();
 
     let wallet = { usdt: 0, zmm: 0 };
     let activePlans = { usdt: null, zmm: null };
-
-    async function fetchUserData() {
-      const doc = await db.collection("users").doc(userId).get();
-      if (doc.exists) {
-        const data = doc.data();
-        wallet = data.wallet || wallet;
-        activePlans = data.activePlans || activePlans;
-      } else {
-        await db.collection("users").doc(userId).set({ wallet, activePlans });
-      }
-      updateBalanceUI();
-      renderPlans();
-    }
 
     const PLAN_CONFIG = {
       usdt: [
@@ -83,12 +83,28 @@
         { amount: 5000, duration: 30 },
         { amount: 10000, duration: 30 },
         { amount: 50000, duration: null },
-      ],
+      ]
     };
 
+    async function fetchUserData() {
+      const docRef = db.collection("users").doc(userId);
+      const doc = await docRef.get();
+
+      if (doc.exists) {
+        const data = doc.data();
+        wallet = data.wallet || wallet;
+        activePlans = data.activePlans || activePlans;
+      } else {
+        await docRef.set({ wallet, activePlans });
+      }
+
+      updateBalanceUI();
+      renderPlans();
+    }
+
     function updateBalanceUI() {
-      document.getElementById("usdt-balance").textContent = wallet.usdt;
-      document.getElementById("zmm-balance").textContent = wallet.zmm;
+      document.getElementById("usdt-balance").textContent = wallet.usdt.toFixed(2);
+      document.getElementById("zmm-balance").textContent = wallet.zmm.toFixed(2);
     }
 
     function formatDaysLeft(dateString) {
@@ -108,6 +124,7 @@
           const planId = `${type}-${plan.amount}`;
           const div = document.createElement("div");
           div.className = "plan";
+
           div.innerHTML = `
             <h3>${type === "usdt" ? "$" + plan.amount : plan.amount + " ZMM"}</h3>
             <p>${plan.duration ? "1 Month Access" : "Lifetime Access"}</p>
@@ -117,7 +134,7 @@
           if (active && active.id === planId) {
             const label = document.createElement("div");
             label.className = "active-label";
-            label.innerHTML = `✅ ${plan.duration ? "Active" : "Lifetime Active"}<br>${plan.duration ? formatDaysLeft(active.expiresAt) : ""}`;
+            label.innerHTML = `✅ Active<br>${plan.duration ? formatDaysLeft(active.expiresAt) : "Lifetime"}`;
             div.appendChild(label);
 
             const cancel = document.createElement("button");
@@ -165,5 +182,6 @@
     }
 
     fetchUserData();
-  </script></body>
-      </html>
+  </script>
+</body>
+</html>
