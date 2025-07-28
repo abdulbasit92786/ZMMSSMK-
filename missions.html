@@ -124,8 +124,7 @@
 
       localStorage.setItem("watchedTime-" + taskId, now);
       document.getElementById("verify-" + taskId).style.display = "none";
-      document.getElementById(taskId).style.display = "none";
-      alert(`✅ Verified! You got ${reward} ZMM token.`);
+      document.getElementById(taskId).innerHTML = `<p>✅ Task Completed! You earned ${reward} ZMM Token.</p>`;
     }
 
     function checkTaskVisibility() {
@@ -136,7 +135,7 @@
         const taskElement = document.getElementById(id);
 
         if (diff < HIDE_DURATION_HOURS * 60 * 60 * 1000) {
-          taskElement.style.display = "none";
+          taskElement.innerHTML = `<p>✅ Already completed. Come back after ${HIDE_DURATION_HOURS} hours.</p>`;
         } else {
           taskElement.style.display = "block";
         }
@@ -178,4 +177,4 @@
     </div>
   </div>
 </body>
-                                                                                              </html>
+        </html>                                                                                              </html>
