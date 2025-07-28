@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ZMMK Dashboard</title>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="firebase.js"></script> <!-- ✅ centralized config -->
   <style>
+    /* (Same CSS as before) */
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
@@ -85,7 +88,7 @@
 
     <div class="referral-box">
       <div>Referral Link:</div>
-      <input type="text" class="referral-input" id="refLink" value="https://t.me/your_bot?start=123456" readonly />
+      <input type="text" class="referral-input" id="refLink" readonly />
       <button class="btn" onclick="copyLink()">Copy Link</button>
     </div>
 
@@ -104,30 +107,27 @@
   </div>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
-      authDomain: "zmmssmk.firebaseapp.com",
-      databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
-      projectId: "zmmssmk",
-      storageBucket: "zmmssmk.appspot.com",
-      messagingSenderId: "677420760492",
-      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09",
-      measurementId: "G-7J7BEDY8H1"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-
-    const userId = "user123"; // ⚠️ اس کو Telegram یا localStorage سے dynamic بنائیں
     const claimCooldown = 4 * 60 * 60;
     const countdownEl = document.getElementById("countdown");
     const claimBtn = document.getElementById("claimBtn");
     const balanceEl = document.getElementById("balance");
     const earnedEl = document.getElementById("totalEarned");
     const claimToWalletBtn = document.getElementById("claimToWalletBtn");
+    const refLink = document.getElementById("refLink");
+
+    let currentUserId;
+
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        currentUserId = user.uid;
+        refLink.value = `https://t.me/your_bot?start=${currentUserId}`;
+        loadUserData();
+      } else {
+        window.location.href = "login.html";
+      }
+    });
 
     function copyLink() {
-      const refLink = document.getElementById("refLink");
       refLink.select();
       document.execCommand("copy");
       alert("Referral link copied!");
@@ -156,7 +156,7 @@
     }
 
     function loadUserData() {
-      db.ref("users/" + userId).once("value").then(snapshot => {
+      database.ref("users/" + currentUserId).once("value").then(snapshot => {
         const data = snapshot.val() || {};
         updateUI(data);
         const lastClaim = data.last_claim_time || 0;
@@ -169,7 +169,7 @@
     }
 
     function claimReward() {
-      db.ref("users/" + userId).once("value").then(snapshot => {
+      database.ref("users/" + currentUserId).once("value").then(snapshot => {
         const data = snapshot.val() || {};
         const planKey = data.active_plan || "plan_nft_25";
         const reward = getRewardForPlan(planKey);
@@ -178,7 +178,7 @@
         const newBalance = (data.zmm_balance || 0) + reward;
         const newTotal = (data.total_earned || 0) + reward;
 
-        db.ref("users/" + userId).update({
+        database.ref("users/" + currentUserId).update({
           zmm_balance: newBalance,
           total_earned: newTotal,
           last_claim_time: now
@@ -205,7 +205,7 @@
     }
 
     function claimToWallet() {
-      db.ref("users/" + userId).once("value").then(snapshot => {
+      database.ref("users/" + currentUserId).once("value").then(snapshot => {
         const data = snapshot.val() || {};
         let total = data.total_earned || 0;
         if (total < 20) return alert("Minimum 20 ZMM required to claim to wallet.");
@@ -215,7 +215,7 @@
         const newZmm = (data.zmm_balance || 0) - amountToClaim;
         const newTotal = total - amountToClaim;
 
-        db.ref("users/" + userId).update({
+        database.ref("users/" + currentUserId).update({
           wallet_balance: newWallet,
           zmm_balance: newZmm,
           total_earned: newTotal
@@ -225,8 +225,6 @@
         updateUI({ zmm_balance: newZmm, total_earned: newTotal });
       });
     }
-
-    loadUserData();
   </script>
 </body>
-      </html>
+  </html>
