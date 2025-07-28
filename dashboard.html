@@ -9,7 +9,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="firebase.js"></script> <!-- ✅ centralized config -->
   <style>
-    /* (Same CSS as before) */
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
@@ -114,7 +113,6 @@
     const earnedEl = document.getElementById("totalEarned");
     const claimToWalletBtn = document.getElementById("claimToWalletBtn");
     const refLink = document.getElementById("refLink");
-
     let currentUserId;
 
     firebase.auth().onAuthStateChanged(function(user) {
