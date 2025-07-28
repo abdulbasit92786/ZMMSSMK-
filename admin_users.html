@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin User Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    .user-card {
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .user-card h2 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+    .user-info p {
+      margin: 6px 0;
+    }
+    .user-info p strong {
+      width: 180px;
+      display: inline-block;
+    }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+</head>
+<body>
+  <h1>📋 All User Details</h1>
+  <div id="user-list"></div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
+      authDomain: "zmmssmk.firebaseapp.com",
+      databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
+      projectId: "zmmssmk",
+      storageBucket: "zmmssmk.appspot.com",
+      messagingSenderId: "677420760492",
+      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    db.ref("users").once("value").then(snapshot => {
+      const users = snapshot.val();
+      const userList = document.getElementById("user-list");
+
+      for (const uid in users) {
+        const user = users[uid];
+        const videoEarned = user.video_earned || 0;
+        const autoEarned = user.auto_earned || 0;
+        const dashboardEarned = videoEarned + autoEarned;
+
+        const card = document.createElement("div");
+        card.className = "user-card";
+        card.innerHTML = `
+          <h2>👤 ${user.username || 'Unknown'}</h2>
+          <div class="user-info">
+            <p><strong>📧 Email:</strong> ${user.email || 'N/A'}</p>
+            <p><strong>🆔 UID:</strong> ${uid}</p>
+            <p><strong>💰 Wallet USDT:</strong> $${user.wallet_balance || 0}</p>
+            <p><strong>🪙 Wallet ZMM:</strong> ${user.zmm_balance || 0} ZMM</p>
+            <p><strong>📤 Withdrawn:</strong> ${user.withdrawn || 0} ZMM</p>
+            <p><strong>🧩 Active Plan:</strong> ${user.active_plan || 'Free'}</p>
+            <p><strong>🎯 Dashboard ZMM Earned:</strong> ${dashboardEarned} ZMM</p>
+          </div>
+        `;
+        userList.appendChild(card);
+      }
+    });
+  </script>
+</body>
+  </html>
