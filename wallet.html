@@ -1,4 +1,6 @@
-<!-- wallet.html --><!DOCTYPE html><html lang="en">
+<!-- wallet.html -->
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Wallet</title>
@@ -18,26 +20,29 @@
         <h3>🪙 ZMM</h3>
         <p id="zmm-balance">0 Tokens</p>
       </div>
-    </div><div class="swap-section">
-  <h3>🔁 Swap Tokens</h3>
-  <label for="swap-direction">Select Direction:</label>
-  <select id="swap-direction">
-    <option value="zmm-to-usdt">ZMM → USDT</option>
-    <option value="usdt-to-zmm">USDT → ZMM</option>
-  </select>
+    </div>
 
-  <input type="number" id="swap-amount" placeholder="Enter amount">
-  <p id="conversion-result">🚱 Rate: 1 ZMM = 0.05 USDT</p>
-  <p id="calculated-output">You will receive: -</p>
-  <button onclick="performSwap()">Swap Now</button>
-</div>
+    <div class="swap-section">
+      <h3>🔁 Swap Tokens</h3>
+      <label for="swap-direction">Select Direction:</label>
+      <select id="swap-direction">
+        <option value="zmm-to-usdt">ZMM → USDT</option>
+        <option value="usdt-to-zmm">USDT → ZMM</option>
+      </select>
 
-<div class="action-buttons">
-  <button onclick="goToWithdrawPage()">🛄 Withdraw</button>
-  <button onclick="goToDepositPage()">🛅 Deposit</button>
-</div>
+      <input type="number" id="swap-amount" placeholder="Enter amount">
+      <p id="conversion-result">🚱 Rate: 1 ZMM = -</p>
+      <p id="calculated-output">You will receive: -</p>
+      <button onclick="performSwap()">Swap Now</button>
+    </div>
 
-  </div>  <script>
+    <div class="action-buttons">
+      <button onclick="goToWithdrawPage()">🛄 Withdraw</button>
+      <button onclick="goToDepositPage()">🛅 Deposit</button>
+    </div>
+  </div>
+
+  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
       authDomain: "zmmssmk.firebaseapp.com",
@@ -52,11 +57,17 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const ZMM_PRICE = 0.05;
     const MIN_SWAP_USDT = 5;
     const MIN_SWAP_ZMM = 100;
-
     const userId = localStorage.getItem("userId") || "guest123";
+
+    let userWallet = { usdt: 0, zmm: 0 };
+    let userPlan = "free";
+    let ZMM_RATE = 0.05;
+
+    function getZmmRate(plan) {
+      return (plan === "nft100" || plan === "nft500") ? 0.01 : 0.05;
+    }
 
     function syncFromFirebase() {
       db.ref("wallets/" + userId).once("value").then(snapshot => {
@@ -65,13 +76,22 @@
         localStorage.setItem("walletData", JSON.stringify(data));
         updateWalletUI();
       });
+
+      db.ref("users/" + userId + "/plan").once("value").then(snapshot => {
+        userPlan = snapshot.val() || "free";
+        ZMM_RATE = getZmmRate(userPlan);
+        updateRateLabel();
+      });
+    }
+
+    function updateRateLabel() {
+      document.getElementById("conversion-result").innerText = `🚱 Rate: 1 ZMM = $${ZMM_RATE.toFixed(2)} USDT`;
+      document.getElementById("swap-amount").dispatchEvent(new Event("input"));
     }
 
     function updateWalletInFirebase() {
       db.ref("wallets/" + userId).set(userWallet);
     }
-
-    let userWallet = JSON.parse(localStorage.getItem("walletData")) || { usdt: 0, zmm: 0 };
 
     function updateWalletUI() {
       document.getElementById("usdt-balance").innerText = `$${userWallet.usdt.toFixed(2)}`;
@@ -87,28 +107,22 @@
         return;
       }
 
+      const rate = ZMM_RATE;
+
       if (direction === "zmm-to-usdt") {
-        if (amount < MIN_SWAP_ZMM) {
-          alert("❌ Minimum 100 ZMM required to swap.");
+        if (amount < MIN_SWAP_ZMM || userWallet.zmm < amount) {
+          alert("❌ Minimum 100 ZMM required or not enough balance.");
           return;
         }
-        if (userWallet.zmm < amount) {
-          alert("❌ Not enough ZMM.");
-          return;
-        }
-        const usdtAmount = amount * ZMM_PRICE;
+        const usdtAmount = amount * rate;
         userWallet.zmm -= amount;
         userWallet.usdt += usdtAmount;
       } else {
-        if (amount < MIN_SWAP_USDT) {
-          alert("❌ Minimum $5 USDT required to swap.");
+        if (amount < MIN_SWAP_USDT || userWallet.usdt < amount) {
+          alert("❌ Minimum $5 required or not enough balance.");
           return;
         }
-        if (userWallet.usdt < amount) {
-          alert("❌ Not enough USDT.");
-          return;
-        }
-        const zmmAmount = amount / ZMM_PRICE;
+        const zmmAmount = amount / rate;
         userWallet.usdt -= amount;
         userWallet.zmm += zmmAmount;
       }
@@ -129,12 +143,14 @@
         return;
       }
 
+      const rate = ZMM_RATE;
       let result;
+
       if (direction === "zmm-to-usdt") {
-        result = amount * ZMM_PRICE;
+        result = amount * rate;
         output.innerText = `You will receive: $${result.toFixed(2)} USDT`;
       } else {
-        result = amount / ZMM_PRICE;
+        result = amount / rate;
         output.innerText = `You will receive: ${result.toFixed(2)} ZMM`;
       }
     });
@@ -154,5 +170,6 @@
     function goToDepositPage() {
       window.location.href = "deposit.html";
     }
-  </script></body>
+  </script>
+</body>
   </html>
