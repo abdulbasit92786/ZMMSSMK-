@@ -8,18 +8,17 @@
 </head>
 <body>
   <div class="container wallet-container">
-    <h2>💼 My Wallet</h2><div class="balances-grid">
-  <div class="balance-card">
-    <h3>💵 USDT</h3>
-    <p id="usdt-balance">$0.00</p>
-  </div>
-  <div class="balance-card">
-    <h3>🪙 ZMM</h3>
-    <p id="zmm-balance">0 Tokens</p>
-  </div>
-</div>
-
-<div class="swap-section">
+    <h2>💼 My Wallet</h2>
+    <div class="balances-grid">
+      <div class="balance-card">
+        <h3>💵 USDT</h3>
+        <p id="usdt-balance">$0.00</p>
+      </div>
+      <div class="balance-card">
+        <h3>🪙 ZMM</h3>
+        <p id="zmm-balance">0 Tokens</p>
+      </div>
+    </div><div class="swap-section">
   <h3>🔁 Swap Tokens</h3>
   <label for="swap-direction">Select Direction:</label>
   <select id="swap-direction">
@@ -34,32 +33,35 @@
 </div>
 
 <div class="action-buttons">
-  <button onclick="goToWithdrawPage()">📤 Withdraw</button>
-  <button onclick="goToDepositPage()">📥 Deposit</button>
+  <button onclick="goToWithdrawPage()">🛄 Withdraw</button>
+  <button onclick="goToDepositPage()">🛅 Deposit</button>
 </div>
 
   </div>  <script>
     const firebaseConfig = {
-  apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
-  authDomain: "zmmssmk.firebaseapp.com",
-  databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
-  projectId: "zmmssmk",
-  storageBucket: "zmmssmk.appspot.com",
-  messagingSenderId: "677420760492",
-  appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09",
-  measurementId: "G-7J7BEDY8H1"
-};
+      apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
+      authDomain: "zmmssmk.firebaseapp.com",
+      databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
+      projectId: "zmmssmk",
+      storageBucket: "zmmssmk.appspot.com",
+      messagingSenderId: "677420760492",
+      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09",
+      measurementId: "G-7J7BEDY8H1"
+    };
 
     firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+    const db = firebase.database();
 
     const ZMM_PRICE = 0.05;
+    const MIN_SWAP_USDT = 5;
+    const MIN_SWAP_ZMM = 100;
 
     const userId = localStorage.getItem("userId") || "guest123";
 
     function syncFromFirebase() {
       db.ref("wallets/" + userId).once("value").then(snapshot => {
         const data = snapshot.val() || { usdt: 0, zmm: 0 };
+        userWallet = data;
         localStorage.setItem("walletData", JSON.stringify(data));
         updateWalletUI();
       });
@@ -86,6 +88,10 @@
       }
 
       if (direction === "zmm-to-usdt") {
+        if (amount < MIN_SWAP_ZMM) {
+          alert("❌ Minimum 100 ZMM required to swap.");
+          return;
+        }
         if (userWallet.zmm < amount) {
           alert("❌ Not enough ZMM.");
           return;
@@ -94,6 +100,10 @@
         userWallet.zmm -= amount;
         userWallet.usdt += usdtAmount;
       } else {
+        if (amount < MIN_SWAP_USDT) {
+          alert("❌ Minimum $5 USDT required to swap.");
+          return;
+        }
         if (userWallet.usdt < amount) {
           alert("❌ Not enough USDT.");
           return;
@@ -145,4 +155,4 @@
       window.location.href = "deposit.html";
     }
   </script></body>
-</html>
+  </html>
