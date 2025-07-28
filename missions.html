@@ -6,10 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 
-  <!-- ✅ Firebase SDKs -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script>
+    // 🔐 Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
       authDomain: "zmmssmk.firebaseapp.com",
@@ -17,128 +18,191 @@
       projectId: "zmmssmk",
       storageBucket: "zmmssmk.appspot.com",
       messagingSenderId: "677420760492",
-      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09",
-      measurementId: "G-7J7BEDY8H1"
+      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
     };
     firebase.initializeApp(firebaseConfig);
 
-    // ✅ Set your dynamic user ID (e.g. from Telegram)
-    const userId = "user123";
-
-    function createUserIfNotExists(callback) {
-      const userRef = firebase.database().ref("users/" + userId);
-      userRef.once("value").then(snapshot => {
-        if (!snapshot.exists()) {
-          const newUser = {
-            active_plan: "plan_free",
-            zmm_balance: 0,
-            total_earned: 0,
-            missions_completed: {}
-          };
-          userRef.set(newUser).then(() => {
-            callback(newUser);
-          });
-        } else {
-          callback(snapshot.val());
-        }
-      });
+    // 🔐 User ID from localStorage
+    function getUserId() {
+      let uid = localStorage.getItem("uid");
+      if (!uid) {
+        uid = "user_" + Math.floor(Math.random() * 1000000);
+        localStorage.setItem("uid", uid);
+      }
+      return uid;
     }
 
-    function getRewardPerTask(planKey) {
-      if (!planKey) return 0.5;
-      if (planKey === "plan_free") return 0.25;
+    const TASK_IDS = ['task1', 'task2', 'task3', 'task4'];
+    const HIDE_DURATION_HOURS = 24;
+    let startTimes = {};
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      await initializeUser();
+      await showPlanInfo();
+      checkTaskVisibility();
+    });
+
+    // ✅ Create User if not exist
+    async function initializeUser() {
+      const userId = getUserId();
+      const userRef = firebase.database().ref('users/' + userId);
+      const snapshot = await userRef.get();
+
+      if (!snapshot.exists()) {
+        await userRef.set({
+          zmm_balance: 0,
+          total_earned: 0,
+          active_plan: "plan_free",
+          missions_completed: {}
+        });
+      }
+    }
+
+    // ✅ Reward based on plan
+    function getRewardForPlan(planKey) {
+      if (!planKey || planKey === "plan_free") return 1;
+
       const parts = planKey.split("_");
       const amount = parseFloat(parts[2]);
-      if (isNaN(amount)) return 0.5;
-      if (amount === 10) return 1;
-      if (amount === 25) return 2;
-      if (amount === 50) return 3;
-      if (amount === 100) return 5;
-      if (amount === 500) return 10;
-      return 0.5;
+
+      switch (amount) {
+        case 10: return 2;
+        case 25: return 3;
+        case 50: return 5;
+        case 100: return 8;
+        case 500: return 15;
+        default: return 1;
+      }
     }
 
-    function updatePlanUI(planKey) {
-      const reward = getRewardPerTask(planKey);
-      document.getElementById("plan-name").innerText = planKey || "Unknown";
-      document.getElementById("plan-reward").innerText = reward;
+    // ✅ Show Plan Info on UI
+    async function showPlanInfo() {
+      const userId = getUserId();
+      const snapshot = await firebase.database().ref('users/' + userId).get();
+      if (!snapshot.exists()) return;
+
+      const user = snapshot.val();
+      const planKey = user.active_plan;
+      const reward = getRewardForPlan(planKey);
+
+      const planNameElem = document.getElementById("plan-name");
+      const planRewardElem = document.getElementById("plan-reward");
+
+      if (planKey === "plan_free") {
+        planNameElem.textContent = "Free Plan";
+      } else {
+        const parts = planKey.split("_");
+        planNameElem.textContent = `${parts[1].toUpperCase()} $${parts[2]}`;
+      }
+
+      planRewardElem.textContent = reward;
     }
 
+    // ▶️ Start Watching
     function startTask(videoUrl, taskId) {
+      startTimes[taskId] = new Date().getTime();
       window.open(videoUrl, "_blank");
+      document.getElementById("verify-" + taskId).style.display = "inline-block";
     }
 
-    function verifyTask(taskId) {
-      const taskRef = firebase.database().ref("users/" + userId);
-      taskRef.once("value").then(snapshot => {
-        const user = snapshot.val();
-        const completed = user.missions_completed || {};
-        if (completed[taskId]) {
-          document.getElementById("status-" + taskId).innerText = "✅ Already Verified";
-          return;
+    // ✅ Verify Task
+    async function verifyTask(taskId) {
+      const now = new Date().getTime();
+      const elapsed = (now - startTimes[taskId]) / 1000;
+
+      if (elapsed < 30) {
+        alert("⏳ Please watch at least 30 seconds.");
+        return;
+      }
+
+      const userId = getUserId();
+      const userRef = firebase.database().ref('users/' + userId);
+      const snapshot = await userRef.get();
+      if (!snapshot.exists()) return;
+
+      const user = snapshot.val();
+      const completed = user.missions_completed || {};
+
+      if (completed[taskId]) {
+        alert("⛔ Already verified today.");
+        return;
+      }
+
+      const reward = getRewardForPlan(user.active_plan);
+      const newBalance = (user.zmm_balance || 0) + reward;
+      const newEarned = (user.total_earned || 0) + reward;
+      completed[taskId] = true;
+
+      await userRef.update({
+        zmm_balance: newBalance,
+        total_earned: newEarned,
+        missions_completed: completed
+      });
+
+      localStorage.setItem("watchedTime-" + taskId, now);
+      document.getElementById("verify-" + taskId).style.display = "none";
+      document.getElementById(taskId).style.display = "none";
+      alert(`✅ Verified! You got ${reward} token(s).`);
+    }
+
+    // ⏳ Hide task for 24 hours after verification
+    function checkTaskVisibility() {
+      const now = new Date().getTime();
+
+      TASK_IDS.forEach(id => {
+        const taskElement = document.getElementById(id);
+        const lastWatched = localStorage.getItem("watchedTime-" + id);
+
+        if (lastWatched) {
+          const diff = now - parseInt(lastWatched);
+          const hoursPassed = diff / (1000 * 60 * 60);
+
+          if (hoursPassed < HIDE_DURATION_HOURS) {
+            taskElement.style.display = "none";
+          } else {
+            taskElement.style.display = "block";
+            localStorage.removeItem("watchedTime-" + id);
+          }
+        } else {
+          taskElement.style.display = "block";
         }
-
-        const plan = user.active_plan;
-        const reward = getRewardPerTask(plan);
-        const newBalance = (user.zmm_balance || 0) + reward;
-        const newEarned = (user.total_earned || 0) + reward;
-        completed[taskId] = true;
-
-        taskRef.update({
-          zmm_balance: newBalance,
-          total_earned: newEarned,
-          missions_completed: completed
-        }).then(() => {
-          document.getElementById("status-" + taskId).innerText = "✅ Verified";
-        });
       });
     }
-
-    window.onload = function () {
-      createUserIfNotExists(user => {
-        updatePlanUI(user.active_plan);
-      });
-    };
   </script>
 </head>
 <body>
   <div class="mission-container">
     <h1>🎯 Daily Missions</h1>
 
-    <!-- ✅ Plan Info -->
     <div style="background:#222;color:#fff;padding:12px;margin-bottom:15px;border-radius:8px;text-align:center;">
-      <strong>📦 Your Active Plan:</strong> <span id="plan-name">-</span><br>
-      <strong>🎁 Reward per Task:</strong> <span id="plan-reward">-</span> Token(s)
+      <strong>📦 Active Plan:</strong> <span id="plan-name">-</span><br>
+      <strong>🎁 Reward/Task:</strong> <span id="plan-reward">-</span> Token(s)
     </div>
 
     <!-- ✅ Tasks -->
     <div class="video-task" id="task1">
-      <p>📺 Watch Video 1 (30 sec)</p>
+      <p>📺 Watch Video 1</p>
       <button onclick="startTask('https://youtu.be/9iBwP4TbFHg?si=-spUOeZHbBEkQRnD', 'task1')">▶️ Watch</button>
-      <button id="verify-task1" onclick="verifyTask('task1')">✅ Verify</button>
-      <div class="status" id="status-task1">⏳ Not Verified</div>
+      <button id="verify-task1" style="display:none;" onclick="verifyTask('task1')">✅ Verify</button>
     </div>
 
     <div class="video-task" id="task2">
-      <p>📺 Watch Video 2 (30 sec)</p>
+      <p>📺 Watch Video 2</p>
       <button onclick="startTask('https://youtu.be/BfTGQYxp0ec?si=zDE8CtMT12B3aEzz', 'task2')">▶️ Watch</button>
-      <button id="verify-task2" onclick="verifyTask('task2')">✅ Verify</button>
-      <div class="status" id="status-task2">⏳ Not Verified</div>
+      <button id="verify-task2" style="display:none;" onclick="verifyTask('task2')">✅ Verify</button>
     </div>
 
     <div class="video-task" id="task3">
-      <p>📺 Watch Video 3 (30 sec)</p>
+      <p>📺 Watch Video 3</p>
       <button onclick="startTask('https://youtu.be/N4fOamB7uec?si=4timJdDmBeTlZvNG', 'task3')">▶️ Watch</button>
-      <button id="verify-task3" onclick="verifyTask('task3')">✅ Verify</button>
-      <div class="status" id="status-task3">⏳ Not Verified</div>
+      <button id="verify-task3" style="display:none;" onclick="verifyTask('task3')">✅ Verify</button>
     </div>
 
     <div class="video-task" id="task4">
-      <p>📺 Watch Video 4 (30 sec)</p>
+      <p>📺 Watch Video 4</p>
       <button onclick="startTask('https://youtu.be/BAXgvXnaKB4?si=acuEFWXuZazv4rrB', 'task4')">▶️ Watch</button>
-      <button id="verify-task4" onclick="verifyTask('task4')">✅ Verify</button>
-      <div class="status" id="status-task4">⏳ Not Verified</div>
+      <button id="verify-task4" style="display:none;" onclick="verifyTask('task4')">✅ Verify</button>
     </div>
   </div>
 </body>
-  </html>
+</html>
