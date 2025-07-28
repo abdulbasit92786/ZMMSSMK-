@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>📦 NFT Plans</title>
+  <title>📦 NFT Plans (Realtime DB)</title>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -45,6 +45,7 @@
     const firebaseConfig = {
       apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
       authDomain: "zmmssmk.firebaseapp.com",
+      databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",  // ✅ Realtime Database URL
       projectId: "zmmssmk",
       storageBucket: "zmmssmk.appspot.com",
       messagingSenderId: "677420760492",
@@ -52,9 +53,8 @@
     };
 
     firebase.initializeApp(firebaseConfig);
-    const database = firebase.firestore();
+    const db = firebase.database();
 
-    // 🔐 Generate or get existing userId
     function getUserId() {
       let uid = localStorage.getItem("uid");
       if (!uid) {
@@ -65,7 +65,6 @@
     }
 
     const userId = getUserId();
-
     let wallet = { usdt: 0, zmm: 0 };
     let activePlans = { usdt: null, zmm: null };
 
@@ -87,19 +86,19 @@
     };
 
     async function fetchUserData() {
-      const docRef = db.collection("users").doc(userId);
-      const doc = await docRef.get();
+      const userRef = db.ref("users/" + userId);
+      userRef.once("value").then(snapshot => {
+        const data = snapshot.val();
+        if (data) {
+          wallet = data.wallet || wallet;
+          activePlans = data.activePlans || activePlans;
+        } else {
+          userRef.set({ wallet, activePlans });
+        }
 
-      if (doc.exists) {
-        const data = doc.data();
-        wallet = data.wallet || wallet;
-        activePlans = data.activePlans || activePlans;
-      } else {
-        await docRef.set({ wallet, activePlans });
-      }
-
-      updateBalanceUI();
-      renderPlans();
+        updateBalanceUI();
+        renderPlans();
+      });
     }
 
     function updateBalanceUI() {
@@ -168,7 +167,7 @@
       };
       wallet[type] -= amount;
 
-      await db.collection("users").doc(userId).update({ wallet, activePlans });
+      await db.ref("users/" + userId).update({ wallet, activePlans });
       updateBalanceUI();
       renderPlans();
       alert("✅ Plan activated successfully!");
@@ -177,7 +176,7 @@
     async function cancelPlan(type) {
       if (!confirm("Cancel this plan?")) return;
       activePlans[type] = null;
-      await db.collection("users").doc(userId).update({ activePlans });
+      await db.ref("users/" + userId + "/activePlans/" + type).remove();
       renderPlans();
     }
 
