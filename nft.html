@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -35,152 +34,152 @@
     <div>💵 USDT Balance: <span id="usdt-balance">0</span></div>
     <div>🪙 ZMM Balance: <span id="zmm-balance">0</span></div>
   </div>
-
   <div class="plan-container">
     <div class="plan-section" id="usdt-section"></div>
     <div class="plan-section" id="zmm-section"></div>
   </div>
-
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
       authDomain: "zmmssmk.firebaseapp.com",
-      databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",  // ✅ Realtime Database URL
+      databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
       projectId: "zmmssmk",
       storageBucket: "zmmssmk.appspot.com",
       messagingSenderId: "677420760492",
       appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
-    };
+    };firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+function getUserId() {
+  let uid = localStorage.getItem("uid");
+  if (!uid) {
+    uid = "user_" + Math.floor(Math.random() * 1000000);
+    localStorage.setItem("uid", uid);
+  }
+  return uid;
+}
 
-    function getUserId() {
-      let uid = localStorage.getItem("uid");
-      if (!uid) {
-        uid = "user_" + Math.floor(Math.random() * 1000000);
-        localStorage.setItem("uid", uid);
-      }
-      return uid;
+const userId = getUserId();
+let wallet = { usdt: 0, zmm: 0 };
+let activePlans = { usdt: null, zmm: null };
+
+const PLAN_CONFIG = {
+  usdt: [
+    { amount: 10, duration: 30, videoReward: 2, dailyReward: 2 },
+    { amount: 25, duration: 30, videoReward: 6, dailyReward: 4 },
+    { amount: 50, duration: 30, videoReward: 10, dailyReward: 6 },
+    { amount: 100, duration: 30, videoReward: 16, dailyReward: 12 },
+    { amount: 500, duration: null, videoReward: 22, dailyReward: 20 },
+  ],
+  zmm: [
+    { amount: 1000, duration: 30, videoReward: 2, dailyReward: 2 },
+    { amount: 2500, duration: 30, videoReward: 6, dailyReward: 4 },
+    { amount: 5000, duration: 30, videoReward: 10, dailyReward: 6 },
+    { amount: 10000, duration: 30, videoReward: 16, dailyReward: 12 },
+    { amount: 50000, duration: null, videoReward: 22, dailyReward: 20 },
+  ]
+};
+
+async function fetchUserData() {
+  const userRef = db.ref("users/" + userId);
+  userRef.once("value").then(snapshot => {
+    const data = snapshot.val();
+    if (data) {
+      wallet = data.wallet || wallet;
+      activePlans = data.activePlans || activePlans;
+    } else {
+      userRef.set({ wallet, activePlans });
     }
+    updateBalanceUI();
+    renderPlans();
+  });
+}
 
-    const userId = getUserId();
-    let wallet = { usdt: 0, zmm: 0 };
-    let activePlans = { usdt: null, zmm: null };
+function updateBalanceUI() {
+  document.getElementById("usdt-balance").textContent = wallet.usdt.toFixed(2);
+  document.getElementById("zmm-balance").textContent = wallet.zmm.toFixed(2);
+}
 
-    const PLAN_CONFIG = {
-      usdt: [
-        { amount: 10, duration: 30 },
-        { amount: 25, duration: 30 },
-        { amount: 50, duration: 30 },
-        { amount: 100, duration: 30 },
-        { amount: 500, duration: null },
-      ],
-      zmm: [
-        { amount: 1000, duration: 30 },
-        { amount: 2500, duration: 30 },
-        { amount: 5000, duration: 30 },
-        { amount: 10000, duration: 30 },
-        { amount: 50000, duration: null },
-      ]
-    };
+function formatDaysLeft(dateString) {
+  const now = new Date();
+  const expires = new Date(dateString);
+  const diffTime = expires - now;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays <= 0 ? "Expired" : `${diffDays} days left`;
+}
 
-    async function fetchUserData() {
-      const userRef = db.ref("users/" + userId);
-      userRef.once("value").then(snapshot => {
-        const data = snapshot.val();
-        if (data) {
-          wallet = data.wallet || wallet;
-          activePlans = data.activePlans || activePlans;
-        } else {
-          userRef.set({ wallet, activePlans });
+function renderPlans() {
+  ["usdt", "zmm"].forEach(type => {
+    const container = document.getElementById(`${type}-section`);
+    container.innerHTML = `<h2>${type === "usdt" ? "💵 USDT Plans" : "🪙 ZMM Token Plans"}</h2>`;
+
+    PLAN_CONFIG[type].forEach(plan => {
+      const planId = `${type}-${plan.amount}`;
+      const div = document.createElement("div");
+      div.className = "plan";
+
+      div.innerHTML = `
+        <h3>${type === "usdt" ? "$" + plan.amount : plan.amount + " ZMM"}</h3>
+        <p>${plan.duration ? "1 Month Access" : "Lifetime Access"}</p>
+        <p>👉 Video Reward: ${plan.videoReward} tokens</p>
+        <p>⏰ Every 4 Hours: ${plan.dailyReward} tokens</p>
+      `;
+
+      const active = activePlans[type];
+      if (active && active.id === planId) {
+        const label = document.createElement("div");
+        label.className = "active-label";
+        label.innerHTML = `✅ Active<br>${plan.duration ? formatDaysLeft(active.expiresAt) : "Lifetime"}`;
+        div.appendChild(label);
+
+        if (plan.duration) {
+          const cancel = document.createElement("button");
+          cancel.className = "cancel-button";
+          cancel.innerText = "Cancel";
+          cancel.onclick = () => cancelPlan(type);
+          div.appendChild(cancel);
         }
+      } else {
+        const button = document.createElement("button");
+        button.innerText = "Buy";
+        button.onclick = () => buyPlan(type, plan.amount);
+        if (active) button.disabled = true;
+        div.appendChild(button);
+      }
 
-        updateBalanceUI();
-        renderPlans();
-      });
-    }
+      container.appendChild(div);
+    });
+  });
+}
 
-    function updateBalanceUI() {
-      document.getElementById("usdt-balance").textContent = wallet.usdt.toFixed(2);
-      document.getElementById("zmm-balance").textContent = wallet.zmm.toFixed(2);
-    }
+async function buyPlan(type, amount) {
+  const planId = `${type}-${amount}`;
+  const plan = PLAN_CONFIG[type].find(p => p.amount === amount);
+  if (!plan || wallet[type] < amount) return alert("❌ Not enough balance");
 
-    function formatDaysLeft(dateString) {
-      const now = new Date();
-      const expires = new Date(dateString);
-      const diffTime = expires - now;
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays <= 0 ? "Expired" : `${diffDays} days left`;
-    }
+  const otherType = type === "usdt" ? "zmm" : "usdt";
+  activePlans[otherType] = null;
+  activePlans[type] = {
+    id: planId,
+    expiresAt: plan.duration ? new Date(Date.now() + plan.duration * 86400000).toISOString() : null
+  };
+  wallet[type] -= amount;
 
-    function renderPlans() {
-      ["usdt", "zmm"].forEach(type => {
-        const container = document.getElementById(`${type}-section`);
-        container.innerHTML = `<h2>${type === "usdt" ? "💵 USDT Plans" : "🪙 ZMM Token Plans"}</h2>`;
+  await db.ref("users/" + userId).update({ wallet, activePlans });
+  updateBalanceUI();
+  renderPlans();
+  alert("✅ Plan activated successfully!");
+}
 
-        PLAN_CONFIG[type].forEach(plan => {
-          const planId = `${type}-${plan.amount}`;
-          const div = document.createElement("div");
-          div.className = "plan";
+async function cancelPlan(type) {
+  if (!confirm("Cancel this plan?")) return;
+  activePlans[type] = null;
+  await db.ref("users/" + userId + "/activePlans/" + type).remove();
+  renderPlans();
+}
 
-          div.innerHTML = `
-            <h3>${type === "usdt" ? "$" + plan.amount : plan.amount + " ZMM"}</h3>
-            <p>${plan.duration ? "1 Month Access" : "Lifetime Access"}</p>
-          `;
+fetchUserData();
 
-          const active = activePlans[type];
-          if (active && active.id === planId) {
-            const label = document.createElement("div");
-            label.className = "active-label";
-            label.innerHTML = `✅ Active<br>${plan.duration ? formatDaysLeft(active.expiresAt) : "Lifetime"}`;
-            div.appendChild(label);
-
-            const cancel = document.createElement("button");
-            cancel.className = "cancel-button";
-            cancel.innerText = "Cancel";
-            cancel.onclick = () => cancelPlan(type);
-            div.appendChild(cancel);
-          } else {
-            const button = document.createElement("button");
-            button.innerText = "Buy";
-            button.onclick = () => buyPlan(type, plan.amount);
-            if (active) button.disabled = true;
-            div.appendChild(button);
-          }
-
-          container.appendChild(div);
-        });
-      });
-    }
-
-    async function buyPlan(type, amount) {
-      const planId = `${type}-${amount}`;
-      const plan = PLAN_CONFIG[type].find(p => p.amount === amount);
-      if (!plan || wallet[type] < amount) return alert("❌ Not enough balance");
-
-      const otherType = type === "usdt" ? "zmm" : "usdt";
-      activePlans[otherType] = null;
-      activePlans[type] = {
-        id: planId,
-        expiresAt: plan.duration ? new Date(Date.now() + plan.duration * 86400000).toISOString() : null
-      };
-      wallet[type] -= amount;
-
-      await db.ref("users/" + userId).update({ wallet, activePlans });
-      updateBalanceUI();
-      renderPlans();
-      alert("✅ Plan activated successfully!");
-    }
-
-    async function cancelPlan(type) {
-      if (!confirm("Cancel this plan?")) return;
-      activePlans[type] = null;
-      await db.ref("users/" + userId + "/activePlans/" + type).remove();
-      renderPlans();
-    }
-
-    fetchUserData();
   </script>
 </body>
-</html>
+  </html>
