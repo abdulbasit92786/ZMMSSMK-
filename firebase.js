@@ -1,5 +1,5 @@
 // firebase.js
-// ✅ Firebase Config and Initialization (Shared)
+// ✅ Firebase Config and Initialization (Realtime DB + Auth)
 
 const firebaseConfig = {
   apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
@@ -15,20 +15,43 @@ const firebaseConfig = {
 // ✅ Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-// ✅ Database & Auth Instances
+// ✅ Get Instances
 const database = firebase.database();
 const auth = firebase.auth();
 
-// ✅ Automatically detect login and expose user ID globally
+// ✅ Auth Listener – Track Login Status
 auth.onAuthStateChanged(function (user) {
   if (user) {
-    // User is logged in
+    // 🔓 User logged in
     window.currentUserId = user.uid;
     console.log("✅ Logged in as:", window.currentUserId);
+
+    // ✅ Store essential user data to Firebase
+    const userRef = database.ref("users/" + user.uid);
+    userRef.once("value").then((snapshot) => {
+      if (!snapshot.exists()) {
+        // 🔄 First time user, save basic profile
+        userRef.set({
+          uid: user.uid,
+          email: user.email || "",
+          username: user.displayName || "Anonymous",
+          zmmToken: 0,
+          usdtToken: 0,
+          activePlan: "none",
+          lastDailyClaim: 0,
+          joinedAt: Date.now()
+        });
+      }
+    });
   } else {
-    // Not logged in → redirect to login
-    if (!window.location.href.includes("login.html") && !window.location.href.includes("register.html")) {
+    // 🔒 Not logged in → redirect
+    if (!window.location.href.includes("login.html") &&
+        !window.location.href.includes("register.html")) {
       window.location.href = "login.html";
     }
   }
 });
+
+// ✅ Export for global access
+window.database = database;
+window.auth = auth;
