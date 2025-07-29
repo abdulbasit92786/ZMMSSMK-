@@ -71,41 +71,30 @@
 
     function syncFromFirebase() {
       if (!userId) {
-        alert("❌ User ID not found. Please login again.");
+        alert("❌ User ID not found.");
         return;
       }
 
-      db.ref("wallets/" + userId).once("value").then(snapshot => {
-        const data = snapshot.val();
-        if (data) {
-          userWallet = {
-            usdt: Number(data.usdt) || 0,
-            zmm: Number(data.zmm) || 0
-          };
-        } else {
-          userWallet = { usdt: 0, zmm: 0 };
-          db.ref("wallets/" + userId).set(userWallet);
-        }
+      const walletRef = db.ref("wallets/" + userId);
 
-        // ✅ Step 1: Handle NFT Plan Deduction
-        const nftSpend = Number(localStorage.getItem("nftSpendAmount"));
-        if (!isNaN(nftSpend) && nftSpend > 0 && userWallet.usdt >= nftSpend) {
-          userWallet.usdt -= nftSpend;
-          localStorage.removeItem("nftSpendAmount");
+      walletRef.once("value").then(snapshot => {
+        if (!snapshot.exists()) {
+          walletRef.set({ usdt: 0, zmm: 0 });
         }
+      });
 
-        // ✅ Step 2: Handle Claim to Wallet
-        const claimZmm = Number(localStorage.getItem("claimToWalletAmount"));
-        if (!isNaN(claimZmm) && claimZmm > 0) {
-          userWallet.zmm += claimZmm;
-          localStorage.removeItem("claimToWalletAmount");
-        }
-
-        db.ref("wallets/" + userId).set(userWallet);
+      // 🔄 Real-time Listener for Wallet
+      walletRef.on("value", snapshot => {
+        const data = snapshot.val() || { usdt: 0, zmm: 0 };
+        userWallet = {
+          usdt: Number(data.usdt),
+          zmm: Number(data.zmm)
+        };
         updateWalletUI();
         localStorage.setItem("walletData", JSON.stringify(userWallet));
       });
 
+      // 📦 Get User Plan for Rate
       db.ref("users/" + userId + "/plan").once("value").then(snapshot => {
         userPlan = snapshot.val() || "free";
         ZMM_RATE = getZmmRate(userPlan);
@@ -126,7 +115,6 @@
     function performSwap() {
       const direction = document.getElementById("swap-direction").value;
       const amount = parseFloat(document.getElementById("swap-amount").value);
-
       if (isNaN(amount) || amount <= 0) {
         alert("❌ Enter valid amount.");
         return;
@@ -134,26 +122,24 @@
 
       if (direction === "zmm-to-usdt") {
         if (amount < MIN_SWAP_ZMM || userWallet.zmm < amount) {
-          alert("❌ Minimum 100 ZMM required or not enough balance.");
+          alert("❌ Not enough ZMM or less than 100.");
           return;
         }
-        const usdtAmount = amount * ZMM_RATE;
+        const usdtEarn = amount * ZMM_RATE;
         userWallet.zmm -= amount;
-        userWallet.usdt += usdtAmount;
+        userWallet.usdt += usdtEarn;
       } else {
         if (amount < MIN_SWAP_USDT || userWallet.usdt < amount) {
-          alert("❌ Minimum $5 required or not enough balance.");
+          alert("❌ Not enough USDT or less than $5.");
           return;
         }
-        const zmmAmount = amount / ZMM_RATE;
+        const zmmEarn = amount / ZMM_RATE;
         userWallet.usdt -= amount;
-        userWallet.zmm += zmmAmount;
+        userWallet.zmm += zmmEarn;
       }
 
-      updateWalletUI();
       db.ref("wallets/" + userId).set(userWallet);
-      localStorage.setItem("walletData", JSON.stringify(userWallet));
-      alert("✅ Swap Successful!");
+      alert("✅ Swap successful!");
     }
 
     document.getElementById("swap-amount").addEventListener("input", () => {
@@ -190,4 +176,4 @@
     }
   </script>
 </body>
-</html>
+  </html>
