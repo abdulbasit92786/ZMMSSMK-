@@ -1,3 +1,4 @@
+<!-- wallet.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -36,7 +37,6 @@
     </div>
 
     <div class="action-buttons">
-      <button onclick="claimToWallet()">🎁 Claim to Wallet</button>
       <button onclick="goToWithdrawPage()">🛄 Withdraw</button>
       <button onclick="goToDepositPage()">🛅 Deposit</button>
     </div>
@@ -50,7 +50,8 @@
       projectId: "zmmssmk",
       storageBucket: "zmmssmk.appspot.com",
       messagingSenderId: "677420760492",
-      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
+      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09",
+      measurementId: "G-7J7BEDY8H1"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -85,6 +86,22 @@
           userWallet = { usdt: 0, zmm: 0 };
           db.ref("wallets/" + userId).set(userWallet);
         }
+
+        // ✅ Step 1: Handle NFT Plan Deduction
+        const nftSpend = Number(localStorage.getItem("nftSpendAmount"));
+        if (!isNaN(nftSpend) && nftSpend > 0 && userWallet.usdt >= nftSpend) {
+          userWallet.usdt -= nftSpend;
+          localStorage.removeItem("nftSpendAmount");
+        }
+
+        // ✅ Step 2: Handle Claim to Wallet
+        const claimZmm = Number(localStorage.getItem("claimToWalletAmount"));
+        if (!isNaN(claimZmm) && claimZmm > 0) {
+          userWallet.zmm += claimZmm;
+          localStorage.removeItem("claimToWalletAmount");
+        }
+
+        db.ref("wallets/" + userId).set(userWallet);
         updateWalletUI();
         localStorage.setItem("walletData", JSON.stringify(userWallet));
       });
@@ -171,28 +188,6 @@
     function goToDepositPage() {
       window.location.href = "deposit.html";
     }
-
-    // 🔄 Claim from zmm_balance to wallet.zmm
-    function claimToWallet() {
-      const userRef = db.ref("users/" + userId);
-      userRef.once("value").then(snapshot => {
-        if (!snapshot.exists()) return alert("❌ User not found.");
-        const userData = snapshot.val();
-        const balance = Number(userData.zmm_balance || 0);
-
-        if (balance <= 0) return alert("⚠️ No ZMM tokens to claim.");
-
-        // Add to wallet
-        userWallet.zmm += balance;
-        db.ref("wallets/" + userId).set(userWallet);
-
-        // Reset user zmm_balance
-        userRef.update({ zmm_balance: 0 });
-
-        updateWalletUI();
-        alert(`✅ Claimed ${balance} ZMM tokens to your wallet.`);
-      });
-    }
   </script>
 </body>
-  </html>
+</html>
