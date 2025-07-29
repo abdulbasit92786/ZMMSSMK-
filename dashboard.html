@@ -4,10 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ZMMK Dashboard</title>
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="firebase.js"></script> <!-- ✅ centralized config -->
+
   <style>
     body {
       margin: 0;
@@ -106,7 +107,22 @@
   </div>
 
   <script>
-    const claimCooldown = 4 * 60 * 60;
+    // ✅ Firebase config
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      databaseURL: "YOUR_DATABASE_URL",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_BUCKET",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
+
+    const claimCooldown = 4 * 60 * 60; // 4 hours in seconds
     const countdownEl = document.getElementById("countdown");
     const claimBtn = document.getElementById("claimBtn");
     const balanceEl = document.getElementById("balance");
@@ -115,7 +131,7 @@
     const refLink = document.getElementById("refLink");
     let currentUserId;
 
-    firebase.auth().onAuthStateChanged(function(user) {
+    auth.onAuthStateChanged(function(user) {
       if (user) {
         currentUserId = user.uid;
         refLink.value = `https://t.me/your_bot?start=${currentUserId}`;
@@ -150,7 +166,7 @@
       const totalEarned = data.total_earned || 0;
       balanceEl.textContent = zmmBalance.toFixed(2);
       earnedEl.textContent = `Total Earned: ${totalEarned.toFixed(2)} ZMM`;
-      claimToWalletBtn.disabled = totalEarned < 20;
+      claimToWalletBtn.disabled = totalEarned < 20 || zmmBalance < 20;
     }
 
     function loadUserData() {
@@ -222,9 +238,8 @@
         updates["users/" + currentUserId + "/zmm_balance"] = newZmm;
         updates["users/" + currentUserId + "/total_earned"] = newTotal;
 
-        // ✅ wallet.html کیلئے صحیح ڈیٹا لکھا جا رہا ہے
         updates["wallets/" + currentUserId] = {
-          usdt: 0, // یا اگر آپ نے usdt earn کیا ہو تو وہ ڈالیں
+          usdt: 0,
           zmm: newWallet
         };
 
