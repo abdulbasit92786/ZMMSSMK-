@@ -1,4 +1,3 @@
-<!-- ✅ Updated HTML With Requirements Implemented -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -128,9 +127,7 @@
         missions_completed: updatedMissions
       });
 
-      // ✅ Pop-up success message
-      alert("✅ Congratulations!\nYour Watch Was Successful.\nCome Back After 12 Hours For This Mission.");
-
+      alert("✅ Video verified successfully. Tokens have been added.");
       document.getElementById("verify-" + taskId).style.display = "none";
       document.getElementById(taskId).innerHTML = `<p>✅ Already completed. Come back after ${HIDE_DURATION_HOURS} hours.</p>`;
     }
@@ -161,7 +158,6 @@
 <body>
   <div class="mission-container">
     <h1>🎯 Daily Missions</h1>
-
     <div style="background:#222;color:#fff;padding:12px;margin-bottom:15px;border-radius:8px;text-align:center;">
       <strong>📦 Active Plan:</strong> <span id="plan-name">-</span><br>
       <strong>🎁 Reward/Task:</strong> <span id="plan-reward">-</span> ZMM Token(s)
