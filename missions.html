@@ -1,3 +1,4 @@
+<!-- ✅ Updated HTML + JS Without LocalStorage -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,21 +22,19 @@
 
     const TASK_IDS = ['task1', 'task2', 'task3', 'task4'];
     const HIDE_DURATION_HOURS = 12;
-    let startTimes = {};
+    let currentTaskStart = {};
 
+    // Get UID from URL parameter
     function getUserId() {
-      let uid = localStorage.getItem("uid");
-      if (!uid) {
-        uid = "user_" + Math.floor(Math.random() * 1000000);
-        localStorage.setItem("uid", uid);
-      }
-      return uid;
+      const urlParams = new URLSearchParams(window.location.search);
+      const uid = urlParams.get('uid');
+      return uid || "unknown_user";
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
       await initializeUser();
       await showPlanInfo();
-      checkTaskVisibility();
+      await checkTaskVisibility();
     });
 
     async function initializeUser() {
@@ -48,8 +47,7 @@
         total_earned: 0,
         active_plan: "plan_free",
         missions_completed: {},
-        video_earned: 0,
-        auto_earned: 0
+        video_earned: 0
       };
 
       if (!snapshot.exists()) {
@@ -63,33 +61,43 @@
     }
 
     function getRewardForPlan(planKey) {
-      return 1; // Fixed 1 ZMM token per video
+      switch (planKey) {
+        case "plan_premium": return 3;
+        case "plan_pro": return 5;
+        default: return 1;
+      }
     }
 
     async function showPlanInfo() {
       const userId = getUserId();
-      const snapshot = await firebase.database().ref('users/' + userId).get();
+      const userRef = firebase.database().ref('users/' + userId);
+      const snapshot = await userRef.get();
       if (!snapshot.exists()) return;
 
       const user = snapshot.val();
-      let planKey = user.active_plan || "plan_free";
-
+      const planKey = user.active_plan || "plan_free";
+      const balance = user.zmm_balance || 0;
+      const earned = user.total_earned || 0;
       const reward = getRewardForPlan(planKey);
-      document.getElementById("plan-name").textContent = "Free Plan";
+      const planName = planKey.replace("plan_", "").toUpperCase();
+
+      document.getElementById("plan-name").textContent = planName;
       document.getElementById("plan-reward").textContent = reward;
+      document.getElementById("zmm-balance").textContent = balance;
+      document.getElementById("total-earned").textContent = earned;
     }
 
     function startTask(videoUrl, taskId) {
-      startTimes[taskId] = new Date().getTime();
+      currentTaskStart[taskId] = Date.now();
       window.open(videoUrl, "_blank");
       document.getElementById("verify-" + taskId).style.display = "inline-block";
     }
 
     async function verifyTask(taskId) {
-      const now = new Date().getTime();
-      const elapsed = (now - startTimes[taskId]) / 1000;
-      if (elapsed < 30) {
-        alert("⏳ Please watch at least 30 seconds.");
+      const now = Date.now();
+      const start = currentTaskStart[taskId];
+      if (!start || (now - start) < 30000) {
+        alert("⏳ Watch at least 30 seconds.");
         return;
       }
 
@@ -99,45 +107,59 @@
       if (!snapshot.exists()) return;
 
       const user = snapshot.val();
-      const completed = user.missions_completed || {};
+      const lastWatched = user.missions_completed?.[taskId]?.lastWatched || 0;
+      const diff = now - lastWatched;
+      const reward = getRewardForPlan(user.active_plan || "plan_free");
 
-      const lastWatched = localStorage.getItem("watchedTime-" + taskId);
-      const twelveHours = 1000 * 60 * 60 * 12;
-      if (lastWatched && (now - parseInt(lastWatched)) < twelveHours) {
-        alert("⛔ Already verified recently. Try after 12 hours.");
+      if (diff < HIDE_DURATION_HOURS * 3600000) {
+        alert("⛔ Already completed. Come back later.");
         return;
       }
 
-      const reward = 1;
       const newBalance = (user.zmm_balance || 0) + reward;
       const newEarned = (user.total_earned || 0) + reward;
       const videoEarned = (user.video_earned || 0) + reward;
 
-      completed[taskId] = true;
+      const updatedMissions = {
+        ...(user.missions_completed || {}),
+        [taskId]: {
+          completed: true,
+          lastWatched: now
+        }
+      };
 
       await userRef.update({
         zmm_balance: newBalance,
         total_earned: newEarned,
         video_earned: videoEarned,
-        missions_completed: completed
+        missions_completed: updatedMissions
       });
 
-      localStorage.setItem("watchedTime-" + taskId, now);
       document.getElementById("verify-" + taskId).style.display = "none";
       document.getElementById(taskId).innerHTML = `<p>✅ Task Completed! You earned ${reward} ZMM Token.</p>`;
+
+      document.getElementById("zmm-balance").textContent = newBalance;
+      document.getElementById("total-earned").textContent = newEarned;
     }
 
-    function checkTaskVisibility() {
-      const now = new Date().getTime();
-      TASK_IDS.forEach(id => {
-        const lastWatched = localStorage.getItem("watchedTime-" + id);
-        const diff = lastWatched ? now - parseInt(lastWatched) : Infinity;
-        const taskElement = document.getElementById(id);
+    async function checkTaskVisibility() {
+      const userId = getUserId();
+      const userRef = firebase.database().ref('users/' + userId);
+      const snapshot = await userRef.get();
+      if (!snapshot.exists()) return;
 
-        if (diff < HIDE_DURATION_HOURS * 60 * 60 * 1000) {
-          taskElement.innerHTML = `<p>✅ Already completed. Come back after ${HIDE_DURATION_HOURS} hours.</p>`;
+      const user = snapshot.val();
+      const now = Date.now();
+
+      TASK_IDS.forEach(id => {
+        const last = user.missions_completed?.[id]?.lastWatched || 0;
+        const diff = now - last;
+        const taskEl = document.getElementById(id);
+
+        if (diff < HIDE_DURATION_HOURS * 3600000) {
+          taskEl.innerHTML = `<p>✅ Already completed. Come back after ${HIDE_DURATION_HOURS} hours.</p>`;
         } else {
-          taskElement.style.display = "block";
+          taskEl.style.display = "block";
         }
       });
     }
@@ -149,7 +171,9 @@
 
     <div style="background:#222;color:#fff;padding:12px;margin-bottom:15px;border-radius:8px;text-align:center;">
       <strong>📦 Active Plan:</strong> <span id="plan-name">-</span><br>
-      <strong>🎁 Reward/Task:</strong> <span id="plan-reward">-</span> ZMM Token(s)
+      <strong>🎁 Reward/Task:</strong> <span id="plan-reward">-</span> ZMM Token(s)<br>
+      <strong>💰 Your Balance:</strong> <span id="zmm-balance">-</span><br>
+      <strong>📈 Total Earned:</strong> <span id="total-earned">-</span>
     </div>
 
     <div class="video-task" id="task1">
@@ -177,4 +201,4 @@
     </div>
   </div>
 </body>
-        </html>                                                                                              </html>
+      </html>
