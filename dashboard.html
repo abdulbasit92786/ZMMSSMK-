@@ -1,3 +1,4 @@
+<!-- dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +9,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
   <style>
     body {
       margin: 0;
@@ -20,26 +20,14 @@
     .container { padding: 20px; }
     .title { font-size: 26px; font-weight: bold; margin-top: 15px; }
     .subtitle { font-size: 18px; margin: 10px 0; }
-    .balance {
-      font-size: 16px;
-      margin: 10px 0;
-      background-color: #fff;
-      padding: 10px;
-      border-radius: 10px;
-      display: inline-block;
-    }
     .earned {
-      font-size: 14px;
-      margin-top: 10px;
+      font-size: 18px;
+      margin: 20px 0;
+      background-color: #fff;
+      padding: 12px;
+      border-radius: 10px;
       color: green;
-    }
-    .referral-box { margin: 15px 0; }
-    .referral-input {
-      width: 90%;
-      padding: 8px;
-      border: 1px solid #aaa;
-      border-radius: 6px;
-      margin-top: 8px;
+      display: inline-block;
     }
     .btn {
       margin-top: 10px;
@@ -51,6 +39,14 @@
       font-size: 16px;
     }
     .btn:disabled { background-color: gray; }
+    .referral-box { margin: 15px 0; }
+    .referral-input {
+      width: 90%;
+      padding: 8px;
+      border: 1px solid #aaa;
+      border-radius: 6px;
+      margin-top: 8px;
+    }
     .countdown {
       margin-top: 10px;
       color: red;
@@ -79,10 +75,9 @@
     <div class="title">ZMMK App</div>
     <div class="subtitle">ZMM Token Dashboard</div>
 
-    <div class="balance" id="balanceBox">Your Balance: <strong id="balance">0</strong> ZMM</div>
     <div class="earned" id="totalEarned">Total Earned: 0 ZMM</div>
 
-    <div class="earned" id="walletTransferBox">
+    <div class="earned">
       <button class="btn" id="claimToWalletBtn" onclick="claimToWallet()" disabled>Claim to Wallet</button>
     </div>
 
@@ -107,29 +102,28 @@
   </div>
 
   <script>
-    // ✅ Firebase config
     const firebaseConfig = {
-  apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
-  authDomain: "zmmssmk.firebaseapp.com",
-  databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
-  projectId: "zmmssmk",
-  storageBucket: "zmmssmk.appspot.com",
-  messagingSenderId: "677420760492",
-  appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09",
-  measurementId: "G-7J7BEDY8H1"
-};
+      apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
+      authDomain: "zmmssmk.firebaseapp.com",
+      databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
+      projectId: "zmmssmk",
+      storageBucket: "zmmssmk.appspot.com",
+      messagingSenderId: "677420760492",
+      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09",
+      measurementId: "G-7J7BEDY8H1"
+    };
 
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const database = firebase.database();
 
-    const claimCooldown = 4 * 60 * 60; // 4 hours in seconds
+    const claimCooldown = 4 * 60 * 60;
     const countdownEl = document.getElementById("countdown");
     const claimBtn = document.getElementById("claimBtn");
-    const balanceEl = document.getElementById("balance");
     const earnedEl = document.getElementById("totalEarned");
     const claimToWalletBtn = document.getElementById("claimToWalletBtn");
     const refLink = document.getElementById("refLink");
+
     let currentUserId;
 
     auth.onAuthStateChanged(function(user) {
@@ -150,8 +144,7 @@
 
     function getRewardForPlan(planKey) {
       if (!planKey || planKey === "free") return 0.5;
-      const parts = planKey.split("_");
-      const amount = parseFloat(parts[2]);
+      const amount = parseFloat(planKey.split("_")[2]);
       switch (amount) {
         case 10: case 1000: return 2;
         case 25: case 2500: return 4;
@@ -163,11 +156,9 @@
     }
 
     function updateUI(data) {
-      const zmmBalance = data.zmm_balance || 0;
       const totalEarned = data.total_earned || 0;
-      balanceEl.textContent = zmmBalance.toFixed(2);
       earnedEl.textContent = `Total Earned: ${totalEarned.toFixed(2)} ZMM`;
-      claimToWalletBtn.disabled = totalEarned < 20 || zmmBalance < 20;
+      claimToWalletBtn.disabled = totalEarned < 20;
     }
 
     function loadUserData() {
@@ -189,18 +180,15 @@
         const planKey = data.active_plan || "plan_nft_25";
         const reward = getRewardForPlan(planKey);
         const now = Date.now();
-
-        const newBalance = (data.zmm_balance || 0) + reward;
         const newTotal = (data.total_earned || 0) + reward;
 
         database.ref("users/" + currentUserId).update({
-          zmm_balance: newBalance,
           total_earned: newTotal,
           last_claim_time: now
         });
 
         claimBtn.disabled = true;
-        updateUI({ zmm_balance: newBalance, total_earned: newTotal });
+        updateUI({ total_earned: newTotal });
         startCountdown(claimCooldown);
       });
     }
@@ -223,22 +211,15 @@
       database.ref("users/" + currentUserId).once("value").then(snapshot => {
         const data = snapshot.val() || {};
         let total = data.total_earned || 0;
-        let balance = data.zmm_balance || 0;
+        if (total < 20) return alert("Minimum 20 ZMM required to claim.");
 
-        if (total < 20 || balance < 20) {
-          return alert("Minimum 20 ZMM required in both balance and total earned to claim.");
-        }
-
-        const amountToClaim = Math.min(100, total, balance);
+        const amountToClaim = Math.min(100, total);
         const newWallet = (data.wallet_balance || 0) + amountToClaim;
-        const newZmm = balance - amountToClaim;
         const newTotal = total - amountToClaim;
 
         const updates = {};
         updates["users/" + currentUserId + "/wallet_balance"] = newWallet;
-        updates["users/" + currentUserId + "/zmm_balance"] = newZmm;
         updates["users/" + currentUserId + "/total_earned"] = newTotal;
-
         updates["wallets/" + currentUserId] = {
           usdt: 0,
           zmm: newWallet
@@ -246,7 +227,7 @@
 
         database.ref().update(updates).then(() => {
           alert(`${amountToClaim} ZMM claimed to wallet!`);
-          updateUI({ zmm_balance: newZmm, total_earned: newTotal });
+          updateUI({ total_earned: newTotal });
         });
       });
     }
