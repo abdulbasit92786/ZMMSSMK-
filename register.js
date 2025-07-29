@@ -8,6 +8,10 @@ document.getElementById("registerBtn").addEventListener("click", function () {
     return;
   }
 
+  // ✅ Get referrer from URL if exists (e.g., ?start=refUserId)
+  const urlParams = new URLSearchParams(window.location.search);
+  const referralBy = urlParams.get("start") || null;
+
   // Step 1: Create Firebase Auth user
   firebase.auth().createUserWithEmailAndPassword(email, password)
     .then((userCredential) => {
@@ -31,7 +35,8 @@ document.getElementById("registerBtn").addEventListener("click", function () {
         withdrawn: 0,
         referrals: 0,
         plan: "Free",
-        referralBy: null,
+        referralBy: referralBy, // ✅ Save referrer ID from URL
+
         tasks: {
           task1: false,
           task2: false,
