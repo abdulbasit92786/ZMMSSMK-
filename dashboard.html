@@ -245,12 +245,12 @@
         if (total < 20) return alert("Minimum 20 ZMM required to claim.");
 
         const amountToClaim = Math.min(100, total);
-        const newWallet = (data.wallet_balance || 0) + amountToClaim;
-        const newTotal = total - amountToClaim;
+const newZMM = (data.wallet?.zmm || 0) + amountToClaim;
+const newTotal = total - amountToClaim;
 
-        const updates = {};
-        updates[`users/${currentUserId}/wallet_balance`] = newWallet;
-        updates[`users/${currentUserId}/total_earned`] = newTotal;
+const updates = {};
+updates[`users/${currentUserId}/wallet/zmm`] = newZMM;
+updates[`users/${currentUserId}/total_earned`] = newTotal;
 
         // Merge existing wallet data if any
         updates[`wallets/${currentUserId}/zmm`] = newWallet;
