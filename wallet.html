@@ -1,4 +1,3 @@
-<!-- wallet.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,6 +36,7 @@
     </div>
 
     <div class="action-buttons">
+      <button onclick="claimToWallet()">🎁 Claim to Wallet</button>
       <button onclick="goToWithdrawPage()">🛄 Withdraw</button>
       <button onclick="goToDepositPage()">🛅 Deposit</button>
     </div>
@@ -50,8 +50,7 @@
       projectId: "zmmssmk",
       storageBucket: "zmmssmk.appspot.com",
       messagingSenderId: "677420760492",
-      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09",
-      measurementId: "G-7J7BEDY8H1"
+      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -88,9 +87,6 @@
         }
         updateWalletUI();
         localStorage.setItem("walletData", JSON.stringify(userWallet));
-      }).catch(error => {
-        console.error("❌ Firebase read error:", error);
-        alert("⚠️ Error reading wallet data. Check internet or Firebase config.");
       });
 
       db.ref("users/" + userId + "/plan").once("value").then(snapshot => {
@@ -175,6 +171,28 @@
     function goToDepositPage() {
       window.location.href = "deposit.html";
     }
+
+    // 🔄 Claim from zmm_balance to wallet.zmm
+    function claimToWallet() {
+      const userRef = db.ref("users/" + userId);
+      userRef.once("value").then(snapshot => {
+        if (!snapshot.exists()) return alert("❌ User not found.");
+        const userData = snapshot.val();
+        const balance = Number(userData.zmm_balance || 0);
+
+        if (balance <= 0) return alert("⚠️ No ZMM tokens to claim.");
+
+        // Add to wallet
+        userWallet.zmm += balance;
+        db.ref("wallets/" + userId).set(userWallet);
+
+        // Reset user zmm_balance
+        userRef.update({ zmm_balance: 0 });
+
+        updateWalletUI();
+        alert(`✅ Claimed ${balance} ZMM tokens to your wallet.`);
+      });
+    }
   </script>
 </body>
-                                                       </html>
+  </html>
