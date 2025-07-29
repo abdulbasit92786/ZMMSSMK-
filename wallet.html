@@ -71,10 +71,12 @@
 
     function syncFromFirebase() {
       db.ref("wallets/" + userId).once("value").then(snapshot => {
-        const data = snapshot.val() || { usdt: 0, zmm: 0 };
-        userWallet = data;
-        localStorage.setItem("walletData", JSON.stringify(data));
-        updateWalletUI();
+        const data = snapshot.val();
+        if (data) {
+          userWallet = data;
+          updateWalletUI();
+          localStorage.setItem("walletData", JSON.stringify(userWallet));
+        }
       });
 
       db.ref("users/" + userId + "/plan").once("value").then(snapshot => {
@@ -84,18 +86,16 @@
       });
     }
 
+    function updateWalletUI() {
+      const usdtEl = document.getElementById("usdt-balance");
+      const zmmEl = document.getElementById("zmm-balance");
+      usdtEl.innerText = `$${userWallet.usdt.toFixed(2)}`;
+      zmmEl.innerText = `${userWallet.zmm.toFixed(2)} Tokens`;
+    }
+
     function updateRateLabel() {
       document.getElementById("conversion-result").innerText = `🚱 Rate: 1 ZMM = $${ZMM_RATE.toFixed(2)} USDT`;
       document.getElementById("swap-amount").dispatchEvent(new Event("input"));
-    }
-
-    function updateWalletInFirebase() {
-      db.ref("wallets/" + userId).set(userWallet);
-    }
-
-    function updateWalletUI() {
-      document.getElementById("usdt-balance").innerText = `$${userWallet.usdt.toFixed(2)}`;
-      document.getElementById("zmm-balance").innerText = `${userWallet.zmm.toFixed(2)} Tokens`;
     }
 
     function performSwap() {
@@ -127,9 +127,9 @@
         userWallet.zmm += zmmAmount;
       }
 
-      localStorage.setItem("walletData", JSON.stringify(userWallet));
-      updateWalletInFirebase();
       updateWalletUI();
+      db.ref("wallets/" + userId).set(userWallet);
+      localStorage.setItem("walletData", JSON.stringify(userWallet));
       alert("✅ Swap Successful!");
     }
 
@@ -159,9 +159,7 @@
       document.getElementById("swap-amount").dispatchEvent(new Event("input"));
     });
 
-    document.addEventListener("DOMContentLoaded", () => {
-      syncFromFirebase();
-    });
+    document.addEventListener("DOMContentLoaded", syncFromFirebase);
 
     function goToWithdrawPage() {
       window.location.href = "withdraw.html";
@@ -172,4 +170,4 @@
     }
   </script>
 </body>
-  </html>
+</html>
