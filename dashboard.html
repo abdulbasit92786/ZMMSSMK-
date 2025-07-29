@@ -7,7 +7,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="firebase.js"></script> <!-- ✅ centralized config -->
+  <script src="firebase.js"></script>
   <style>
     body {
       margin: 0;
@@ -206,11 +206,15 @@
       database.ref("users/" + currentUserId).once("value").then(snapshot => {
         const data = snapshot.val() || {};
         let total = data.total_earned || 0;
-        if (total < 20) return alert("Minimum 20 ZMM required to claim to wallet.");
+        let balance = data.zmm_balance || 0;
 
-        const amountToClaim = Math.min(100, total);
+        if (total < 20 || balance < 20) {
+          return alert("Minimum 20 ZMM required in both balance and total earned to claim.");
+        }
+
+        const amountToClaim = Math.min(100, total, balance);
         const newWallet = (data.wallet_balance || 0) + amountToClaim;
-        const newZmm = (data.zmm_balance || 0) - amountToClaim;
+        const newZmm = balance - amountToClaim;
         const newTotal = total - amountToClaim;
 
         database.ref("users/" + currentUserId).update({
@@ -225,4 +229,4 @@
     }
   </script>
 </body>
-  </html>
+</html>
