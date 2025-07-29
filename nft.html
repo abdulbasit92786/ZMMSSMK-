@@ -7,17 +7,70 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
   <style>
-    body { font-family: Arial; background: #0f0f0f; color: #fff; margin: 0; padding: 20px; }
-    h1, h2, h3 { text-align: center; }
-    .balances, .active-info { text-align: center; margin: 15px 0; }
-    .plan-container { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 20px; }
-    .plan-section { width: 48%; }
-    .plan { background: #1a1a1a; border: 2px solid #333; border-radius: 10px; padding: 15px; margin: 10px 0; text-align: center; }
-    .plan button { padding: 10px 20px; margin-top: 10px; background: #00cc66; color: white; border: none; border-radius: 6px; cursor: pointer; }
-    .plan button:disabled { background: #555; cursor: not-allowed; }
-    .active-label { color: #00ffcc; font-weight: bold; margin-top: 10px; }
-    .cancel-button { background-color: #cc3300; margin-top: 10px; }
-    @media screen and (max-width: 768px) { .plan-section { width: 100%; } }
+    body {
+      font-family: Arial;
+      background: #0f0f0f;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+    }
+    h1, h2, h3 {
+      text-align: center;
+    }
+    .balances, .active-info {
+      text-align: center;
+      margin: 15px 0;
+    }
+    .plan-container {
+      display: flex;
+      flex-wrap: nowrap;
+      justify-content: center;
+      gap: 20px;
+    }
+    .plan-section {
+      width: 45%;
+    }
+    .plan {
+      background: #1a1a1a;
+      border: 2px solid #333;
+      border-radius: 10px;
+      padding: 15px;
+      margin: 10px 0;
+      text-align: center;
+    }
+    .plan button {
+      padding: 10px 20px;
+      margin-top: 10px;
+      background: #00cc66;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .plan button:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+    .active-label {
+      color: #00ffcc;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .cancel-button {
+      background-color: #cc3300;
+      margin-top: 10px;
+    }
+    @media screen and (max-width: 768px) {
+      .plan-container {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 10px;
+      }
+      .plan-section {
+        width: 85%;
+        min-width: 280px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -37,7 +90,7 @@
   </div>
 
 <script>
-  // 🔐 Firebase Config
+  // ✅ Firebase Config
   const firebaseConfig = {
     apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
     authDomain: "zmmssmk.firebaseapp.com",
@@ -50,16 +103,9 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  function getUserId() {
-    let uid = localStorage.getItem("uid");
-    if (!uid) {
-      uid = "user_" + Math.floor(Math.random() * 1000000);
-      localStorage.setItem("uid", uid);
-    }
-    return uid;
-  }
+  // ✅ Set your userId (replace with Telegram ID or unique)
+  const userId = "user_123456";
 
-  const userId = getUserId();
   let wallet = { usdt: 0, zmm: 0 };
   let activePlans = { usdt: null, zmm: null };
 
@@ -160,8 +206,8 @@
     userRef.once("value").then(snapshot => {
       const data = snapshot.val();
       if (data) {
-        wallet = typeof data.wallet === "object" ? data.wallet : wallet;
-        activePlans = typeof data.activePlans === "object" ? data.activePlans : activePlans;
+        wallet = data.wallet || wallet;
+        activePlans = data.activePlans || activePlans;
       } else {
         userRef.set({ wallet, activePlans });
       }
@@ -205,4 +251,4 @@
   fetchUserData();
 </script>
 </body>
-  </html>
+</html>
