@@ -138,7 +138,7 @@
     const auth = firebase.auth();
     const database = firebase.database();
 
-    const claimCooldown = 4 * 60 * 60;
+    const claimCooldown = 4 * 60 * 60; // 4 hours in seconds
     const countdownEl = document.getElementById("countdown");
     const claimBtn = document.getElementById("claimBtn");
     const earnedEl = document.getElementById("totalEarned");
@@ -158,9 +158,11 @@
     });
 
     function copyLink() {
-      refLink.select();
-      document.execCommand("copy");
-      alert("Referral link copied!");
+      navigator.clipboard.writeText(refLink.value).then(() => {
+        alert("Referral link copied!");
+      }).catch(() => {
+        alert("Failed to copy link.");
+      });
     }
 
     function getRewardForPlan(planKey) {
@@ -249,10 +251,9 @@
         const updates = {};
         updates[`users/${currentUserId}/wallet_balance`] = newWallet;
         updates[`users/${currentUserId}/total_earned`] = newTotal;
-        updates[`wallets/${currentUserId}`] = {
-          usdt: 0,
-          zmm: newWallet
-        };
+
+        // Merge existing wallet data if any
+        updates[`wallets/${currentUserId}/zmm`] = newWallet;
 
         database.ref().update(updates).then(() => {
           alert(`${amountToClaim} ZMM claimed to wallet!`);
@@ -272,4 +273,4 @@
     }
   </script>
 </body>
-  </html>
+    </html>
