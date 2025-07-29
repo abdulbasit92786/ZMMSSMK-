@@ -37,6 +37,7 @@
   </div>
 
 <script>
+  // 🔐 Firebase Config
   const firebaseConfig = {
     apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
     authDomain: "zmmssmk.firebaseapp.com",
@@ -95,10 +96,14 @@
   function renderActivePlanInfo() {
     const infoDiv = document.getElementById("active-plan-info");
     let active = activePlans.usdt || activePlans.zmm;
-    if (active) {
+
+    if (active && active.id) {
       const type = activePlans.usdt ? "USDT" : "ZMM";
       const plan = PLAN_CONFIG[type.toLowerCase()].find(p => `${type.toLowerCase()}-${p.amount}` === active.id);
-      if (!plan) return infoDiv.textContent = "Error loading active plan.";
+      if (!plan) {
+        infoDiv.textContent = "⚠️ Error loading active plan.";
+        return;
+      }
       const timeText = plan.duration ? formatDaysLeft(active.expiresAt) : "Lifetime";
       infoDiv.innerHTML = `✅ Your Active Plan: <strong>${type} ${plan.amount}</strong> – ${timeText}`;
     } else {
@@ -155,14 +160,17 @@
     userRef.once("value").then(snapshot => {
       const data = snapshot.val();
       if (data) {
-        wallet = data.wallet || wallet;
-        activePlans = data.activePlans || activePlans;
+        wallet = typeof data.wallet === "object" ? data.wallet : wallet;
+        activePlans = typeof data.activePlans === "object" ? data.activePlans : activePlans;
       } else {
         userRef.set({ wallet, activePlans });
       }
       updateBalanceUI();
       renderActivePlanInfo();
       renderPlans();
+    }).catch(error => {
+      console.error("❌ Firebase error:", error);
+      document.getElementById("active-plan-info").textContent = "Error loading data.";
     });
   }
 
@@ -197,4 +205,4 @@
   fetchUserData();
 </script>
 </body>
-</html>
+  </html>
