@@ -89,7 +89,7 @@
       const now = Date.now();
       const start = currentTaskStart[taskId];
       if (!start || (now - start) < 30000) {
-        alert("⏳ Watch at least 30 seconds.");
+        alert("⏳ Please watch at least 30 seconds.");
         return;
       }
 
@@ -127,9 +127,9 @@
         missions_completed: updatedMissions
       });
 
-      alert("✅ Video verified successfully. Tokens have been added.");
+      alert("✅ Video verified. Tokens added!");
       document.getElementById("verify-" + taskId).style.display = "none";
-      document.getElementById(taskId).innerHTML = `<p>✅ Already completed. Come back after ${HIDE_DURATION_HOURS} hours.</p>`;
+      document.getElementById(taskId).innerHTML = `<p>✅ Completed. Come back after ${HIDE_DURATION_HOURS} hours.</p>`;
     }
 
     async function checkTaskVisibility() {
@@ -188,4 +188,4 @@
     </div>
   </div>
 </body>
-        </html>
+  </html>
