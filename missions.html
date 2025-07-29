@@ -1,4 +1,4 @@
-<!-- ✅ Updated HTML + JS Without LocalStorage -->
+<!-- ✅ Updated HTML With Requirements Implemented -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,11 +24,9 @@
     const HIDE_DURATION_HOURS = 12;
     let currentTaskStart = {};
 
-    // Get UID from URL parameter
     function getUserId() {
       const urlParams = new URLSearchParams(window.location.search);
-      const uid = urlParams.get('uid');
-      return uid || "unknown_user";
+      return urlParams.get('uid') || "unknown_user";
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
@@ -70,21 +68,16 @@
 
     async function showPlanInfo() {
       const userId = getUserId();
-      const userRef = firebase.database().ref('users/' + userId);
-      const snapshot = await userRef.get();
+      const snapshot = await firebase.database().ref('users/' + userId).get();
       if (!snapshot.exists()) return;
 
       const user = snapshot.val();
       const planKey = user.active_plan || "plan_free";
-      const balance = user.zmm_balance || 0;
-      const earned = user.total_earned || 0;
       const reward = getRewardForPlan(planKey);
       const planName = planKey.replace("plan_", "").toUpperCase();
 
       document.getElementById("plan-name").textContent = planName;
       document.getElementById("plan-reward").textContent = reward;
-      document.getElementById("zmm-balance").textContent = balance;
-      document.getElementById("total-earned").textContent = earned;
     }
 
     function startTask(videoUrl, taskId) {
@@ -135,11 +128,11 @@
         missions_completed: updatedMissions
       });
 
-      document.getElementById("verify-" + taskId).style.display = "none";
-      document.getElementById(taskId).innerHTML = `<p>✅ Task Completed! You earned ${reward} ZMM Token.</p>`;
+      // ✅ Pop-up success message
+      alert("✅ Congratulations!\nYour Watch Was Successful.\nCome Back After 12 Hours For This Mission.");
 
-      document.getElementById("zmm-balance").textContent = newBalance;
-      document.getElementById("total-earned").textContent = newEarned;
+      document.getElementById("verify-" + taskId).style.display = "none";
+      document.getElementById(taskId).innerHTML = `<p>✅ Already completed. Come back after ${HIDE_DURATION_HOURS} hours.</p>`;
     }
 
     async function checkTaskVisibility() {
@@ -171,9 +164,7 @@
 
     <div style="background:#222;color:#fff;padding:12px;margin-bottom:15px;border-radius:8px;text-align:center;">
       <strong>📦 Active Plan:</strong> <span id="plan-name">-</span><br>
-      <strong>🎁 Reward/Task:</strong> <span id="plan-reward">-</span> ZMM Token(s)<br>
-      <strong>💰 Your Balance:</strong> <span id="zmm-balance">-</span><br>
-      <strong>📈 Total Earned:</strong> <span id="total-earned">-</span>
+      <strong>🎁 Reward/Task:</strong> <span id="plan-reward">-</span> ZMM Token(s)
     </div>
 
     <div class="video-task" id="task1">
@@ -201,4 +192,4 @@
     </div>
   </div>
 </body>
-      </html>
+        </html>
