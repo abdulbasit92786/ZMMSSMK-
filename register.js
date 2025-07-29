@@ -33,12 +33,7 @@ document.getElementById("registerBtn").addEventListener("click", function () {
           usdt: 0,
           zmm: 0
         },
-
-        nft_earn: {
-          usdt: 0,
-          zmm: 0
-        },
-
+        
         admob_views: {
           watched: 0,
           skipped: 0
