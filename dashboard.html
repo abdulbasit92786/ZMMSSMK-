@@ -7,7 +7,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <script src="firebase.js"></script>
+  <script src="firebase.js"></script> <!-- ✅ centralized config -->
   <style>
     body {
       margin: 0;
@@ -217,14 +217,21 @@
         const newZmm = balance - amountToClaim;
         const newTotal = total - amountToClaim;
 
-        database.ref("users/" + currentUserId).update({
-          wallet_balance: newWallet,
-          zmm_balance: newZmm,
-          total_earned: newTotal
-        });
+        const updates = {};
+        updates["users/" + currentUserId + "/wallet_balance"] = newWallet;
+        updates["users/" + currentUserId + "/zmm_balance"] = newZmm;
+        updates["users/" + currentUserId + "/total_earned"] = newTotal;
 
-        alert(`${amountToClaim} ZMM claimed to wallet!`);
-        updateUI({ zmm_balance: newZmm, total_earned: newTotal });
+        // ✅ wallet.html کیلئے صحیح ڈیٹا لکھا جا رہا ہے
+        updates["wallets/" + currentUserId] = {
+          usdt: 0, // یا اگر آپ نے usdt earn کیا ہو تو وہ ڈالیں
+          zmm: newWallet
+        };
+
+        database.ref().update(updates).then(() => {
+          alert(`${amountToClaim} ZMM claimed to wallet!`);
+          updateUI({ zmm_balance: newZmm, total_earned: newTotal });
+        });
       });
     }
   </script>
