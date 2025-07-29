@@ -6,23 +6,23 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f5f5f5;
+      background: #f0f0f0;
       padding: 20px;
     }
     h1 {
       text-align: center;
     }
     .user-card {
-      background: #fff;
-      border: 1px solid #ddd;
+      background: #ffffff;
+      border: 1px solid #ccc;
       padding: 15px;
+      margin-bottom: 20px;
       border-radius: 10px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     .user-card h2 {
       margin: 0 0 10px;
-      font-size: 18px;
+      font-size: 20px;
     }
     .user-info p {
       margin: 6px 0;
@@ -32,11 +32,13 @@
       display: inline-block;
     }
   </style>
+
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 </head>
 <body>
-  <h1>📋 All User Details</h1>
+  <h1>📋 Admin User Dashboard</h1>
   <div id="user-list"></div>
 
   <script>
@@ -59,22 +61,37 @@
 
       for (const uid in users) {
         const user = users[uid];
-        const videoEarned = user.video_earned || 0;
-        const autoEarned = user.auto_earned || 0;
-        const dashboardEarned = videoEarned + autoEarned;
+
+        const email = user.email || 'N/A';
+        const username = user.username || 'N/A';
+        const totalEarned = user.total_earned || 0;
+
+        const walletUSDT = user.wallet?.usdt || 0;
+        const walletZMM = user.wallet?.zmm || 0;
+
+        const activePlan = user.active_plan || 'Free';
+
+        const nftUSDT = user.nft_earn?.usdt || 0;
+        const nftZMM = user.nft_earn?.zmm || 0;
+
+        const admobWatched = user.admob_views?.watched || 0;
+        const admobSkipped = user.admob_views?.skipped || 0;
 
         const card = document.createElement("div");
         card.className = "user-card";
         card.innerHTML = `
-          <h2>👤 ${user.username || 'Unknown'}</h2>
+          <h2>👤 ${username}</h2>
           <div class="user-info">
-            <p><strong>📧 Email:</strong> ${user.email || 'N/A'}</p>
+            <p><strong>📧 Email:</strong> ${email}</p>
             <p><strong>🆔 UID:</strong> ${uid}</p>
-            <p><strong>💰 Wallet USDT:</strong> $${user.wallet_balance || 0}</p>
-            <p><strong>🪙 Wallet ZMM:</strong> ${user.zmm_balance || 0} ZMM</p>
-            <p><strong>📤 Withdrawn:</strong> ${user.withdrawn || 0} ZMM</p>
-            <p><strong>🧩 Active Plan:</strong> ${user.active_plan || 'Free'}</p>
-            <p><strong>🎯 Dashboard ZMM Earned:</strong> ${dashboardEarned} ZMM</p>
+            <p><strong>🪙 Total ZMM Earned:</strong> ${totalEarned}</p>
+            <p><strong>💰 Wallet USDT:</strong> ${walletUSDT}</p>
+            <p><strong>🪙 Wallet ZMM:</strong> ${walletZMM}</p>
+            <p><strong>📌 Active Plan:</strong> ${activePlan}</p>
+            <p><strong>🎨 NFT USDT Earn:</strong> ${nftUSDT}</p>
+            <p><strong>🎨 NFT ZMM Earn:</strong> ${nftZMM}</p>
+            <p><strong>📺 AdMob Watched:</strong> ${admobWatched} ads</p>
+            <p><strong>⏭️ AdMob Skipped:</strong> ${admobSkipped} ads</p>
           </div>
         `;
         userList.appendChild(card);
@@ -82,4 +99,4 @@
     });
   </script>
 </body>
-  </html>
+</html>
