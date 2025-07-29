@@ -108,6 +108,7 @@
         return;
       }
 
+      // Update balances
       const newBalance = (user.zmm_balance || 0) + reward;
       const newEarned = (user.total_earned || 0) + reward;
       const videoEarned = (user.video_earned || 0) + reward;
@@ -122,12 +123,12 @@
 
       await userRef.update({
         zmm_balance: newBalance,
-        total_earned: newEarned,
+        total_earned: newEarned,       // ✅ Total earned updated here
         video_earned: videoEarned,
         missions_completed: updatedMissions
       });
 
-      alert("✅ Video verified. Tokens added!");
+      alert(`✅ Video verified. You earned +${reward} ZMM!`);
       document.getElementById("verify-" + taskId).style.display = "none";
       document.getElementById(taskId).innerHTML = `<p>✅ Completed. Come back after ${HIDE_DURATION_HOURS} hours.</p>`;
     }
@@ -188,4 +189,4 @@
     </div>
   </div>
 </body>
-  </html>
+</html>
