@@ -115,7 +115,7 @@
     const auth = firebase.auth();
     const database = firebase.database();
 
-    const claimCooldown = 4 * 60 * 60; // 4 hours
+    const claimCooldown = 4 * 60 * 60;
     const countdownEl = document.getElementById("countdown");
     const claimBtn = document.getElementById("claimBtn");
     const earnedEl = document.getElementById("totalEarned");
@@ -127,7 +127,7 @@
     auth.onAuthStateChanged(function(user) {
       if (user) {
         currentUserId = user.uid;
-        refLink.value = `https://zmmssmk.com/register?ref=${currentUserId}`; // ✅ Updated
+        refLink.value = `https://zmmssmk.com/register?ref=${currentUserId}`;
         loadUserData();
       } else {
         window.location.href = "login.html";
@@ -144,11 +144,16 @@
       if (!planKey || planKey === "free") return 0.5;
       const amount = parseFloat(planKey.split("_")[2]);
       switch (amount) {
-        case 10: case 1000: return 2;
-        case 25: case 2500: return 4;
-        case 50: case 5000: return 6;
-        case 100: case 10000: return 12;
-        case 500: case 50000: return 20;
+        case 10:
+        case 1000: return 2;
+        case 25:
+        case 2500: return 4;
+        case 50:
+        case 5000: return 6;
+        case 100:
+        case 10000: return 12;
+        case 500:
+        case 50000: return 20;
         default: return 0.5;
       }
     }
@@ -178,7 +183,7 @@
     function claimReward() {
       database.ref("users/" + currentUserId).once("value").then(snapshot => {
         const data = snapshot.val() || {};
-        const planKey = data.active_plan || "plan_nft_25";
+        const planKey = data.active_plan || "free";
         const reward = getRewardForPlan(planKey);
         const now = Date.now();
         const newTotal = (data.total_earned || 0) + reward;
@@ -232,6 +237,21 @@
         });
       });
     }
+
+    // ✅ Mission Token Logic (e.g. from watching videos)
+    function addMissionToken() {
+      database.ref("users/" + currentUserId).once("value").then(snapshot => {
+        const data = snapshot.val() || {};
+        const newTotal = (data.total_earned || 0) + 1;
+        database.ref("users/" + currentUserId + "/total_earned").set(newTotal).then(() => {
+          updateUI({ total_earned: newTotal });
+        });
+      });
+    }
+
+    // 📌 Call this function from mission.js when a user completes a video:
+    // addMissionToken();
+
   </script>
 </body>
   </html>
