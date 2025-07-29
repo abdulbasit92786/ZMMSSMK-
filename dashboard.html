@@ -5,7 +5,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ZMMK Dashboard</title>
-  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -116,7 +115,7 @@
     const auth = firebase.auth();
     const database = firebase.database();
 
-    const claimCooldown = 4 * 60 * 60;
+    const claimCooldown = 4 * 60 * 60; // 4 hours
     const countdownEl = document.getElementById("countdown");
     const claimBtn = document.getElementById("claimBtn");
     const earnedEl = document.getElementById("totalEarned");
@@ -128,7 +127,7 @@
     auth.onAuthStateChanged(function(user) {
       if (user) {
         currentUserId = user.uid;
-        refLink.value = `https://t.me/your_bot?start=${currentUserId}`;
+        refLink.value = `https://zmmssmk.com/register?ref=${currentUserId}`; // ✅ Updated
         loadUserData();
       } else {
         window.location.href = "login.html";
@@ -166,9 +165,12 @@
         updateUI(data);
         const lastClaim = data.last_claim_time || 0;
         const now = Date.now();
-        if ((now - lastClaim) / 1000 < claimCooldown) {
+        const remaining = Math.floor(claimCooldown - (now - lastClaim) / 1000);
+        if (remaining > 0) {
           claimBtn.disabled = true;
-          startCountdown(Math.floor(claimCooldown - (now - lastClaim) / 1000));
+          startCountdown(remaining);
+        } else {
+          claimBtn.disabled = false;
         }
       });
     }
