@@ -60,9 +60,6 @@
     const MIN_SWAP_USDT = 5;
     const MIN_SWAP_ZMM = 100;
     const userId = localStorage.getItem("userId") || "guest123";
-
-    let userWallet = { usdt: 0, zmm: 0 };
-    let userPlan = "free";
     let ZMM_RATE = 0.05;
 
     function getZmmRate(plan) {
@@ -83,28 +80,21 @@
         }
       });
 
-      // 🔄 Real-time Listener for Wallet
       walletRef.on("value", snapshot => {
         const data = snapshot.val() || { usdt: 0, zmm: 0 };
-        userWallet = {
-          usdt: Number(data.usdt),
-          zmm: Number(data.zmm)
-        };
-        updateWalletUI();
-        localStorage.setItem("walletData", JSON.stringify(userWallet));
+        updateWalletUI(data.usdt, data.zmm);
       });
 
-      // 📦 Get User Plan for Rate
       db.ref("users/" + userId + "/plan").once("value").then(snapshot => {
-        userPlan = snapshot.val() || "free";
+        const userPlan = snapshot.val() || "free";
         ZMM_RATE = getZmmRate(userPlan);
         updateRateLabel();
       });
     }
 
-    function updateWalletUI() {
-      document.getElementById("usdt-balance").innerText = `$${userWallet.usdt.toFixed(2)}`;
-      document.getElementById("zmm-balance").innerText = `${userWallet.zmm.toFixed(2)} Tokens`;
+    function updateWalletUI(usdt, zmm) {
+      document.getElementById("usdt-balance").innerText = `$${usdt.toFixed(2)}`;
+      document.getElementById("zmm-balance").innerText = `${zmm.toFixed(2)} Tokens`;
     }
 
     function updateRateLabel() {
@@ -115,31 +105,40 @@
     function performSwap() {
       const direction = document.getElementById("swap-direction").value;
       const amount = parseFloat(document.getElementById("swap-amount").value);
+
       if (isNaN(amount) || amount <= 0) {
         alert("❌ Enter valid amount.");
         return;
       }
 
-      if (direction === "zmm-to-usdt") {
-        if (amount < MIN_SWAP_ZMM || userWallet.zmm < amount) {
-          alert("❌ Not enough ZMM or less than 100.");
-          return;
-        }
-        const usdtEarn = amount * ZMM_RATE;
-        userWallet.zmm -= amount;
-        userWallet.usdt += usdtEarn;
-      } else {
-        if (amount < MIN_SWAP_USDT || userWallet.usdt < amount) {
-          alert("❌ Not enough USDT or less than $5.");
-          return;
-        }
-        const zmmEarn = amount / ZMM_RATE;
-        userWallet.usdt -= amount;
-        userWallet.zmm += zmmEarn;
-      }
+      const walletRef = db.ref("wallets/" + userId);
 
-      db.ref("wallets/" + userId).set(userWallet);
-      alert("✅ Swap successful!");
+      walletRef.once("value").then(snapshot => {
+        const data = snapshot.val() || { usdt: 0, zmm: 0 };
+        let zmm = Number(data.zmm);
+        let usdt = Number(data.usdt);
+
+        if (direction === "zmm-to-usdt") {
+          if (amount < MIN_SWAP_ZMM || zmm < amount) {
+            alert("❌ Not enough ZMM or less than 100.");
+            return;
+          }
+          const usdtEarn = amount * ZMM_RATE;
+          zmm -= amount;
+          usdt += usdtEarn;
+        } else {
+          if (amount < MIN_SWAP_USDT || usdt < amount) {
+            alert("❌ Not enough USDT or less than $5.");
+            return;
+          }
+          const zmmEarn = amount / ZMM_RATE;
+          usdt -= amount;
+          zmm += zmmEarn;
+        }
+
+        walletRef.set({ zmm, usdt });
+        alert("✅ Swap successful!");
+      });
     }
 
     document.getElementById("swap-amount").addEventListener("input", () => {
