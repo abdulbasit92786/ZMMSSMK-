@@ -61,7 +61,6 @@
       background-color: #cc3300;
       margin-top: 10px;
     }
-
     @media screen and (max-width: 768px) {
       .plan-container {
         flex-direction: column;
@@ -95,7 +94,7 @@
   <div style="margin-top: 50px; padding: 20px; background: #1a1a1a; border: 2px solid #333; border-radius: 10px;">
     <h2 style="text-align:center;">📦 What are NFT Access Plans?</h2>
     <p style="line-height:1.6;">
-      🖼️ NFT Access Plans allow you to unlock exclusive features, missions, and rewards in our platform. <br/><br/>
+      🖼️ NFT Access Plans allow you to unlock exclusive features, missions, and rewards in our platform.<br/><br/>
       ✅ By purchasing a plan using <strong>USDT</strong> or <strong>ZMM Tokens</strong>, you gain:
       <ul>
         <li>🎥 Extra video rewards</li>
@@ -120,7 +119,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-const userId = prompt("🔐 Enter your User ID:");
+const userId = localStorage.getItem("userId") || prompt("🔐 Enter your User ID:");
+localStorage.setItem("userId", userId);
 
 let wallet = { usdt: 0, zmm: 0 };
 let activePlans = { usdt: null, zmm: null };
@@ -163,6 +163,10 @@ function renderActivePlanInfo() {
     const plan = PLAN_CONFIG[type].find(p => `${type}-${p.amount}` === active.id);
     if (!plan) {
       info.textContent = "⚠️ Error loading active plan.";
+      return;
+    }
+    if (plan.duration && new Date(active.expiresAt) < new Date()) {
+      cancelPlan(type);
       return;
     }
     const time = plan.duration ? formatDaysLeft(active.expiresAt) : "Lifetime";
@@ -219,7 +223,7 @@ async function fetchUserData() {
     renderPlans();
   });
 
-  firebase.database().ref("activePlans/" + userId).once("value").then(snapshot => {
+  firebase.database().ref("activePlans/" + userId).on("value", snapshot => {
     const data = snapshot.val();
     activePlans = data || { usdt: null, zmm: null };
     renderActivePlanInfo();
@@ -231,6 +235,8 @@ async function buyPlan(type, amount) {
   const plan = PLAN_CONFIG[type].find(p => p.amount === amount);
   if (!plan || wallet[type] < amount) return alert("❌ Not enough balance");
 
+  if (activePlans[type] && !confirm("⚠️ You already have an active plan. Replace it?")) return;
+
   const planId = `${type}-${amount}`;
   const other = type === "usdt" ? "zmm" : "usdt";
   activePlans[other] = null;
@@ -240,12 +246,17 @@ async function buyPlan(type, amount) {
   };
   wallet[type] -= amount;
 
-  await db.ref("wallets/" + userId).set(wallet);
-  await db.ref("activePlans/" + userId).set(activePlans);
-  updateBalanceUI();
-  renderActivePlanInfo();
-  renderPlans();
-  alert("✅ Plan activated successfully!");
+  try {
+    await db.ref("wallets/" + userId).set(wallet);
+    await db.ref("activePlans/" + userId).set(activePlans);
+    updateBalanceUI();
+    renderActivePlanInfo();
+    renderPlans();
+    alert("✅ Plan activated successfully!");
+  } catch (error) {
+    alert("❌ Failed to activate plan. Try again.");
+    console.error(error);
+  }
 }
 
 async function cancelPlan(type) {
