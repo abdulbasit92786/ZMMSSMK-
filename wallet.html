@@ -83,6 +83,10 @@
       walletRef.on("value", snapshot => {
         const data = snapshot.val() || { usdt: 0, zmm: 0 };
         updateWalletUI(data.usdt, data.zmm);
+
+        // Store balances to localStorage so NFT.html can use them too
+        localStorage.setItem("usdtBalance", data.usdt);
+        localStorage.setItem("zmmBalance", data.zmm);
       });
 
       db.ref("users/" + userId + "/plan").once("value").then(snapshot => {
@@ -175,4 +179,4 @@
     }
   </script>
 </body>
-  </html>
+</html>
