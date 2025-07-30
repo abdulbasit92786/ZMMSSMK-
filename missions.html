@@ -5,7 +5,6 @@
   <title>Daily Missions</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
-
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script>
@@ -41,7 +40,6 @@
       const snapshot = await userRef.get();
 
       const defaultData = {
-        zmm_balance: 0,
         total_earned: 0,
         active_plan: "plan_free",
         missions_completed: {}
@@ -108,7 +106,7 @@
         return;
       }
 
-      // ✅ صرف total_earned میں اضافہ
+      // ✅ صرف total_earned میں جمع کریں
       const newEarned = (user.total_earned || 0) + reward;
 
       const updatedMissions = {
