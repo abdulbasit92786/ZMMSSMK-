@@ -13,10 +13,11 @@
     <h1>🎯 Daily Missions</h1>
 
     <div style="background:#222;color:#fff;padding:12px;margin-bottom:15px;border-radius:8px;text-align:center;">
-      <strong>📦 Active Plan:</strong> <span id="plan-name">-</span><br>
+      <strong>📦 Active Plan:</strong> <span id="plan-name">Loading...</span><br>
       <strong>🎁 Reward/Task:</strong> <span id="plan-reward">-</span> ZMM Token(s)
     </div>
 
+    <!-- Tasks -->
     <div class="video-task" id="task1">
       <p>📺 Watch Video 1</p>
       <button onclick="startTask('https://youtu.be/9iBwP4TbFHg?si=-spUOeZHbBEkQRnD', 'task1')">▶️ Watch</button>
@@ -43,7 +44,7 @@
   </div>
 
   <script>
-    // Firebase config
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
       authDomain: "zmmssmk.firebaseapp.com",
@@ -56,7 +57,7 @@
     firebase.initializeApp(firebaseConfig);
 
     const TASK_IDS = ['task1', 'task2', 'task3', 'task4'];
-    const HIDE_DURATION_HOURS = 12;
+    const HIDE_DURATION_HOURS = 4;
     let currentTaskStart = {};
 
     function getUserId() {
@@ -66,11 +67,7 @@
 
     document.addEventListener("DOMContentLoaded", async () => {
       const userId = getUserId();
-      if (userId === "unknown_user") {
-        alert("❌ UID missing. Please open via Telegram WebApp.");
-        document.body.innerHTML = "<h2 style='text-align:center;color:red;'>❌ UID missing. Please open via Telegram WebApp.</h2>";
-        return;
-      }
+      if (userId === "unknown_user") return;
 
       await initializeUser();
       await showPlanInfo();
@@ -81,18 +78,12 @@
       const userId = getUserId();
       const userRef = firebase.database().ref('users/' + userId);
       const snapshot = await userRef.get();
-      const defaultData = {
-        total_earned: 0,
-        dashboard_balance: 0,
-        active_plan: "plan_free"
-      };
       if (!snapshot.exists()) {
-        await userRef.set(defaultData);
-      } else {
-        const user = snapshot.val();
-        if (!user.active_plan || user.active_plan === "expired") {
-          await userRef.update({ active_plan: "plan_free" });
-        }
+        await userRef.set({
+          total_earned: 0,
+          dashboard_balance: 0,
+          active_plan: "plan_free"
+        });
       }
     }
 
@@ -148,7 +139,6 @@
       const updatedTotal = (user.total_earned || 0) + reward;
       const updatedDashboard = (user.dashboard_balance || 0) + reward;
 
-      // Just update the main data used by dashboard.html
       await userRef.update({
         total_earned: updatedTotal,
         dashboard_balance: updatedDashboard,
