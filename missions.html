@@ -40,6 +40,7 @@
       border-radius: 8px;
       cursor: pointer;
       font-size: 16px;
+      margin: 5px 0;
     }
     .btn:disabled {
       background: #ccc;
@@ -57,11 +58,7 @@
   <div class="title">🎯 Missions</div>
   <div class="plan" id="activePlan">Loading your plan...</div>
 
-  <div class="mission-box" id="videoMissionBox" style="display:none;">
-    <p>🎥 Watch video to earn 1 ZMM</p>
-    <button class="btn" onclick="watchVideo()">Watch Video</button>
-    <div class="message" id="videoMessage"></div>
-  </div>
+  <div id="videosContainer"></div>
 
   <script>
     const firebaseConfig = {
@@ -77,6 +74,13 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
+
+    const videos = [
+      { id: "video1", title: "📺 Watch & Earn #1", url: "https://www.youtube.com/watch?v=VIDEO_ID_1" },
+      { id: "video2", title: "📺 Watch & Earn #2", url: "https://www.youtube.com/watch?v=VIDEO_ID_2" },
+      { id: "video3", title: "📺 Watch & Earn #3", url: "https://www.youtube.com/watch?v=VIDEO_ID_3" },
+      { id: "video4", title: "📺 Watch & Earn #4", url: "https://www.youtube.com/watch?v=VIDEO_ID_4" },
+    ];
 
     let currentUser;
 
@@ -95,45 +99,83 @@
         const data = snapshot.val() || {};
         const plan = data.active_plan || "free";
         planEl.textContent = "Active Plan: " + plan;
-        checkVideoEligibility(data);
+
+        showVideos(data);
       }).catch(() => {
         planEl.textContent = "Failed to load plan.";
       });
     }
 
-    function checkVideoEligibility(userData) {
-      const lastWatched = userData.last_video_watch || 0;
-      const now = Date.now();
-      const diff = now - lastWatched;
-      const videoBox = document.getElementById("videoMissionBox");
+    function showVideos(userData) {
+      const container = document.getElementById("videosContainer");
+      container.innerHTML = "";
 
-      if (diff >= 12 * 60 * 60 * 1000) {
-        videoBox.style.display = "block";
-      } else {
-        videoBox.style.display = "none";
-      }
+      videos.forEach(video => {
+        const lastWatch = userData[video.id + "_watch"] || 0;
+        const now = Date.now();
+        const diff = now - lastWatch;
+        const canWatch = diff >= 12 * 60 * 60 * 1000;
+
+        const box = document.createElement("div");
+        box.className = "mission-box";
+
+        const title = document.createElement("p");
+        title.textContent = video.title;
+        box.appendChild(title);
+
+        const watchBtn = document.createElement("button");
+        watchBtn.className = "btn";
+        watchBtn.textContent = "▶️ Watch Now";
+        watchBtn.disabled = !canWatch;
+        watchBtn.onclick = () => {
+          window.open(video.url, "_blank");
+          watchBtn.disabled = true;
+
+          setTimeout(() => {
+            verifyBtn.disabled = false;
+          }, 30000); // Enable after 30 sec
+        };
+        box.appendChild(watchBtn);
+
+        const verifyBtn = document.createElement("button");
+        verifyBtn.className = "btn";
+        verifyBtn.textContent = "✅ Verify & Claim";
+        verifyBtn.disabled = true;
+        verifyBtn.onclick = () => {
+          claimReward(video.id);
+          verifyBtn.disabled = true;
+        };
+        box.appendChild(verifyBtn);
+
+        const msg = document.createElement("div");
+        msg.className = "message";
+        msg.id = "msg_" + video.id;
+        box.appendChild(msg);
+
+        if (!canWatch) {
+          const hoursLeft = Math.ceil((12 * 60 * 60 * 1000 - diff) / (60 * 60 * 1000));
+          msg.textContent = `⏳ Please wait ${hoursLeft} hour(s) to watch again.`;
+        }
+
+        container.appendChild(box);
+      });
     }
 
-    function watchVideo() {
-      // Simulate video watching delay
-      document.getElementById("videoMessage").textContent = "⏳ Verifying...";
-      setTimeout(() => {
-        db.ref("users/" + currentUser).once("value").then(snapshot => {
-          const data = snapshot.val() || {};
-          const newTotal = (data.total_earned || 0) + 1;
-          const now = Date.now();
+    function claimReward(videoId) {
+      db.ref("users/" + currentUser).once("value").then(snapshot => {
+        const data = snapshot.val() || {};
+        const total = (data.total_earned || 0) + 1;
+        const now = Date.now();
 
-          const updates = {
-            [`users/${currentUser}/total_earned`]: newTotal,
-            [`users/${currentUser}/last_video_watch`]: now
-          };
+        const updates = {
+          [`users/${currentUser}/total_earned`]: total,
+          [`users/${currentUser}/${videoId}_watch`]: now
+        };
 
-          db.ref().update(updates).then(() => {
-            document.getElementById("videoMessage").textContent = "✅ 1 ZMM added successfully!";
-            document.getElementById("videoMissionBox").style.display = "none";
-          });
+        db.ref().update(updates).then(() => {
+          document.getElementById("msg_" + videoId).textContent = "🎉 1 ZMM added!";
         });
-      }, 2000); // simulate 2 sec wait
+      });
     }
   </script>
 
