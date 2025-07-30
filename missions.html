@@ -1,4 +1,3 @@
-<!-- ✅ mission.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -75,6 +74,7 @@
       const snapshot = await userRef.get();
       const defaultData = {
         total_earned: 0,
+        dashboard_balance: 0,
         active_plan: "plan_free",
         missions_completed: {}
       };
@@ -146,13 +146,15 @@
       };
 
       const updatedTotal = (user.total_earned || 0) + reward;
+      const updatedDashboard = (user.dashboard_balance || 0) + reward;
 
       await userRef.update({
         total_earned: updatedTotal,
+        dashboard_balance: updatedDashboard,
         missions_completed: updatedMissions
       });
 
-      alert(`✅ Verified! +${reward} ZMM added to Total Earned.`);
+      alert(`✅ Verified! +${reward} ZMM added to your dashboard.`);
       document.getElementById("verify-" + taskId).style.display = "none";
       document.getElementById(taskId).innerHTML = `<p>✅ Completed. Come back in ${HIDE_DURATION_HOURS} hours.</p>`;
     }
@@ -179,4 +181,4 @@
     }
   </script>
 </body>
-</html>
+      </html>
