@@ -2,49 +2,68 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Daily Missions</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ZMMK Missions</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f3f3f3;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .plan {
+      margin-bottom: 20px;
+      font-size: 18px;
+      color: #6a11cb;
+    }
+    .mission-box {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .btn {
+      padding: 10px 20px;
+      background: linear-gradient(to right, #6a11cb, #2575fc);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .message {
+      margin-top: 10px;
+      font-weight: bold;
+      color: green;
+    }
+  </style>
 </head>
 <body>
-  <div class="mission-container">
-    <h1>🎯 Daily Missions</h1>
 
-    <div style="background:#222;color:#fff;padding:12px;margin-bottom:15px;border-radius:8px;text-align:center;">
-      <strong>📦 Active Plan:</strong> <span id="plan-name">Loading...</span><br>
-      <strong>🎁 Reward/Task:</strong> <span id="plan-reward">-</span> ZMM Token(s)
-    </div>
+  <div class="title">🎯 Missions</div>
+  <div class="plan" id="activePlan">Loading your plan...</div>
 
-    <!-- Tasks -->
-    <div class="video-task" id="task1">
-      <p>📺 Watch Video 1</p>
-      <button onclick="startTask('https://youtu.be/9iBwP4TbFHg?si=-spUOeZHbBEkQRnD', 'task1')">▶️ Watch</button>
-      <button id="verify-task1" style="display:none;" onclick="verifyTask('task1')">✅ Verify</button>
-    </div>
-
-    <div class="video-task" id="task2">
-      <p>📺 Watch Video 2</p>
-      <button onclick="startTask('https://youtu.be/BfTGQYxp0ec?si=zDE8CtMT12B3aEzz', 'task2')">▶️ Watch</button>
-      <button id="verify-task2" style="display:none;" onclick="verifyTask('task2')">✅ Verify</button>
-    </div>
-
-    <div class="video-task" id="task3">
-      <p>📺 Watch Video 3</p>
-      <button onclick="startTask('https://youtu.be/N4fOamB7uec?si=4timJdDmBeTlZvNG', 'task3')">▶️ Watch</button>
-      <button id="verify-task3" style="display:none;" onclick="verifyTask('task3')">✅ Verify</button>
-    </div>
-
-    <div class="video-task" id="task4">
-      <p>📺 Watch Video 4</p>
-      <button onclick="startTask('https://youtu.be/BAXgvXnaKB4?si=acuEFWXuZazv4rrB', 'task4')">▶️ Watch</button>
-      <button id="verify-task4" style="display:none;" onclick="verifyTask('task4')">✅ Verify</button>
-    </div>
+  <div class="mission-box" id="videoMissionBox" style="display:none;">
+    <p>🎥 Watch video to earn 1 ZMM</p>
+    <button class="btn" onclick="watchVideo()">Watch Video</button>
+    <div class="message" id="videoMessage"></div>
   </div>
 
   <script>
-    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
       authDomain: "zmmssmk.firebaseapp.com",
@@ -54,122 +73,69 @@
       messagingSenderId: "677420760492",
       appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
     };
+
     firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
 
-    const TASK_IDS = ['task1', 'task2', 'task3', 'task4'];
-    const HIDE_DURATION_HOURS = 4;
-    let currentTaskStart = {};
+    let currentUser;
 
-    function getUserId() {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get('uid') || "unknown_user";
-    }
-
-    document.addEventListener("DOMContentLoaded", async () => {
-      const userId = getUserId();
-      if (userId === "unknown_user") return;
-
-      await initializeUser();
-      await showPlanInfo();
-      await checkTaskVisibility();
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        currentUser = user.uid;
+        loadUserData();
+      } else {
+        window.location.href = "login.html";
+      }
     });
 
-    async function initializeUser() {
-      const userId = getUserId();
-      const userRef = firebase.database().ref('users/' + userId);
-      const snapshot = await userRef.get();
-      if (!snapshot.exists()) {
-        await userRef.set({
-          total_earned: 0,
-          dashboard_balance: 0,
-          active_plan: "plan_free"
-        });
-      }
+    function loadUserData() {
+      const planEl = document.getElementById("activePlan");
+      db.ref("users/" + currentUser).once("value").then(snapshot => {
+        const data = snapshot.val() || {};
+        const plan = data.active_plan || "free";
+        planEl.textContent = "Active Plan: " + plan;
+        checkVideoEligibility(data);
+      }).catch(() => {
+        planEl.textContent = "Failed to load plan.";
+      });
     }
 
-    function getRewardForPlan(planKey) {
-      switch (planKey) {
-        case "plan_premium": return 3;
-        case "plan_pro": return 5;
-        default: return 1;
-      }
-    }
-
-    async function showPlanInfo() {
-      const userId = getUserId();
-      const snapshot = await firebase.database().ref('users/' + userId).get();
-      if (!snapshot.exists()) return;
-      const user = snapshot.val();
-      const planKey = user.active_plan || "plan_free";
-      const reward = getRewardForPlan(planKey);
-      const planName = planKey.replace("plan_", "").toUpperCase();
-      document.getElementById("plan-name").textContent = planName;
-      document.getElementById("plan-reward").textContent = reward;
-    }
-
-    function startTask(videoUrl, taskId) {
-      currentTaskStart[taskId] = Date.now();
-      window.open(videoUrl, "_blank");
-      document.getElementById("verify-" + taskId).style.display = "inline-block";
-    }
-
-    async function verifyTask(taskId) {
+    function checkVideoEligibility(userData) {
+      const lastWatched = userData.last_video_watch || 0;
       const now = Date.now();
-      const start = currentTaskStart[taskId];
-      if (!start || (now - start) < 30000) {
-        alert("⏳ Please watch at least 30 seconds.");
-        return;
-      }
-
-      const userId = getUserId();
-      const userRef = firebase.database().ref('users/' + userId);
-      const snapshot = await userRef.get();
-      if (!snapshot.exists()) return;
-
-      const user = snapshot.val();
-      const lastWatched = user?.missions_completed?.[taskId]?.lastWatched || 0;
       const diff = now - lastWatched;
-      const reward = getRewardForPlan(user.active_plan || "plan_free");
+      const videoBox = document.getElementById("videoMissionBox");
 
-      if (diff < HIDE_DURATION_HOURS * 3600000) {
-        alert("⛔ Already completed. Come back later.");
-        return;
+      if (diff >= 12 * 60 * 60 * 1000) {
+        videoBox.style.display = "block";
+      } else {
+        videoBox.style.display = "none";
       }
-
-      const updatedTotal = (user.total_earned || 0) + reward;
-      const updatedDashboard = (user.dashboard_balance || 0) + reward;
-
-      await userRef.update({
-        total_earned: updatedTotal,
-        dashboard_balance: updatedDashboard,
-        [`missions_completed/${taskId}/lastWatched`]: now
-      });
-
-      alert(`✅ Verified! +${reward} ZMM added to your main dashboard.`);
-      document.getElementById("verify-" + taskId).style.display = "none";
-      document.getElementById(taskId).innerHTML = `<p>✅ Completed. Come back in ${HIDE_DURATION_HOURS} hours.</p>`;
     }
 
-    async function checkTaskVisibility() {
-      const userId = getUserId();
-      const userRef = firebase.database().ref('users/' + userId);
-      const snapshot = await userRef.get();
-      if (!snapshot.exists()) return;
+    function watchVideo() {
+      // Simulate video watching delay
+      document.getElementById("videoMessage").textContent = "⏳ Verifying...";
+      setTimeout(() => {
+        db.ref("users/" + currentUser).once("value").then(snapshot => {
+          const data = snapshot.val() || {};
+          const newTotal = (data.total_earned || 0) + 1;
+          const now = Date.now();
 
-      const user = snapshot.val();
-      const now = Date.now();
+          const updates = {
+            [`users/${currentUser}/total_earned`]: newTotal,
+            [`users/${currentUser}/last_video_watch`]: now
+          };
 
-      TASK_IDS.forEach(id => {
-        const last = user?.missions_completed?.[id]?.lastWatched || 0;
-        const diff = now - last;
-        const taskEl = document.getElementById(id);
-        if (diff < HIDE_DURATION_HOURS * 3600000) {
-          taskEl.innerHTML = `<p>✅ Already completed. Come back after ${HIDE_DURATION_HOURS} hours.</p>`;
-        } else {
-          taskEl.style.display = "block";
-        }
-      });
+          db.ref().update(updates).then(() => {
+            document.getElementById("videoMessage").textContent = "✅ 1 ZMM added successfully!";
+            document.getElementById("videoMissionBox").style.display = "none";
+          });
+        });
+      }, 2000); // simulate 2 sec wait
     }
   </script>
+
 </body>
-</html>
+  </html>
