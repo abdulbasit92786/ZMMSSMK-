@@ -1,129 +1,18 @@
-<!-- dashboard.html -->
+<!-- ✅ dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ZMMK Dashboard</title>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to right top, #dfe9f3, #ffffff);
-      color: #333;
-      text-align: center;
-      background-image: url('https://i.ibb.co/p2JSP8P/bg-pattern.png');
-      background-size: cover;
-      background-attachment: fixed;
-    }
-    .container {
-      padding: 20px;
-    }
-    .title {
-      font-size: 30px;
-      font-weight: bold;
-      margin-top: 20px;
-      color: #512DA8;
-      text-shadow: 1px 1px #ccc;
-    }
-    .subtitle {
-      font-size: 18px;
-      margin-bottom: 20px;
-      color: #8E24AA;
-    }
-    .earned {
-      font-size: 20px;
-      margin: 20px auto;
-      background-color: #fff;
-      padding: 15px;
-      border-radius: 15px;
-      color: #2E7D32;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-      max-width: 320px;
-    }
-    .btn {
-      margin-top: 10px;
-      padding: 12px 22px;
-      background-image: linear-gradient(to right, #6a11cb, #2575fc);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      cursor: pointer;
-      box-shadow: 0 5px 10px rgba(0,0,0,0.1);
-    }
-    .btn:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-    .referral-box {
-      margin: 20px auto;
-      max-width: 350px;
-    }
-    .referral-input {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #bbb;
-      border-radius: 8px;
-      margin-top: 10px;
-    }
-    .countdown {
-      margin-top: 15px;
-      color: #d32f2f;
-      font-weight: bold;
-    }
-    .nav {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      background-color: #ffffffcc;
-      display: flex;
-      justify-content: space-around;
-      padding: 12px 0;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-      backdrop-filter: blur(8px);
-    }
-    .nav a {
-      color: #6a11cb;
-      font-size: 14px;
-      text-decoration: none;
-    }
-    .nav a:hover {
-      text-decoration: underline;
-    }
-  </style>
+  <title>ZMM Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 </head>
 <body>
   <div class="container">
-    <div class="title">ZMMK App</div>
-    <div class="subtitle">ZMM Token Dashboard</div>
-    <div class="earned" id="totalEarned">Total Earned: 0 ZMM</div>
-
-    <div class="earned">
-      <button class="btn" id="claimToWalletBtn" onclick="claimToWallet()" disabled>Claim to Wallet</button>
-    </div>
-
-    <div class="referral-box">
-      <div><strong>Referral Link:</strong></div>
-      <input type="text" class="referral-input" id="refLink" readonly />
-      <button class="btn" onclick="copyLink()">Copy Link</button>
-    </div>
-
-    <div>
-      <button class="btn" id="claimBtn" onclick="claimReward()">Claim Daily Reward</button>
-      <div id="countdown" class="countdown"></div>
-    </div>
-  </div>
-
-  <div class="nav">
-    <a href="dashboard.html">🏠 Home</a>
-    <a href="missions.html">🎯 Mission</a>
-    <a href="nft.html">🖼 NFT</a>
-    <a href="wallet.html">💼 Wallet</a>
-    <a href="profile.html">👤 Profile</a>
+    <h1>📊 Dashboard</h1>
+    <p><strong>Total Earned:</strong> <span id="total-earned">0.00</span> ZMM</p>
   </div>
 
   <script>
@@ -136,142 +25,38 @@
       messagingSenderId: "677420760492",
       appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
     };
-
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const database = firebase.database();
 
-    const claimCooldown = 4 * 60 * 60;
-    const countdownEl = document.getElementById("countdown");
-    const claimBtn = document.getElementById("claimBtn");
-    const earnedEl = document.getElementById("totalEarned");
-    const claimToWalletBtn = document.getElementById("claimToWalletBtn");
-    const refLink = document.getElementById("refLink");
+    function getUserId() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("uid") || "unknown_user";
+    }
 
-    let currentUserId;
+    async function updateBalance() {
+      const userId = getUserId();
+      const userRef = firebase.database().ref("users/" + userId);
+      const snapshot = await userRef.get();
+      if (!snapshot.exists()) return;
 
-    auth.onAuthStateChanged(function(user) {
-      if (user) {
-        currentUserId = user.uid;
-        refLink.value = `https://zmmssmk.com/register?ref=${currentUserId}`;
-        loadUserData();
+      const user = snapshot.val();
+      const now = Date.now();
+      const lastClaimed = user.lastClaimed || 0;
+
+      if (now - lastClaimed >= 4 * 60 * 60 * 1000) {
+        const updatedTotal = (user.total_earned || 0) + 0.5;
+
+        await userRef.update({
+          total_earned: updatedTotal,
+          lastClaimed: now
+        });
+
+        document.getElementById("total-earned").textContent = updatedTotal.toFixed(2);
       } else {
-        window.location.href = "login.html";
-      }
-    });
-
-    function copyLink() {
-      navigator.clipboard.writeText(refLink.value).then(() => {
-        alert("Referral link copied!");
-      }).catch(() => {
-        alert("Failed to copy link.");
-      });
-    }
-
-    function getRewardForPlan(planKey) {
-      if (!planKey || planKey === "free") return 0.5;
-      const amount = parseFloat(planKey.split("_")[2]);
-      switch (amount) {
-        case 10:
-        case 1000: return 2;
-        case 25:
-        case 2500: return 4;
-        case 50:
-        case 5000: return 6;
-        case 100:
-        case 10000: return 12;
-        case 500:
-        case 50000: return 20;
-        default: return 0.5;
+        document.getElementById("total-earned").textContent = (user.total_earned || 0).toFixed(2);
       }
     }
 
-    function updateUI(data) {
-      const totalEarned = data.total_earned || 0;
-      earnedEl.textContent = `Total Earned: ${totalEarned.toFixed(2)} ZMM`;
-      claimToWalletBtn.disabled = totalEarned < 20;
-    }
-
-    function loadUserData() {
-      database.ref("users/" + currentUserId).once("value").then(snapshot => {
-        const data = snapshot.val() || {};
-        updateUI(data);
-        const lastClaim = data.last_claim_time || 0;
-        const now = Date.now();
-        const remaining = Math.floor(claimCooldown - (now - lastClaim) / 1000);
-        if (remaining > 0) {
-          claimBtn.disabled = true;
-          startCountdown(remaining);
-        } else {
-          claimBtn.disabled = false;
-        }
-      });
-    }
-
-    function claimReward() {
-      database.ref("users/" + currentUserId).once("value").then(snapshot => {
-        const data = snapshot.val() || {};
-        const planKey = data.active_plan || "free";
-        const reward = getRewardForPlan(planKey);
-        const now = Date.now();
-        const newTotal = (data.total_earned || 0) + reward;
-
-        database.ref("users/" + currentUserId).update({
-          total_earned: newTotal,
-          last_claim_time: now
-        });
-
-        claimBtn.disabled = true;
-        updateUI({ total_earned: newTotal });
-        startCountdown(claimCooldown);
-      });
-    }
-
-    function startCountdown(seconds) {
-      let interval = setInterval(() => {
-        let h = Math.floor(seconds / 3600);
-        let m = Math.floor((seconds % 3600) / 60);
-        let s = seconds % 60;
-        countdownEl.textContent = `Next claim in ${h}h ${m}m ${s}s`;
-        if (--seconds < 0) {
-          clearInterval(interval);
-          countdownEl.textContent = "";
-          claimBtn.disabled = false;
-        }
-      }, 1000);
-    }
-
-    function claimToWallet() {
-      database.ref("users/" + currentUserId).once("value").then(snapshot => {
-        const data = snapshot.val() || {};
-        let total = data.total_earned || 0;
-        if (total < 20) return alert("Minimum 20 ZMM required to claim.");
-
-        const amountToClaim = Math.min(100, total);
-        const newZMM = (data.wallet?.zmm || 0) + amountToClaim;
-        const newTotal = total - amountToClaim;
-
-        const updates = {};
-        updates[`users/${currentUserId}/wallet/zmm`] = newZMM;
-        updates[`users/${currentUserId}/total_earned`] = newTotal;
-        updates[`wallets/${currentUserId}/zmm`] = newZMM;
-
-        database.ref().update(updates).then(() => {
-          alert(`${amountToClaim} ZMM claimed to wallet!`);
-          updateUI({ total_earned: newTotal });
-        });
-      });
-    }
-
-    function addMissionToken() {
-      database.ref("users/" + currentUserId).once("value").then(snapshot => {
-        const data = snapshot.val() || {};
-        const newTotal = (data.total_earned || 0) + 1;
-        database.ref("users/" + currentUserId + "/total_earned").set(newTotal).then(() => {
-          updateUI({ total_earned: newTotal });
-        });
-      });
-    }
+    window.onload = updateBalance;
   </script>
 </body>
-  </html>
+</html>
