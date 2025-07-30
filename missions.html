@@ -5,6 +5,7 @@
   <title>Daily Missions</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
+
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script>
@@ -43,8 +44,7 @@
         zmm_balance: 0,
         total_earned: 0,
         active_plan: "plan_free",
-        missions_completed: {},
-        video_earned: 0
+        missions_completed: {}
       };
 
       if (!snapshot.exists()) {
@@ -108,10 +108,8 @@
         return;
       }
 
-      // Update balances
-      const newBalance = (user.zmm_balance || 0) + reward;
+      // ✅ صرف total_earned میں اضافہ
       const newEarned = (user.total_earned || 0) + reward;
-      const videoEarned = (user.video_earned || 0) + reward;
 
       const updatedMissions = {
         ...(user.missions_completed || {}),
@@ -122,9 +120,7 @@
       };
 
       await userRef.update({
-        zmm_balance: newBalance,
-        total_earned: newEarned,       // ✅ Total earned updated here
-        video_earned: videoEarned,
+        total_earned: newEarned,
         missions_completed: updatedMissions
       });
 
