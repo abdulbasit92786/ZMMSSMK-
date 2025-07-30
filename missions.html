@@ -1,154 +1,13 @@
+<!-- ✅ mission.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Daily Missions</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
-      authDomain: "zmmssmk.firebaseapp.com",
-      databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
-      projectId: "zmmssmk",
-      storageBucket: "zmmssmk.appspot.com",
-      messagingSenderId: "677420760492",
-      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
-    };
-    firebase.initializeApp(firebaseConfig);
-
-    const TASK_IDS = ['task1', 'task2', 'task3', 'task4'];
-    const HIDE_DURATION_HOURS = 12;
-    let currentTaskStart = {};
-
-    function getUserId() {
-      const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get('uid') || "unknown_user";
-    }
-
-    document.addEventListener("DOMContentLoaded", async () => {
-      await initializeUser();
-      await showPlanInfo();
-      await checkTaskVisibility();
-    });
-
-    async function initializeUser() {
-      const userId = getUserId();
-      const userRef = firebase.database().ref('users/' + userId);
-      const snapshot = await userRef.get();
-
-      const defaultData = {
-        total_earned: 0,
-        active_plan: "plan_free",
-        missions_completed: {}
-      };
-
-      if (!snapshot.exists()) {
-        await userRef.set(defaultData);
-      } else {
-        const user = snapshot.val();
-        if (!user.active_plan || user.active_plan === "expired") {
-          await userRef.update({ active_plan: "plan_free" });
-        }
-      }
-    }
-
-    function getRewardForPlan(planKey) {
-      switch (planKey) {
-        case "plan_premium": return 3;
-        case "plan_pro": return 5;
-        default: return 1;
-      }
-    }
-
-    async function showPlanInfo() {
-      const userId = getUserId();
-      const snapshot = await firebase.database().ref('users/' + userId).get();
-      if (!snapshot.exists()) return;
-
-      const user = snapshot.val();
-      const planKey = user.active_plan || "plan_free";
-      const reward = getRewardForPlan(planKey);
-      const planName = planKey.replace("plan_", "").toUpperCase();
-
-      document.getElementById("plan-name").textContent = planName;
-      document.getElementById("plan-reward").textContent = reward;
-    }
-
-    function startTask(videoUrl, taskId) {
-      currentTaskStart[taskId] = Date.now();
-      window.open(videoUrl, "_blank");
-      document.getElementById("verify-" + taskId).style.display = "inline-block";
-    }
-
-    async function verifyTask(taskId) {
-      const now = Date.now();
-      const start = currentTaskStart[taskId];
-      if (!start || (now - start) < 30000) {
-        alert("⏳ Please watch at least 30 seconds.");
-        return;
-      }
-
-      const userId = getUserId();
-      const userRef = firebase.database().ref('users/' + userId);
-      const snapshot = await userRef.get();
-      if (!snapshot.exists()) return;
-
-      const user = snapshot.val();
-      const lastWatched = user.missions_completed?.[taskId]?.lastWatched || 0;
-      const diff = now - lastWatched;
-      const reward = getRewardForPlan(user.active_plan || "plan_free");
-
-      if (diff < HIDE_DURATION_HOURS * 3600000) {
-        alert("⛔ Already completed. Come back later.");
-        return;
-      }
-
-      // ✅ صرف total_earned میں جمع کریں
-      const newEarned = (user.total_earned || 0) + reward;
-
-      const updatedMissions = {
-        ...(user.missions_completed || {}),
-        [taskId]: {
-          completed: true,
-          lastWatched: now
-        }
-      };
-
-      await userRef.update({
-        total_earned: newEarned,
-        missions_completed: updatedMissions
-      });
-
-      alert(`✅ Video verified. You earned +${reward} ZMM!`);
-      document.getElementById("verify-" + taskId).style.display = "none";
-      document.getElementById(taskId).innerHTML = `<p>✅ Completed. Come back after ${HIDE_DURATION_HOURS} hours.</p>`;
-    }
-
-    async function checkTaskVisibility() {
-      const userId = getUserId();
-      const userRef = firebase.database().ref('users/' + userId);
-      const snapshot = await userRef.get();
-      if (!snapshot.exists()) return;
-
-      const user = snapshot.val();
-      const now = Date.now();
-
-      TASK_IDS.forEach(id => {
-        const last = user.missions_completed?.[id]?.lastWatched || 0;
-        const diff = now - last;
-        const taskEl = document.getElementById(id);
-
-        if (diff < HIDE_DURATION_HOURS * 3600000) {
-          taskEl.innerHTML = `<p>✅ Already completed. Come back after ${HIDE_DURATION_HOURS} hours.</p>`;
-        } else {
-          taskEl.style.display = "block";
-        }
-      });
-    }
-  </script>
 </head>
 <body>
   <div class="mission-container">
@@ -182,5 +41,142 @@
       <button id="verify-task4" style="display:none;" onclick="verifyTask('task4')">✅ Verify</button>
     </div>
   </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
+      authDomain: "zmmssmk.firebaseapp.com",
+      databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
+      projectId: "zmmssmk",
+      storageBucket: "zmmssmk.appspot.com",
+      messagingSenderId: "677420760492",
+      appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    const TASK_IDS = ['task1', 'task2', 'task3', 'task4'];
+    const HIDE_DURATION_HOURS = 12;
+    let currentTaskStart = {};
+
+    function getUserId() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('uid') || "unknown_user";
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      await initializeUser();
+      await showPlanInfo();
+      await checkTaskVisibility();
+    });
+
+    async function initializeUser() {
+      const userId = getUserId();
+      const userRef = firebase.database().ref('users/' + userId);
+      const snapshot = await userRef.get();
+      const defaultData = {
+        total_earned: 0,
+        active_plan: "plan_free",
+        missions_completed: {}
+      };
+      if (!snapshot.exists()) {
+        await userRef.set(defaultData);
+      } else {
+        const user = snapshot.val();
+        if (!user.active_plan || user.active_plan === "expired") {
+          await userRef.update({ active_plan: "plan_free" });
+        }
+      }
+    }
+
+    function getRewardForPlan(planKey) {
+      switch (planKey) {
+        case "plan_premium": return 3;
+        case "plan_pro": return 5;
+        default: return 1;
+      }
+    }
+
+    async function showPlanInfo() {
+      const userId = getUserId();
+      const snapshot = await firebase.database().ref('users/' + userId).get();
+      if (!snapshot.exists()) return;
+      const user = snapshot.val();
+      const planKey = user.active_plan || "plan_free";
+      const reward = getRewardForPlan(planKey);
+      const planName = planKey.replace("plan_", "").toUpperCase();
+      document.getElementById("plan-name").textContent = planName;
+      document.getElementById("plan-reward").textContent = reward;
+    }
+
+    function startTask(videoUrl, taskId) {
+      currentTaskStart[taskId] = Date.now();
+      window.open(videoUrl, "_blank");
+      document.getElementById("verify-" + taskId).style.display = "inline-block";
+    }
+
+    async function verifyTask(taskId) {
+      const now = Date.now();
+      const start = currentTaskStart[taskId];
+      if (!start || (now - start) < 30000) {
+        alert("⏳ Please watch at least 30 seconds.");
+        return;
+      }
+
+      const userId = getUserId();
+      const userRef = firebase.database().ref('users/' + userId);
+      const snapshot = await userRef.get();
+      if (!snapshot.exists()) return;
+
+      const user = snapshot.val();
+      const lastWatched = user.missions_completed?.[taskId]?.lastWatched || 0;
+      const diff = now - lastWatched;
+      const reward = getRewardForPlan(user.active_plan || "plan_free");
+
+      if (diff < HIDE_DURATION_HOURS * 3600000) {
+        alert("⛔ Already completed. Come back later.");
+        return;
+      }
+
+      const updatedMissions = {
+        ...(user.missions_completed || {}),
+        [taskId]: {
+          completed: true,
+          lastWatched: now
+        }
+      };
+
+      const updatedTotal = (user.total_earned || 0) + reward;
+
+      await userRef.update({
+        total_earned: updatedTotal,
+        missions_completed: updatedMissions
+      });
+
+      alert(`✅ Verified! +${reward} ZMM added to Total Earned.`);
+      document.getElementById("verify-" + taskId).style.display = "none";
+      document.getElementById(taskId).innerHTML = `<p>✅ Completed. Come back in ${HIDE_DURATION_HOURS} hours.</p>`;
+    }
+
+    async function checkTaskVisibility() {
+      const userId = getUserId();
+      const userRef = firebase.database().ref('users/' + userId);
+      const snapshot = await userRef.get();
+      if (!snapshot.exists()) return;
+
+      const user = snapshot.val();
+      const now = Date.now();
+
+      TASK_IDS.forEach(id => {
+        const last = user.missions_completed?.[id]?.lastWatched || 0;
+        const diff = now - last;
+        const taskEl = document.getElementById(id);
+        if (diff < HIDE_DURATION_HOURS * 3600000) {
+          taskEl.innerHTML = `<p>✅ Already completed. Come back after ${HIDE_DURATION_HOURS} hours.</p>`;
+        } else {
+          taskEl.style.display = "block";
+        }
+      });
+    }
+  </script>
 </body>
 </html>
