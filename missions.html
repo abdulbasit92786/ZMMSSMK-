@@ -59,13 +59,22 @@
 
     function getUserId() {
       const urlParams = new URLSearchParams(window.location.search);
-      return urlParams.get('uid') || "unknown_user";
+      const uid = urlParams.get('uid');
+      if (!uid) {
+        alert("❌ UID missing in URL. Please open this from Telegram WebApp.");
+        throw new Error("UID not found in URL");
+      }
+      return uid;
     }
 
     document.addEventListener("DOMContentLoaded", async () => {
-      await initializeUser();
-      await showPlanInfo();
-      await checkTaskVisibility();
+      try {
+        await initializeUser();
+        await showPlanInfo();
+        await checkTaskVisibility();
+      } catch (e) {
+        console.error(e);
+      }
     });
 
     async function initializeUser() {
@@ -181,4 +190,4 @@
     }
   </script>
 </body>
-      </html>
+  </html>
