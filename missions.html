@@ -10,28 +10,51 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: #f3f3f3;
+      background: linear-gradient(to right, #ece9e6, #ffffff);
       margin: 0;
       padding: 20px;
       color: #333;
     }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+    }
+
     .title {
-      font-size: 24px;
+      font-size: 28px;
       font-weight: bold;
       margin-bottom: 10px;
+      text-align: center;
+      color: #444;
     }
+
     .plan {
-      margin-bottom: 20px;
-      font-size: 18px;
+      margin-bottom: 30px;
+      font-size: 20px;
       color: #6a11cb;
+      text-align: center;
     }
+
     .mission-box {
       background: #fff;
       padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 5px 10px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
+      border-radius: 15px;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
+      transition: transform 0.2s ease-in-out;
     }
+
+    .mission-box:hover {
+      transform: translateY(-3px);
+    }
+
+    .mission-box p {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+
     .btn {
       padding: 10px 20px;
       background: linear-gradient(to right, #6a11cb, #2575fc);
@@ -39,13 +62,15 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      font-size: 16px;
-      margin: 5px 0;
+      font-size: 15px;
+      margin-right: 10px;
     }
+
     .btn:disabled {
       background: #ccc;
       cursor: not-allowed;
     }
+
     .message {
       margin-top: 10px;
       font-weight: bold;
@@ -55,10 +80,11 @@
 </head>
 <body>
 
-  <div class="title">🎯 Missions</div>
-  <div class="plan" id="activePlan">Loading your plan...</div>
-
-  <div id="videosContainer"></div>
+  <div class="container">
+    <div class="title">🎯 Missions</div>
+    <div class="plan" id="activePlan">Loading your plan...</div>
+    <div id="videosContainer"></div>
+  </div>
 
   <script>
     const firebaseConfig = {
@@ -83,6 +109,7 @@
     ];
 
     let currentUser;
+    let currentPlan = "free";
 
     auth.onAuthStateChanged(user => {
       if (user) {
@@ -97,13 +124,24 @@
       const planEl = document.getElementById("activePlan");
       db.ref("users/" + currentUser).once("value").then(snapshot => {
         const data = snapshot.val() || {};
-        const plan = data.active_plan || "free";
-        planEl.textContent = "Active Plan: " + plan;
+        currentPlan = data.active_plan || "free";
+
+        let planText = currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1);
+        planEl.textContent = "🎫 Active Plan: " + planText;
 
         showVideos(data);
       }).catch(() => {
-        planEl.textContent = "Failed to load plan.";
+        planEl.textContent = "⚠️ Failed to load plan.";
       });
+    }
+
+    function getRewardAmount() {
+      switch (currentPlan) {
+        case "premium": return 7;
+        case "basic": return 3;
+        case "free":
+        default: return 1;
+      }
     }
 
     function showVideos(userData) {
@@ -127,36 +165,36 @@
         watchBtn.className = "btn";
         watchBtn.textContent = "▶️ Watch Now";
         watchBtn.disabled = !canWatch;
-        watchBtn.onclick = () => {
-          window.open(video.url, "_blank");
-          watchBtn.disabled = true;
-
-          setTimeout(() => {
-            verifyBtn.disabled = false;
-          }, 30000); // Enable after 30 sec
-        };
-        box.appendChild(watchBtn);
 
         const verifyBtn = document.createElement("button");
         verifyBtn.className = "btn";
         verifyBtn.textContent = "✅ Verify & Claim";
         verifyBtn.disabled = true;
+
+        watchBtn.onclick = () => {
+          window.open(video.url, "_blank");
+          watchBtn.disabled = true;
+          setTimeout(() => verifyBtn.disabled = false, 30000);
+        };
+
         verifyBtn.onclick = () => {
           claimReward(video.id);
           verifyBtn.disabled = true;
         };
+
+        box.appendChild(watchBtn);
         box.appendChild(verifyBtn);
 
         const msg = document.createElement("div");
         msg.className = "message";
         msg.id = "msg_" + video.id;
-        box.appendChild(msg);
 
         if (!canWatch) {
           const hoursLeft = Math.ceil((12 * 60 * 60 * 1000 - diff) / (60 * 60 * 1000));
           msg.textContent = `⏳ Please wait ${hoursLeft} hour(s) to watch again.`;
         }
 
+        box.appendChild(msg);
         container.appendChild(box);
       });
     }
@@ -164,8 +202,9 @@
     function claimReward(videoId) {
       db.ref("users/" + currentUser).once("value").then(snapshot => {
         const data = snapshot.val() || {};
-        const total = (data.total_earned || 0) + 1;
         const now = Date.now();
+        const reward = getRewardAmount();
+        const total = (data.total_earned || 0) + reward;
 
         const updates = {
           [`users/${currentUser}/total_earned`]: total,
@@ -173,11 +212,10 @@
         };
 
         db.ref().update(updates).then(() => {
-          document.getElementById("msg_" + videoId).textContent = "🎉 1 ZMM added!";
+          document.getElementById("msg_" + videoId).textContent = `🎉 ${reward} ZMM added!`;
         });
       });
     }
   </script>
-
 </body>
   </html>
