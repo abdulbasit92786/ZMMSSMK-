@@ -1,3 +1,4 @@
+<!-- مکمل اپڈیٹڈ HTML کوڈ یہاں ہے -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -213,7 +214,8 @@ function renderPlans() {
 }
 
 async function fetchUserData() {
-  firebase.database().ref("wallets/" + userId).on("value", snapshot => {
+  // ✅ بیلنس یہاں سے لوڈ ہو گا
+  firebase.database().ref("users/" + userId + "/wallet").on("value", snapshot => {
     const data = snapshot.val();
     wallet = {
       usdt: data?.usdt || 0,
@@ -247,7 +249,8 @@ async function buyPlan(type, amount) {
   wallet[type] -= amount;
 
   try {
-    await db.ref("wallets/" + userId).set(wallet);
+    // ✅ اب یہاں save ہو گا
+    await db.ref("users/" + userId + "/wallet").set(wallet);
     await db.ref("activePlans/" + userId).set(activePlans);
     updateBalanceUI();
     renderActivePlanInfo();
@@ -270,4 +273,4 @@ async function cancelPlan(type) {
 fetchUserData();
 </script>
 </body>
-  </html>
+      </html>
