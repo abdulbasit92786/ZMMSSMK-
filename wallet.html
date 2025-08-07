@@ -54,16 +54,13 @@
     };
 
     firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
     const db = firebase.database();
 
     const MIN_SWAP_USDT = 5;
     const MIN_SWAP_ZMM = 100;
 
-    const uid = localStorage.getItem("userId");
-    if (!uid) {
-      alert("❌ User ID not found.");
-    }
-
+    let currentUid = null;
     let ZMM_RATE = 0.05;
 
     function getZmmRate(plan) {
@@ -71,7 +68,12 @@
     }
 
     function syncFromFirebase() {
-      const userRef = db.ref("users/" + uid);
+      if (!currentUid) {
+        alert("❌ User not logged in.");
+        return;
+      }
+
+      const userRef = db.ref("users/" + currentUid);
 
       userRef.once("value").then(snapshot => {
         if (!snapshot.exists()) {
@@ -88,8 +90,8 @@
         updateRateLabel();
       });
 
-      // Live listener
-      db.ref("users/" + uid + "/wallet").on("value", snapshot => {
+      // Real-time update
+      db.ref("users/" + currentUid + "/wallet").on("value", snapshot => {
         const wallet = snapshot.val() || { usdt: 0, zmm: 0 };
         updateWalletUI(wallet.usdt, wallet.zmm);
       });
@@ -114,7 +116,7 @@
         return;
       }
 
-      const walletRef = db.ref("users/" + uid + "/wallet");
+      const walletRef = db.ref("users/" + currentUid + "/wallet");
 
       walletRef.once("value").then(snapshot => {
         let data = snapshot.val() || { usdt: 0, zmm: 0 };
@@ -139,7 +141,6 @@
           zmm += zmmEarn;
         }
 
-        // Correctly update in same wallet node
         walletRef.set({ zmm: parseFloat(zmm), usdt: parseFloat(usdt) });
         alert("✅ Swap successful!");
       });
@@ -168,7 +169,15 @@
       document.getElementById("swap-amount").dispatchEvent(new Event("input"));
     });
 
-    document.addEventListener("DOMContentLoaded", syncFromFirebase);
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        currentUid = user.uid;
+        syncFromFirebase();
+      } else {
+        alert("❌ User not logged in.");
+        window.location.href = "login.html"; // یا جہاں آپ کا لاگ اِن پیج ہو
+      }
+    });
 
     function goToWithdrawPage() {
       window.location.href = "withdraw.html";
@@ -179,4 +188,4 @@
     }
   </script>
 </body>
-  </html>
+        </html>
