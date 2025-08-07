@@ -28,7 +28,6 @@
         <option value="zmm-to-usdt">ZMM → USDT</option>
         <option value="usdt-to-zmm">USDT → ZMM</option>
       </select>
-
       <input type="number" id="swap-amount" placeholder="Enter amount">
       <p id="conversion-result">🚱 Rate: 1 ZMM = -</p>
       <p id="calculated-output">You will receive: -</p>
@@ -59,8 +58,10 @@
     const MIN_SWAP_USDT = 5;
     const MIN_SWAP_ZMM = 100;
 
-    // ⚠️ Replace this with actual authentication-based user ID
-    const userId = "guest123";
+    const uid = localStorage.getItem("userId"); // یا جو بھی طریقہ آپ کا UID حاصل کرنے کا ہے
+    if (!uid) {
+      alert("❌ User ID not found.");
+    }
 
     let ZMM_RATE = 0.05;
 
@@ -69,28 +70,27 @@
     }
 
     function syncFromFirebase() {
-      if (!userId) {
-        alert("❌ User ID not found.");
-        return;
-      }
+      const userRef = db.ref("users/" + uid);
 
-      const walletRef = db.ref("users/" + userId + "/wallet");
-
-      walletRef.once("value").then(snapshot => {
+      userRef.once("value").then(snapshot => {
         if (!snapshot.exists()) {
-          walletRef.set({ usdt: 0, zmm: 0 });
+          alert("❌ User not found in database.");
+          return;
         }
-      });
 
-      walletRef.on("value", snapshot => {
-        const data = snapshot.val() || { usdt: 0, zmm: 0 };
-        updateWalletUI(data.usdt, data.zmm);
-      });
+        const userData = snapshot.val();
+        const wallet = userData.wallet || { usdt: 0, zmm: 0 };
+        const activePlan = userData.activePlan || "free";
 
-      db.ref("users/" + userId + "/plan").once("value").then(snapshot => {
-        const userPlan = snapshot.val() || "free";
-        ZMM_RATE = getZmmRate(userPlan);
+        updateWalletUI(wallet.usdt, wallet.zmm);
+        ZMM_RATE = getZmmRate(activePlan);
         updateRateLabel();
+      });
+
+      // Listen to wallet changes
+      db.ref("users/" + uid + "/wallet").on("value", snapshot => {
+        const wallet = snapshot.val() || { usdt: 0, zmm: 0 };
+        updateWalletUI(wallet.usdt, wallet.zmm);
       });
     }
 
@@ -113,10 +113,10 @@
         return;
       }
 
-      const walletRef = db.ref("users/" + userId + "/wallet");
+      const walletRef = db.ref("users/" + uid + "/wallet");
 
       walletRef.once("value").then(snapshot => {
-        const data = snapshot.val() || { usdt: 0, zmm: 0 };
+        let data = snapshot.val() || { usdt: 0, zmm: 0 };
         let zmm = Number(data.zmm);
         let usdt = Number(data.usdt);
 
@@ -177,4 +177,4 @@
     }
   </script>
 </body>
-        </html>
+</html>
