@@ -72,7 +72,7 @@
         return;
       }
 
-      const walletRef = db.ref("wallets/" + userId);
+      const walletRef = db.ref(`users/${userId}/wallet`);
 
       walletRef.once("value").then(snapshot => {
         if (!snapshot.exists()) {
@@ -83,13 +83,11 @@
       walletRef.on("value", snapshot => {
         const data = snapshot.val() || { usdt: 0, zmm: 0 };
         updateWalletUI(data.usdt, data.zmm);
-
-        // Store balances to localStorage so NFT.html can use them too
         localStorage.setItem("usdtBalance", data.usdt);
         localStorage.setItem("zmmBalance", data.zmm);
       });
 
-      db.ref("users/" + userId + "/plan").once("value").then(snapshot => {
+      db.ref(`users/${userId}/plan`).once("value").then(snapshot => {
         const userPlan = snapshot.val() || "free";
         ZMM_RATE = getZmmRate(userPlan);
         updateRateLabel();
@@ -115,7 +113,7 @@
         return;
       }
 
-      const walletRef = db.ref("wallets/" + userId);
+      const walletRef = db.ref(`users/${userId}/wallet`);
 
       walletRef.once("value").then(snapshot => {
         const data = snapshot.val() || { usdt: 0, zmm: 0 };
