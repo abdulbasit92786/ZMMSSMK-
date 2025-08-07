@@ -48,13 +48,13 @@
   <input type="email" id="email" placeholder="Email Address" required />
   <input type="text" id="username" placeholder="Username" required />
   <input type="password" id="password" placeholder="Password" required />
-  <input type="text" id="wallet" placeholder="Wallet Address" required /> <!-- ✅ یہ نیا فیلڈ ہے -->
+  <input type="text" id="wallet" placeholder="Wallet Address" required />
 
   <button id="registerBtn">Register</button>
 
   <script>
     // Firebase initialized in firebase.js
-    
+
     document.getElementById("registerBtn").addEventListener("click", function () {
       const email = document.getElementById("email").value.trim();
       const username = document.getElementById("username").value.trim();
@@ -66,16 +66,19 @@
         return;
       }
 
-      // Firebase Auth کے ذریعے یوزر بنائیں
       firebase.auth().createUserWithEmailAndPassword(email, password)
         .then(userCredential => {
           const uid = userCredential.user.uid;
 
-          // اب Firebase Realtime Database میں یوزر ڈیٹا save کریں
+          // Firebase Realtime Database میں nested wallet object کے ساتھ save کریں
           firebase.database().ref("users/" + uid).set({
             email: email,
             username: username,
-            wallet: wallet,
+            wallet: {
+              address: wallet,
+              usdt: 0,
+              zmm: 0
+            },
             balance: 0,
             activePlan: "free"
           }).then(() => {
@@ -89,4 +92,4 @@
     });
   </script>
 </body>
-    </html>
+</html>
