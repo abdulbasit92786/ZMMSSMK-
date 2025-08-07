@@ -5,6 +5,7 @@
   <title>Wallet</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 </head>
 <body>
@@ -58,7 +59,7 @@
     const MIN_SWAP_USDT = 5;
     const MIN_SWAP_ZMM = 100;
 
-    const uid = localStorage.getItem("userId"); // یہاں سے UID آ رہا ہے
+    const uid = localStorage.getItem("userId");
     if (!uid) {
       alert("❌ User ID not found.");
     }
@@ -95,8 +96,8 @@
     }
 
     function updateWalletUI(usdt, zmm) {
-      document.getElementById("usdt-balance").innerText = `$${usdt.toFixed(2)}`;
-      document.getElementById("zmm-balance").innerText = `${zmm.toFixed(2)} Tokens`;
+      document.getElementById("usdt-balance").innerText = `$${parseFloat(usdt).toFixed(2)}`;
+      document.getElementById("zmm-balance").innerText = `${parseFloat(zmm).toFixed(2)} Tokens`;
     }
 
     function updateRateLabel() {
@@ -138,7 +139,8 @@
           zmm += zmmEarn;
         }
 
-        walletRef.set({ zmm, usdt });
+        // Correctly update in same wallet node
+        walletRef.set({ zmm: parseFloat(zmm), usdt: parseFloat(usdt) });
         alert("✅ Swap successful!");
       });
     }
