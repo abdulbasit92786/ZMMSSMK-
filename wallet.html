@@ -58,7 +58,7 @@
     const MIN_SWAP_USDT = 5;
     const MIN_SWAP_ZMM = 100;
 
-    const uid = localStorage.getItem("userId"); // یا جو بھی طریقہ آپ کا UID حاصل کرنے کا ہے
+    const uid = localStorage.getItem("userId"); // یہاں سے UID آ رہا ہے
     if (!uid) {
       alert("❌ User ID not found.");
     }
@@ -87,7 +87,7 @@
         updateRateLabel();
       });
 
-      // Listen to wallet changes
+      // Live listener
       db.ref("users/" + uid + "/wallet").on("value", snapshot => {
         const wallet = snapshot.val() || { usdt: 0, zmm: 0 };
         updateWalletUI(wallet.usdt, wallet.zmm);
@@ -177,4 +177,4 @@
     }
   </script>
 </body>
-</html>
+  </html>
