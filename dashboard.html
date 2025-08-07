@@ -264,7 +264,6 @@
         const updates = {};
         updates[`users/${currentUserId}/wallet/zmm`] = newZMM;
         updates[`users/${currentUserId}/total_earned`] = newTotal;
-        updates[`wallets/${currentUserId}/zmm`] = newZMM;
 
         database.ref().update(updates).then(() => {
           alert(`${amountToClaim} ZMM claimed to wallet!`);
@@ -294,4 +293,4 @@
     }
   </script>
 </body>
-  </html>
+      </html>
