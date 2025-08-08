@@ -68,10 +68,10 @@
         .then(userCredential => {
           const uid = userCredential.user.uid;
 
-          // Default Free Plan Structure
-          const freePlan = {
+          // Default Free Plan Object (single place for active plan)
+          const activePlan = {
             planId: "free",
-            type: "free",
+            type: "Free",
             amount: 0,
             currency: "USD",
             expiresAt: null,
@@ -88,10 +88,10 @@
               zmm: 0
             },
             balance: 0,
-            activePlan: freePlan
+            activePlan: activePlan
           }).then(() => {
             alert("✅ Registered Successfully!");
-            window.location.href = "index.html"; 
+            window.location.href = "index.html";
           });
         })
         .catch(error => {
