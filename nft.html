@@ -11,11 +11,11 @@
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      background: linear-gradient(120deg, #89f7fe 0%, #66a6ff 100%);
       min-height: 100vh;
       margin: 0;
       padding: 20px;
-      color: #f0f0f0;
+      color: #1a1a1a;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -23,13 +23,15 @@
 
     h1 {
       margin-bottom: 5px;
-      text-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+      color: #0d3b66;
+      text-shadow: 1px 1px 4px rgba(255, 255, 255, 0.6);
     }
     p {
       margin-top: 0;
       margin-bottom: 25px;
       font-size: 18px;
-      text-shadow: 1px 1px 6px rgba(0,0,0,0.3);
+      color: #1a1a1a;
+      text-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
     }
 
     .balances {
@@ -37,136 +39,172 @@
       font-size: 20px;
       display: flex;
       gap: 40px;
-      font-weight: 600;
-      text-shadow: 1px 1px 5px rgba(0,0,0,0.4);
+      font-weight: 700;
+      color: #054a91;
+      text-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
     }
 
     .active-info {
       font-size: 22px;
       font-weight: 700;
       margin-bottom: 30px;
-      padding: 12px 20px;
-      background: rgba(0,0,0,0.3);
-      border-radius: 12px;
-      box-shadow: 0 0 15px #00ff9daa;
+      padding: 15px 25px;
+      background: #e0f7fa;
+      border-radius: 14px;
+      box-shadow: 0 0 20px #29b6f6aa;
       user-select: none;
-      max-width: 600px;
+      max-width: 650px;
       text-align: center;
+      color: #0277bd;
+      letter-spacing: 0.5px;
     }
 
     .plan-container {
       display: flex;
-      max-width: 900px;
+      max-width: 950px;
       width: 100%;
       gap: 40px;
       justify-content: center;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      flex-direction: row;
     }
 
     .plan-section {
-      background: rgba(0,0,0,0.35);
-      padding: 20px;
-      border-radius: 16px;
-      flex: 1 1 350px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-      min-width: 320px;
+      background: #ffffffcc;
+      padding: 25px;
+      border-radius: 18px;
+      flex: 1 1 400px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+      min-width: 350px;
+      color: #054a91;
+      transition: transform 0.3s ease;
+    }
+    .plan-section:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.18);
     }
 
     .plan-section h2 {
       margin-top: 0;
       text-align: center;
-      margin-bottom: 20px;
-      text-shadow: 1px 1px 6px rgba(0,0,0,0.5);
-      font-weight: 800;
+      margin-bottom: 25px;
+      font-weight: 900;
+      font-size: 28px;
+      letter-spacing: 1px;
+      color: #0288d1;
+      text-shadow: 0 0 8px #81d4fa;
     }
 
     .plan {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 14px;
-      margin-bottom: 20px;
-      padding: 15px 20px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.5);
-      transition: background 0.3s ease;
+      background: #bbdefb;
+      border-radius: 16px;
+      margin-bottom: 25px;
+      padding: 20px 24px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+      transition: background 0.4s ease;
+      color: #0d47a1;
     }
 
     .plan:hover {
-      background: rgba(255, 255, 255, 0.18);
+      background: #90caf9;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.2);
     }
 
     .plan h3 {
-      margin: 0 0 6px 0;
-      font-weight: 700;
-      font-size: 22px;
+      margin: 0 0 10px 0;
+      font-weight: 900;
+      font-size: 24px;
+      letter-spacing: 0.5px;
     }
 
     .plan p {
       margin: 6px 0;
-      font-weight: 600;
-      font-size: 15px;
+      font-weight: 700;
+      font-size: 16px;
+      color: #0d47a1dd;
     }
 
     .active-label {
-      background-color: #00cc66dd;
-      color: #fff;
-      padding: 8px 14px;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 16px;
-      margin-top: 12px;
+      background-color: #43a047cc;
+      color: #e8f5e9;
+      padding: 10px 16px;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 17px;
+      margin-top: 14px;
       display: inline-block;
       user-select: none;
+      box-shadow: 0 0 8px #43a047aa;
     }
 
     .btn {
-      margin-top: 12px;
-      padding: 10px 18px;
+      margin-top: 15px;
+      padding: 12px 22px;
       border: none;
-      border-radius: 12px;
-      font-weight: 700;
-      font-size: 16px;
+      border-radius: 16px;
+      font-weight: 800;
+      font-size: 18px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: background-color 0.35s ease;
       user-select: none;
       width: 100%;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+      letter-spacing: 0.5px;
+      color: #ffffff;
     }
 
     .btn:disabled {
-      background-color: #555;
+      background-color: #9e9e9e;
       cursor: not-allowed;
       box-shadow: none;
     }
 
     .buy-btn {
-      background: linear-gradient(45deg, #4caf50, #388e3c);
-      color: white;
+      background: linear-gradient(135deg, #1e88e5, #1565c0);
     }
 
     .buy-btn:hover:not(:disabled) {
-      background: linear-gradient(45deg, #66bb6a, #2e7d32);
+      background: linear-gradient(135deg, #42a5f5, #1e88e5);
     }
 
     .cancel-btn {
-      background: linear-gradient(45deg, #e74c3c, #c0392b);
+      background: linear-gradient(135deg, #e53935, #b71c1c);
       color: white;
-      margin-top: 10px;
+      margin-top: 18px;
       width: auto;
-      padding: 8px 20px;
+      padding: 10px 28px;
+      font-size: 17px;
+      border-radius: 14px;
+      box-shadow: 0 6px 12px #b71c1caa;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      cursor: pointer;
     }
 
     .cancel-btn:hover {
-      background: linear-gradient(45deg, #ff6659, #d35400);
+      background: linear-gradient(135deg, #ef5350, #d32f2f);
+      box-shadow: 0 8px 16px #d32f2faa;
     }
 
     .days-left {
-      margin-top: 8px;
-      font-size: 14px;
+      margin-top: 10px;
+      font-size: 15px;
       font-weight: 700;
-      color: #ffd54f;
+      color: #ffb300;
       user-select: none;
       text-align: right;
+      text-shadow: 0 0 5px #ffa000cc;
     }
 
+    @media(max-width: 860px) {
+      .plan-container {
+        flex-wrap: wrap;
+      }
+      .plan-section {
+        min-width: 100%;
+        margin-bottom: 25px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -182,8 +220,8 @@
   <div class="active-info" id="active-plan-info">Loading your plan...</div>
 
   <div class="plan-container">
-    <div class="plan-section" id="zmm-section"></div>
     <div class="plan-section" id="usdt-section"></div>
+    <div class="plan-section" id="zmm-section"></div>
   </div>
 
 <script>
@@ -265,7 +303,6 @@
     if (daysLeft !== null && daysLeft > 0 && plan.duration) {
       timeText = `${daysLeft} day${daysLeft > 1 ? 's' : ''} remaining`;
     } else if (daysLeft === 0 && plan.duration) {
-      // Plan expired - reset to free plan
       resetPlanToFree();
       return;
     }
@@ -277,7 +314,7 @@
   }
 
   function renderPlans() {
-    ["zmm", "usdt"].forEach(type => {
+    ["usdt", "zmm"].forEach(type => {
       const container = document.getElementById(`${type}-section`);
       container.innerHTML = `<h2>${type === "usdt" ? "💵 USDT Plans" : "🪙 ZMM Token Plans"}</h2>`;
 
@@ -427,4 +464,4 @@
 </script>
 
 </body>
-</html>
+  </html>
