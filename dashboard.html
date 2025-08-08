@@ -151,7 +151,7 @@
     const auth = firebase.auth();
     const database = firebase.database();
 
-    const claimCooldown = 4 * 60 * 60;
+    const claimCooldown = 4 * 60 * 60; // seconds
     const countdownEl = document.getElementById("countdown");
     const claimBtn = document.getElementById("claimBtn");
     const earnedEl = document.getElementById("totalEarned");
@@ -179,8 +179,29 @@
     }
 
     function getRewardForPlan(planKey) {
-      if (!planKey || planKey === "free") return 0.5;
-      const amount = parseFloat(planKey.split("_")[2]);
+      if (!planKey || planKey.toLowerCase() === "free") return 0.5;
+
+      // اگر پلان کا فارمٹ plan_usdt_100 یا کچھ ایسا ہو
+      let amount = 0;
+
+      if (planKey.includes("_")) {
+        const parts = planKey.split("_");
+        for (let part of parts) {
+          const num = parseFloat(part);
+          if (!isNaN(num)) {
+            amount = num;
+            break;
+          }
+        }
+      } else {
+        // اگر پلان کے نام simple ہیں تو mapping کریں
+        switch(planKey.toLowerCase()) {
+          case "premium": amount = 100; break;
+          case "basic": amount = 25; break;
+          default: amount = 0.5;
+        }
+      }
+
       switch (amount) {
         case 10:
         case 1000: return 2;
@@ -222,7 +243,9 @@
       database.ref("users/" + currentUserId).once("value").then(snapshot => {
         const data = snapshot.val() || {};
         const planKey = data.active_plan || "free";
+        console.log("User plan:", planKey);
         const reward = getRewardForPlan(planKey);
+        console.log("Reward for this plan:", reward);
         const now = Date.now();
         const newTotal = (data.total_earned || 0) + reward;
 
