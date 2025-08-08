@@ -13,7 +13,6 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      /* نرم نیلا پس منظر گرادینٹ + ہلکی دھند کے ساتھ */
       background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
       color: #222831;
       text-align: center;
@@ -321,9 +320,18 @@
       database.ref("users/" + currentUserId).once("value").then(snapshot => {
         const data = snapshot.val() || {};
         updateUI(data);
+
+        // Make sure active_plan exists and is valid, fallback to "free"
+        if (!data.active_plan) {
+          currentPlanKey = "free";
+        } else {
+          currentPlanKey = data.active_plan;
+        }
+
         const lastClaim = data.last_claim_time || 0;
         const now = Date.now();
         const remaining = Math.floor(claimCooldown - (now - lastClaim) / 1000);
+
         if (remaining > 0) {
           claimBtn.disabled = true;
           startCountdown(remaining);
@@ -336,14 +344,22 @@
     function claimReward() {
       database.ref("users/" + currentUserId).once("value").then(snapshot => {
         const data = snapshot.val() || {};
-        const planKey = data.active_plan || "free";
+        // Use currentPlanKey from loadUserData(), fallback if missing
+        let planKey = data.active_plan || currentPlanKey || "free";
+        if (!planKey) planKey = "free";
+
         const reward = getRewardForPlan(planKey);
+
+        // If somehow reward is invalid or zero, fallback to free reward
+        const finalReward = (reward && reward > 0) ? reward : PLAN_CONFIG.free.reward;
+
         const now = Date.now();
-        const newTotal = (data.total_earned || 0) + reward;
+        const newTotal = (data.total_earned || 0) + finalReward;
 
         database.ref("users/" + currentUserId).update({
           total_earned: newTotal,
-          last_claim_time: now
+          last_claim_time: now,
+          active_plan: planKey  // ensure active_plan is saved if missing
         }).then(() => {
           claimBtn.disabled = true;
           updateUI({ total_earned: newTotal, active_plan: planKey });
