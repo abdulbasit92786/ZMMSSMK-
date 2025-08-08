@@ -53,8 +53,6 @@
   <button id="registerBtn">Register</button>
 
   <script>
-    // Firebase initialized in firebase.js
-
     document.getElementById("registerBtn").addEventListener("click", function () {
       const email = document.getElementById("email").value.trim();
       const username = document.getElementById("username").value.trim();
@@ -70,7 +68,17 @@
         .then(userCredential => {
           const uid = userCredential.user.uid;
 
-          // Firebase Realtime Database میں nested wallet object کے ساتھ save کریں
+          // Default Free Plan Structure
+          const freePlan = {
+            planId: "free",
+            type: "free",
+            amount: 0,
+            currency: "USD",
+            expiresAt: null,
+            dailyReward: 0,
+            videoReward: 0
+          };
+
           firebase.database().ref("users/" + uid).set({
             email: email,
             username: username,
@@ -80,10 +88,10 @@
               zmm: 0
             },
             balance: 0,
-            activePlan: "free"
+            activePlan: freePlan
           }).then(() => {
             alert("✅ Registered Successfully!");
-            window.location.href = "index.html"; // یا wallet.html
+            window.location.href = "index.html"; 
           });
         })
         .catch(error => {
