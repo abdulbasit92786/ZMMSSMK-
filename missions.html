@@ -109,7 +109,26 @@
     ];
 
     let currentUser;
-    let currentPlan = "free";
+    let currentPlan = "plan_free";
+
+    // پلان کے حساب سے ریوارڈز کنفیگر کریں
+    const PLAN_CONFIG = {
+      usdt: [
+        { amount: 10, videoReward: 2 },
+        { amount: 25, videoReward: 6 },
+        { amount: 50, videoReward: 10 },
+        { amount: 100, videoReward: 16 },
+        { amount: 500, videoReward: 22 }
+      ],
+      zmm: [
+        { amount: 1000, videoReward: 2 },
+        { amount: 2500, videoReward: 6 },
+        { amount: 5000, videoReward: 10 },
+        { amount: 10000, videoReward: 16 },
+        { amount: 50000, videoReward: 22 }
+      ],
+      free: { videoReward: 1 }
+    };
 
     auth.onAuthStateChanged(user => {
       if (user) {
@@ -124,7 +143,7 @@
       const planEl = document.getElementById("activePlan");
       db.ref("users/" + currentUser).once("value").then(snapshot => {
         const data = snapshot.val() || {};
-        currentPlan = data.active_plan || "free";
+        currentPlan = data.active_plan || "plan_free";
 
         let planText = currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1);
         planEl.textContent = "🎫 Active Plan: " + planText;
@@ -135,13 +154,28 @@
       });
     }
 
+    // پلان کے حساب سے ویڈیو انعام دیں
     function getRewardAmount() {
-      switch (currentPlan) {
-        case "premium": return 7;
-        case "basic": return 3;
-        case "free":
-        default: return 1;
+      if (!currentPlan || currentPlan === "plan_free" || currentPlan === "free") {
+        return PLAN_CONFIG.free.videoReward;
       }
+
+      const parts = currentPlan.split("-");
+      if (parts.length !== 2) {
+        return PLAN_CONFIG.free.videoReward; // غلط یا نان میچ پلان پر فری ریوارڈ
+      }
+
+      const [type, amountStr] = parts;
+      const amount = parseInt(amountStr);
+
+      if (PLAN_CONFIG[type]) {
+        const plan = PLAN_CONFIG[type].find(p => p.amount === amount);
+        if (plan) {
+          return plan.videoReward;
+        }
+      }
+
+      return PLAN_CONFIG.free.videoReward;
     }
 
     function showVideos(userData) {
@@ -218,4 +252,4 @@
     }
   </script>
 </body>
-  </html>
+</html>
