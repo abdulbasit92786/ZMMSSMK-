@@ -9,6 +9,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <style>
+    /* آپ کا موجودہ اسٹائل ویسے ہی رہنے دیا ہے */
     body {
       margin: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -175,7 +176,6 @@
     <div class="title">ZMMK App</div>
     <div class="subtitle">ZMM Token Dashboard</div>
 
-    <!-- پلان ڈسپلے -->
     <div class="plan-info" id="activePlanDisplay">Loading your active plan...</div>
 
     <div class="earned" id="totalEarned">Total Earned: 0 ZMM</div>
@@ -219,6 +219,7 @@
     const database = firebase.database();
 
     const claimCooldown = 4 * 60 * 60; // seconds
+
     const countdownEl = document.getElementById("countdown");
     const claimBtn = document.getElementById("claimBtn");
     const earnedEl = document.getElementById("totalEarned");
@@ -227,7 +228,26 @@
     const activePlanDisplay = document.getElementById("activePlanDisplay");
 
     let currentUserId;
-    let currentPlanKey = "free"; // default free
+    let currentPlanKey = "free"; // default
+
+    // پلانز کنفیگریشن - USDT اور ZMM دونوں کے ساتھ
+    const PLAN_CONFIG = {
+      usdt: [
+        { amount: 10, reward: 2 },
+        { amount: 25, reward: 4 },
+        { amount: 50, reward: 6 },
+        { amount: 100, reward: 12 },
+        { amount: 500, reward: 20 }
+      ],
+      zmm: [
+        { amount: 1000, reward: 2 },
+        { amount: 2500, reward: 4 },
+        { amount: 5000, reward: 6 },
+        { amount: 10000, reward: 12 },
+        { amount: 50000, reward: 20 }
+      ],
+      free: { reward: 0.5 }
+    };
 
     auth.onAuthStateChanged(function(user) {
       if (user) {
@@ -249,56 +269,34 @@
 
     function getPlanDisplayName(planKey) {
       if (!planKey || planKey.toLowerCase() === "free") return "Free Plan (0.5 ZMM reward)";
-      if (planKey.includes("_")) {
-        let parts = planKey.split("_");
-        let amount = parts.find(p => !isNaN(parseFloat(p)));
-        if (amount) {
-          let dollarAmount = parseFloat(amount);
-          return `Premium Plan - $${dollarAmount} (Rewards based on plan)`;
-        }
+      if (planKey.startsWith("plan_usdt_")) {
+        let amount = planKey.split("_").pop();
+        return `USDT Plan - $${amount}`;
       }
-      switch(planKey.toLowerCase()) {
-        case "premium": return "Premium Plan (12 ZMM reward)";
-        case "basic": return "Basic Plan (4 ZMM reward)";
-        default: return `Plan: ${planKey}`;
+      if (planKey.startsWith("plan_zmm_")) {
+        let amount = planKey.split("_").pop();
+        return `ZMM Plan - ${amount} ZMM`;
       }
+      return `Plan: ${planKey}`;
     }
 
     function getRewardForPlan(planKey) {
-      if (!planKey || planKey.toLowerCase() === "free") return 0.5;
+      if (!planKey) return PLAN_CONFIG.free.reward;
+      if (planKey.toLowerCase() === "free") return PLAN_CONFIG.free.reward;
 
-      // پلان کی ویلیو واضح نکالیں
-      let amount = 0;
-      if (planKey.includes("_")) {
-        const parts = planKey.split("_");
-        for (let part of parts) {
-          const num = parseFloat(part);
-          if (!isNaN(num)) {
-            amount = num;
-            break;
-          }
-        }
-      } else {
-        switch(planKey.toLowerCase()) {
-          case "premium": amount = 100; break;
-          case "basic": amount = 25; break;
-          default: amount = 0.5;
-        }
+      if (planKey.startsWith("plan_usdt_")) {
+        const amount = parseInt(planKey.split("_").pop(), 10);
+        const plan = PLAN_CONFIG.usdt.find(p => p.amount === amount);
+        if (plan) return plan.reward;
       }
 
-      switch (amount) {
-        case 10:
-        case 1000: return 2;
-        case 25:
-        case 2500: return 4;
-        case 50:
-        case 5000: return 6;
-        case 100:
-        case 10000: return 12;
-        case 500:
-        case 50000: return 20;
-        default: return 0.5;
+      if (planKey.startsWith("plan_zmm_")) {
+        const amount = parseInt(planKey.split("_").pop(), 10);
+        const plan = PLAN_CONFIG.zmm.find(p => p.amount === amount);
+        if (plan) return plan.reward;
       }
+
+      return PLAN_CONFIG.free.reward;
     }
 
     function updateUI(data) {
