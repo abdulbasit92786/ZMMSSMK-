@@ -275,35 +275,42 @@
       });
     }
 
+    // updated to parse planKey like "usdt-100"
     function getPlanDisplayName(planKey) {
       if (!planKey || planKey.toLowerCase() === "free") return "Free Plan (0.5 ZMM reward)";
-      if (planKey.startsWith("plan_usdt_")) {
-        let amount = planKey.split("_").pop();
-        return `USDT Plan - $${amount}`;
-      }
-      if (planKey.startsWith("plan_zmm_")) {
-        let amount = planKey.split("_").pop();
-        return `ZMM Plan - ${amount} ZMM`;
+      
+      const parts = planKey.split("-");
+      if (parts.length === 2) {
+        const type = parts[0];
+        const amount = parts[1];
+        if (type === "usdt") {
+          return `USDT Plan - $${amount}`;
+        }
+        if (type === "zmm") {
+          return `ZMM Plan - ${amount} ZMM`;
+        }
       }
       return `Plan: ${planKey}`;
     }
 
+    // updated to parse planKey like "usdt-100" or "zmm-10000"
     function getRewardForPlan(planKey) {
       if (!planKey) return PLAN_CONFIG.free.reward;
       if (planKey.toLowerCase() === "free") return PLAN_CONFIG.free.reward;
 
-      if (planKey.startsWith("plan_usdt_")) {
-        const amount = parseInt(planKey.split("_").pop(), 10);
-        const plan = PLAN_CONFIG.usdt.find(p => p.amount === amount);
-        if (plan) return plan.reward;
+      const parts = planKey.split("-");
+      if (parts.length === 2) {
+        const type = parts[0];
+        const amount = parseInt(parts[1], 10);
+        if (type === "usdt") {
+          const plan = PLAN_CONFIG.usdt.find(p => p.amount === amount);
+          if (plan) return plan.reward;
+        }
+        if (type === "zmm") {
+          const plan = PLAN_CONFIG.zmm.find(p => p.amount === amount);
+          if (plan) return plan.reward;
+        }
       }
-
-      if (planKey.startsWith("plan_zmm_")) {
-        const amount = parseInt(planKey.split("_").pop(), 10);
-        const plan = PLAN_CONFIG.zmm.find(p => p.amount === amount);
-        if (plan) return plan.reward;
-      }
-
       return PLAN_CONFIG.free.reward;
     }
 
@@ -321,7 +328,6 @@
         const data = snapshot.val() || {};
         updateUI(data);
 
-        // Make sure active_plan exists and is valid, fallback to "free"
         if (!data.active_plan) {
           currentPlanKey = "free";
         } else {
@@ -344,13 +350,11 @@
     function claimReward() {
       database.ref("users/" + currentUserId).once("value").then(snapshot => {
         const data = snapshot.val() || {};
-        // Use currentPlanKey from loadUserData(), fallback if missing
         let planKey = data.active_plan || currentPlanKey || "free";
         if (!planKey) planKey = "free";
 
         const reward = getRewardForPlan(planKey);
 
-        // If somehow reward is invalid or zero, fallback to free reward
         const finalReward = (reward && reward > 0) ? reward : PLAN_CONFIG.free.reward;
 
         const now = Date.now();
@@ -359,7 +363,7 @@
         database.ref("users/" + currentUserId).update({
           total_earned: newTotal,
           last_claim_time: now,
-          active_plan: planKey  // ensure active_plan is saved if missing
+          active_plan: planKey
         }).then(() => {
           claimBtn.disabled = true;
           updateUI({ total_earned: newTotal, active_plan: planKey });
@@ -404,4 +408,4 @@
     }
   </script>
 </body>
-  </html>
+      </html>
