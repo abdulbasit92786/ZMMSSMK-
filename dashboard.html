@@ -11,107 +11,160 @@
   <style>
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to right top, #dfe9f3, #ffffff);
-      color: #333;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      color: #f0f0f0;
       text-align: center;
-      background-image: url('https://i.ibb.co/p2JSP8P/bg-pattern.png');
+      background-image: url('https://i.ibb.co/9r0R9Sr/abstract-waves.png');
+      background-repeat: no-repeat;
       background-size: cover;
       background-attachment: fixed;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
-    .container { padding: 20px; max-width: 400px; margin: auto; }
+    .container { 
+      background: rgba(0,0,0,0.55);
+      padding: 30px 20px 40px 20px; 
+      max-width: 420px; 
+      margin: auto;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    }
     .title {
-      font-size: 30px;
-      font-weight: bold;
-      margin-top: 20px;
-      color: #512DA8;
-      text-shadow: 1px 1px #ccc;
+      font-size: 32px;
+      font-weight: 700;
+      margin-top: 0;
+      color: #ffd700;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
     }
     .subtitle {
-      font-size: 18px;
-      margin-bottom: 20px;
-      color: #8E24AA;
+      font-size: 20px;
+      margin-bottom: 25px;
+      color: #b3b3b3;
+      font-weight: 600;
+      text-shadow: 1px 1px 6px rgba(0,0,0,0.5);
     }
     .plan-info {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 15px;
-      color: #1565c0;
-      background-color: #e3f2fd;
-      padding: 10px 15px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(21, 101, 192, 0.3);
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 25px;
+      color: #4ff2a3;
+      background-color: rgba(0,0,0,0.3);
+      padding: 12px 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 12px #4ff2a3aa;
+      user-select: none;
     }
     .earned {
-      font-size: 20px;
+      font-size: 22px;
       margin: 20px auto;
-      background-color: #fff;
-      padding: 15px;
-      border-radius: 15px;
-      color: #2E7D32;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-      max-width: 320px;
+      background-color: rgba(255,255,255,0.15);
+      padding: 18px 25px;
+      border-radius: 18px;
+      color: #adff2f;
+      box-shadow: 0 6px 18px rgba(173,255,47,0.6);
+      max-width: 350px;
+      user-select: none;
+      font-weight: 600;
+      letter-spacing: 0.04em;
     }
     .btn {
-      margin-top: 10px;
-      padding: 12px 22px;
-      background-image: linear-gradient(to right, #6a11cb, #2575fc);
+      margin-top: 14px;
+      padding: 14px 28px;
+      background-image: linear-gradient(to right, #4caf50, #388e3c);
       color: white;
       border: none;
-      border-radius: 12px;
-      font-size: 16px;
+      border-radius: 16px;
+      font-size: 18px;
       cursor: pointer;
-      box-shadow: 0 5px 10px rgba(0,0,0,0.1);
-      transition: 0.3s;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+      font-weight: 700;
+      transition: background-image 0.3s ease;
+      user-select: none;
+    }
+    .btn:hover:not(:disabled) {
+      background-image: linear-gradient(to right, #66bb6a, #2e7d32);
     }
     .btn:disabled {
-      background-color: #ccc;
+      background-color: #999999;
+      background-image: none;
       cursor: not-allowed;
+      box-shadow: none;
     }
     .referral-box {
-      margin: 20px auto;
-      max-width: 350px;
+      margin: 30px auto 10px auto;
+      max-width: 370px;
+      text-align: left;
+    }
+    .referral-box strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 16px;
+      color: #9ae6b4;
+      user-select: none;
     }
     .referral-input {
       width: 100%;
-      padding: 10px;
-      border: 1px solid #bbb;
-      border-radius: 8px;
-      margin-top: 10px;
+      padding: 12px 15px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      letter-spacing: 0.02em;
+      background-color: rgba(255,255,255,0.15);
+      color: #dff0d8;
+      user-select: all;
+      box-shadow: inset 0 0 10px #4ff2a3aa;
+      font-weight: 600;
     }
     .countdown {
-      margin-top: 15px;
-      color: #d32f2f;
-      font-weight: bold;
+      margin-top: 18px;
+      color: #ff6f61;
+      font-weight: 700;
+      font-size: 18px;
+      user-select: none;
+      text-shadow: 1px 1px 6px rgba(0,0,0,0.7);
     }
     .nav {
       position: fixed;
       bottom: 0;
       width: 100%;
-      background-color: #ffffffcc;
+      background-color: #222222cc;
       display: flex;
       justify-content: space-around;
-      padding: 12px 0;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-      backdrop-filter: blur(8px);
+      padding: 14px 0;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.7);
+      backdrop-filter: blur(12px);
+      user-select: none;
+      z-index: 99;
     }
     .nav a {
-      color: #6a11cb;
-      font-size: 14px;
+      color: #80ffdb;
+      font-size: 16px;
       text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s ease;
     }
-    .nav a:hover { text-decoration: underline; }
-
+    .nav a:hover {
+      color: #00b894;
+      text-decoration: underline;
+    }
     .mission-link {
       display: inline-block;
-      margin-bottom: 20px;
-      padding: 12px 22px;
-      font-size: 16px;
+      margin-bottom: 25px;
+      padding: 14px 28px;
+      font-size: 18px;
       color: white;
       background: linear-gradient(to right, #43cea2, #185a9d);
-      border-radius: 10px;
+      border-radius: 14px;
       text-decoration: none;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.3);
+      font-weight: 700;
+      user-select: none;
+    }
+    .mission-link:hover {
+      background: linear-gradient(to right, #5eead4, #3273a8);
     }
   </style>
 </head>
@@ -122,7 +175,7 @@
     <div class="title">ZMMK App</div>
     <div class="subtitle">ZMM Token Dashboard</div>
 
-    <!-- یہاں پلان کی انفارمیشن دکھائیں گے -->
+    <!-- پلان ڈسپلے -->
     <div class="plan-info" id="activePlanDisplay">Loading your active plan...</div>
 
     <div class="earned" id="totalEarned">Total Earned: 0 ZMM</div>
@@ -131,7 +184,7 @@
     </div>
 
     <div class="referral-box">
-      <div><strong>Referral Link:</strong></div>
+      <strong>Referral Link:</strong>
       <input type="text" class="referral-input" id="refLink" readonly />
       <button class="btn" onclick="copyLink()">Copy Link</button>
     </div>
@@ -194,11 +247,8 @@
       });
     }
 
-    // پلان کے نام کو بہتر readable بنانے والا فنکشن
     function getPlanDisplayName(planKey) {
       if (!planKey || planKey.toLowerCase() === "free") return "Free Plan (0.5 ZMM reward)";
-      
-      // اگر پلان کچھ ایسے ہے plan_usdt_100 یا plan_usdt_5000 وغیرہ
       if (planKey.includes("_")) {
         let parts = planKey.split("_");
         let amount = parts.find(p => !isNaN(parseFloat(p)));
@@ -207,8 +257,6 @@
           return `Premium Plan - $${dollarAmount} (Rewards based on plan)`;
         }
       }
-
-      // ورنہ simple names
       switch(planKey.toLowerCase()) {
         case "premium": return "Premium Plan (12 ZMM reward)";
         case "basic": return "Basic Plan (4 ZMM reward)";
@@ -219,8 +267,8 @@
     function getRewardForPlan(planKey) {
       if (!planKey || planKey.toLowerCase() === "free") return 0.5;
 
+      // پلان کی ویلیو واضح نکالیں
       let amount = 0;
-
       if (planKey.includes("_")) {
         const parts = planKey.split("_");
         for (let part of parts) {
@@ -289,11 +337,11 @@
         database.ref("users/" + currentUserId).update({
           total_earned: newTotal,
           last_claim_time: now
+        }).then(() => {
+          claimBtn.disabled = true;
+          updateUI({ total_earned: newTotal, active_plan: planKey });
+          startCountdown(claimCooldown);
         });
-
-        claimBtn.disabled = true;
-        updateUI({ total_earned: newTotal, active_plan: planKey });
-        startCountdown(claimCooldown);
       });
     }
 
@@ -331,7 +379,6 @@
         });
       });
     }
-
   </script>
 </body>
-    </html>
+  </html>
