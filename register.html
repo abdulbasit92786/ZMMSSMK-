@@ -68,7 +68,7 @@
         .then(userCredential => {
           const uid = userCredential.user.uid;
 
-          // Save user data without activePlan
+          // Save user data WITHOUT activePlan
           firebase.database().ref("users/" + uid).set({
             email: email,
             username: username,
