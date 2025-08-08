@@ -158,7 +158,7 @@ const auth = firebase.auth();
 const db = firebase.database();
 
 let wallet = { usdt: 0, zmm: 0 };
-let activePlans = { usdt: null, zmm: null };
+let activePlan = null;
 let currentUserId = null;
 
 const PLAN_CONFIG = {
@@ -193,19 +193,14 @@ function formatDaysLeft(dateString) {
 
 function renderActivePlanInfo() {
   const info = document.getElementById("active-plan-info");
-  const active = activePlans.usdt || activePlans.zmm;
-  if (active && active.id) {
-    const type = activePlans.usdt ? "usdt" : "zmm";
-    const plan = PLAN_CONFIG[type].find(p => `${type}-${p.amount}` === active.id);
+  if (activePlan) {
+    const type = activePlan.type;
+    const plan = PLAN_CONFIG[type].find(p => `${type}-${p.amount}` === activePlan.planId);
     if (!plan) {
       info.textContent = "⚠️ Error loading active plan.";
       return;
     }
-    if (plan.duration && new Date(active.expiresAt) < new Date()) {
-      cancelPlan(type);
-      return;
-    }
-    const time = plan.duration ? formatDaysLeft(active.expiresAt) : "Lifetime";
+    const time = plan.duration ? formatDaysLeft(activePlan.expiresAt) : "Lifetime";
     info.innerHTML = `✅ Your Active Plan: <strong>${type.toUpperCase()} ${plan.amount}</strong> – ${time}`;
   } else {
     info.innerHTML = `🆓 <strong>Free Plan Active</strong> – Upgrade to earn more!`;
@@ -226,9 +221,9 @@ function renderPlans() {
         <p>🎥 Video Reward: ${plan.videoReward}</p>
         <p>⏰ Every 4 Hours: ${plan.dailyReward}</p>
       `;
-      const isActive = activePlans[type]?.id === planId;
+      const isActive = activePlan?.planId === planId;
       if (isActive) {
-        div.innerHTML += `<div class="active-label">✅ Active<br>${plan.duration ? formatDaysLeft(activePlans[type].expiresAt) : "Lifetime"}</div>`;
+        div.innerHTML += `<div class="active-label">✅ Active<br>${plan.duration ? formatDaysLeft(activePlan.expiresAt) : "Lifetime"}</div>`;
         if (plan.duration) {
           const cancelBtn = document.createElement("button");
           cancelBtn.className = "cancel-button";
@@ -239,7 +234,7 @@ function renderPlans() {
       } else {
         const btn = document.createElement("button");
         btn.textContent = wallet[type] >= plan.amount ? "Buy" : "Insufficient Balance";
-        btn.disabled = !!activePlans[type] || wallet[type] < plan.amount;
+        btn.disabled = !!activePlan || wallet[type] < plan.amount;
         btn.onclick = () => buyPlan(type, plan.amount);
         div.appendChild(btn);
       }
@@ -261,9 +256,9 @@ async function fetchUserData(uid) {
     renderPlans();
   });
 
-  db.ref("activePlans/" + uid).on("value", snapshot => {
+  db.ref("users/" + uid + "/activePlan").on("value", snapshot => {
     const data = snapshot.val();
-    activePlans = data || { usdt: null, zmm: null };
+    activePlan = data || null;
     renderActivePlanInfo();
     renderPlans();
   });
@@ -273,25 +268,21 @@ async function buyPlan(type, amount) {
   const plan = PLAN_CONFIG[type].find(p => p.amount === amount);
   if (!plan || wallet[type] < amount) return alert("❌ Not enough balance");
 
-  if (activePlans[type] && !confirm("⚠️ You already have an active plan. Replace it?")) return;
+  if (activePlan && !confirm("⚠️ You already have an active plan. Replace it?")) return;
 
   const planId = `${type}-${amount}`;
-  const other = type === "usdt" ? "zmm" : "usdt";
-  activePlans[other] = null;
-  activePlans[type] = {
-    id: planId,
-    expiresAt: plan.duration ? new Date(Date.now() + plan.duration * 86400000).toISOString() : null
+  activePlan = {
+    type: type,
+    planId: planId,
+    expiresAt: plan.duration ? new Date(Date.now() + plan.duration * 86400000).toISOString() : null,
+    videoReward: plan.videoReward,
+    dailyReward: plan.dailyReward
   };
   wallet[type] -= amount;
 
   try {
     await db.ref("users/" + currentUserId + "/wallet").set(wallet);
-    await db.ref("activePlans/" + currentUserId).set(activePlans);
-    // --- New extra fields for Mission/Dashboard ---
-    await db.ref("users/" + currentUserId + "/planType").set(type);
-    await db.ref("users/" + currentUserId + "/planId").set(planId);
-    await db.ref("users/" + currentUserId + "/videoReward").set(plan.videoReward);
-    await db.ref("users/" + currentUserId + "/dailyReward").set(plan.dailyReward);
+    await db.ref("users/" + currentUserId + "/activePlan").set(activePlan);
 
     updateBalanceUI();
     renderActivePlanInfo();
@@ -305,12 +296,8 @@ async function buyPlan(type, amount) {
 
 async function cancelPlan(type) {
   if (!confirm("❌ Cancel this plan?")) return;
-  activePlans[type] = null;
-  await db.ref("activePlans/" + currentUserId + "/" + type).remove();
-  await db.ref("users/" + currentUserId + "/planType").remove();
-  await db.ref("users/" + currentUserId + "/planId").remove();
-  await db.ref("users/" + currentUserId + "/videoReward").remove();
-  await db.ref("users/" + currentUserId + "/dailyReward").remove();
+  activePlan = null;
+  await db.ref("users/" + currentUserId + "/activePlan").remove();
   renderActivePlanInfo();
   renderPlans();
 }
