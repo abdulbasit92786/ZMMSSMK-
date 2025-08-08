@@ -22,13 +22,21 @@
       justify-content: center;
     }
     .container { 
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.15); /* ہلکی شفاف سفید */
+      backdrop-filter: saturate(180%) blur(20px); /* گلاس مورفزم ایفکٹ */
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
       padding: 30px 20px 40px 20px; 
       max-width: 420px; 
       margin: auto;
       border-radius: 25px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.12); /* نرم سایہ */
       color: #222831;
+      border: 1.5px solid rgba(255, 255, 255, 0.3); /* نرم سفید بارڈر */
+      transition: background 0.3s ease;
+    }
+    .container:hover {
+      background: rgba(255, 255, 255, 0.25); /* ہلکا ہور ایفکٹ */
+      box-shadow: 0 15px 35px rgba(0,0,0,0.18);
     }
     .title {
       font-size: 34px;
@@ -49,25 +57,35 @@
       font-weight: 700;
       margin-bottom: 25px;
       color: #00adb5;
-      background-color: #d1f0f7;
+      background-color: rgba(209, 240, 247, 0.6);
       padding: 14px 20px;
       border-radius: 18px;
-      box-shadow: 0 0 15px #00adb5aa;
+      box-shadow: 0 0 15px rgba(0, 173, 181, 0.4);
       user-select: none;
-      border: 2px solid #00adb5;
+      border: 2px solid rgba(0, 173, 181, 0.5);
+      transition: background-color 0.3s ease;
+    }
+    .plan-info:hover {
+      background-color: rgba(209, 240, 247, 0.85);
+      box-shadow: 0 0 20px rgba(0, 173, 181, 0.6);
     }
     .earned {
       font-size: 22px;
       margin: 20px auto;
-      background-color: #e0f7fa;
+      background-color: rgba(224, 247, 250, 0.6);
       padding: 20px 25px;
       border-radius: 18px;
       color: #00796b;
-      box-shadow: 0 8px 22px rgba(0,121,107,0.4);
+      box-shadow: 0 8px 22px rgba(0,121,107,0.3);
       max-width: 350px;
       user-select: none;
       font-weight: 600;
       letter-spacing: 0.04em;
+      transition: background-color 0.3s ease;
+    }
+    .earned:hover {
+      background-color: rgba(224, 247, 250, 0.85);
+      box-shadow: 0 10px 30px rgba(0,121,107,0.5);
     }
     .btn {
       margin-top: 14px;
@@ -80,11 +98,12 @@
       cursor: pointer;
       box-shadow: 0 6px 16px rgba(255,111,145,0.5);
       font-weight: 700;
-      transition: background-image 0.3s ease;
+      transition: background-image 0.3s ease, box-shadow 0.3s ease;
       user-select: none;
     }
     .btn:hover:not(:disabled) {
       background-image: linear-gradient(45deg, #ff85a2, #ffa07a);
+      box-shadow: 0 8px 22px rgba(255,135,162,0.7);
     }
     .btn:disabled {
       background-color: #ccc;
@@ -213,6 +232,7 @@
   </div>
 
   <script>
+    // -- JavaScript as you had it -- (no changes needed for the background)
     const firebaseConfig = {
       apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
       authDomain: "zmmssmk.firebaseapp.com",
@@ -275,7 +295,6 @@
       });
     }
 
-    // updated to parse planKey like "usdt-100"
     function getPlanDisplayName(planKey) {
       if (!planKey || planKey.toLowerCase() === "free") return "Free Plan (0.5 ZMM reward)";
       
@@ -293,7 +312,6 @@
       return `Plan: ${planKey}`;
     }
 
-    // updated to parse planKey like "usdt-100" or "zmm-10000"
     function getRewardForPlan(planKey) {
       if (!planKey) return PLAN_CONFIG.free.reward;
       if (planKey.toLowerCase() === "free") return PLAN_CONFIG.free.reward;
@@ -408,4 +426,4 @@
     }
   </script>
 </body>
-      </html>
+  </html>
