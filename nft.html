@@ -14,7 +14,10 @@
     p{text-align:center;font-size:1.2em;margin-bottom:30px}
     .balances{display:flex;justify-content:center;gap:40px;font-size:1.1em;margin-bottom:20px}
     .balances span{font-weight:bold;color:#00ffc3}
-    .active-info{background-color:rgba(255,255,255,0.1);padding:10px 15px;border-radius:8px;text-align:center;margin-bottom:25px;font-size:1em;border:1px solid #00ffc3}
+    .active-info{background-color:rgba(255,255,255,0.1);padding:10px 15px;border-radius:8px;text-align:center;margin-bottom:15px;font-size:1em;border:1px solid #00ffc3}
+    .free-btn-container{text-align:center;margin-bottom:25px}
+    .free-btn{background-color:#00ffc3;color:#000;padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-size:1em;font-weight:bold}
+    .free-btn:hover{background-color:#00c9a7}
     .plan-container{display:flex;flex-wrap:wrap;justify-content:space-between;gap:20px}
     .plan-section{flex:1;min-width:300px;background-color:rgba(255,255,255,0.05);padding:20px;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,0.5)}
     .plan-section h2{text-align:center;margin-bottom:20px;color:#00ffc3}
@@ -33,13 +36,16 @@
 <body>
   <h1>🪙 NFT Access Plans</h1>
   <p>Buy a plan using USDT or ZMM to activate missions and rewards.</p>
-
   <div class="balances">
     <div>💵 USDT Balance: <span id="usdt-dashboard">Loading...</span></div>
     <div>🪙 ZMM Balance: <span id="zmm-dashboard">Loading...</span></div>
   </div>
 
   <div class="active-info" id="active-plan-info">Loading your plan...</div>
+
+  <div class="free-btn-container" id="free-plan-btn-container" style="display:none;">
+    <button class="free-btn" onclick="activateFreePlan()">🆓 Activate Free Plan</button>
+  </div>
 
   <div class="plan-container">
     <div class="plan-section" id="usdt-section"></div>
@@ -104,7 +110,18 @@ function formatDaysLeft(dateString) {
 
 function renderActivePlanInfo() {
   const info = document.getElementById("active-plan-info");
-  if (activePlan && activePlan.type !== "free") {
+  const freeBtnContainer = document.getElementById("free-plan-btn-container");
+
+  if (!activePlan) {
+    info.textContent = "⚠️ No active plan found.";
+    freeBtnContainer.style.display = "block";
+    return;
+  }
+
+  if (activePlan.type === "free") {
+    info.innerHTML = `🆓 <strong>Free Plan Active</strong> – Upgrade to earn more!`;
+    freeBtnContainer.style.display = "none";
+  } else {
     const type = activePlan.type;
     const plan = PLAN_CONFIG[type]?.find(p => `${type}-${p.amount}` === activePlan.planId);
     if (!plan) {
@@ -113,8 +130,7 @@ function renderActivePlanInfo() {
     }
     const time = plan.duration ? formatDaysLeft(activePlan.expiresAt) : "Lifetime";
     info.innerHTML = `✅ Your Active Plan: <strong>${type.toUpperCase()} ${plan.amount}</strong> – ${time}`;
-  } else {
-    info.innerHTML = `🆓 <strong>Free Plan Active</strong> – Upgrade to earn more!`;
+    freeBtnContainer.style.display = "none";
   }
 }
 
@@ -157,13 +173,11 @@ function renderPlans() {
 async function fetchUserData(uid) {
   currentUserId = uid;
 
-  // اگر کوئی پلان نہیں ہے تو فری پلان لگا دو
   const planSnap = await db.ref(`users/${uid}/activePlan`).get();
   if (!planSnap.exists()) {
-    await db.ref(`users/${uid}/activePlan`).set(defaultFreePlan);
+    document.getElementById("free-plan-btn-container").style.display = "block";
   }
 
-  // بیلنس لائیو سنو
   db.ref(`users/${uid}/wallet`).on("value", snapshot => {
     const data = snapshot.val();
     wallet = {
@@ -174,12 +188,20 @@ async function fetchUserData(uid) {
     renderPlans();
   });
 
-  // ایک ہی ایکٹیو پلان لائیو سنو
   db.ref(`users/${uid}/activePlan`).on("value", snapshot => {
-    activePlan = snapshot.val() || defaultFreePlan;
+    activePlan = snapshot.val();
     renderActivePlanInfo();
     renderPlans();
   });
+}
+
+async function activateFreePlan() {
+  if (!currentUserId) return;
+  await db.ref(`users/${currentUserId}/activePlan`).set(defaultFreePlan);
+  activePlan = defaultFreePlan;
+  renderActivePlanInfo();
+  renderPlans();
+  alert("🆓 Free Plan Activated!");
 }
 
 async function buyPlan(type, amount) {
@@ -198,7 +220,6 @@ async function buyPlan(type, amount) {
   wallet[type] -= amount;
 
   try {
-    // صرف ایک ہی activePlan اپڈیٹ
     await db.ref(`users/${currentUserId}/wallet`).set(wallet);
     await db.ref(`users/${currentUserId}/activePlan`).set(newPlan);
     activePlan = newPlan;
