@@ -157,11 +157,13 @@ function renderPlans() {
 async function fetchUserData(uid) {
   currentUserId = uid;
 
+  // اگر کوئی پلان نہیں ہے تو فری پلان لگا دو
   const planSnap = await db.ref(`users/${uid}/activePlan`).get();
   if (!planSnap.exists()) {
     await db.ref(`users/${uid}/activePlan`).set(defaultFreePlan);
   }
 
+  // بیلنس لائیو سنو
   db.ref(`users/${uid}/wallet`).on("value", snapshot => {
     const data = snapshot.val();
     wallet = {
@@ -172,6 +174,7 @@ async function fetchUserData(uid) {
     renderPlans();
   });
 
+  // ایک ہی ایکٹیو پلان لائیو سنو
   db.ref(`users/${uid}/activePlan`).on("value", snapshot => {
     activePlan = snapshot.val() || defaultFreePlan;
     renderActivePlanInfo();
@@ -195,7 +198,7 @@ async function buyPlan(type, amount) {
   wallet[type] -= amount;
 
   try {
-    // صرف ایک ہی ایکٹیو پلان رکھنا
+    // صرف ایک ہی activePlan اپڈیٹ
     await db.ref(`users/${currentUserId}/wallet`).set(wallet);
     await db.ref(`users/${currentUserId}/activePlan`).set(newPlan);
     activePlan = newPlan;
