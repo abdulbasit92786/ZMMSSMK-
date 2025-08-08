@@ -285,7 +285,7 @@ async function fetchUserData(uid) {
     renderPlans();
   });
 
-  db.ref("activePlans/" + uid).on("value", snapshot => {
+  db.ref("active_plan/" + uid).on("value", snapshot => {
     const data = snapshot.val();
     activePlans = data || { usdt: null, zmm: null };
     renderActivePlanInfo();
@@ -310,7 +310,7 @@ async function buyPlan(type, amount) {
 
   try {
     await db.ref("users/" + currentUserId + "/wallet").set(wallet);
-    await db.ref("activePlans/" + currentUserId).set(activePlans);
+    await db.ref("active_plan/" + currentUserId).set(activePlans);
     updateBalanceUI();
     renderActivePlanInfo();
     renderPlans();
@@ -324,7 +324,7 @@ async function buyPlan(type, amount) {
 async function cancelPlan(type) {
   if (!confirm("❌ Cancel this plan?")) return;
   activePlans[type] = null;
-  await db.ref("activePlans/" + currentUserId + "/" + type).remove();
+  await db.ref("active_plan/" + currentUserId + "/" + type).remove();
   renderActivePlanInfo();
   renderPlans();
 }
