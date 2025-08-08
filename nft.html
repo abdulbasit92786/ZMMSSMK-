@@ -9,8 +9,164 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
   <style>
-    /* (آپ کا موجودہ CSS یہاں رہے گا، ویسا ہی) */
-    /* omitted for brevity */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      color: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin-bottom: 5px;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+    }
+    p {
+      margin-top: 0;
+      margin-bottom: 25px;
+      font-size: 18px;
+      text-shadow: 1px 1px 6px rgba(0,0,0,0.3);
+    }
+
+    .balances {
+      margin-bottom: 25px;
+      font-size: 20px;
+      display: flex;
+      gap: 40px;
+      font-weight: 600;
+      text-shadow: 1px 1px 5px rgba(0,0,0,0.4);
+    }
+
+    .active-info {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 30px;
+      padding: 12px 20px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      box-shadow: 0 0 15px #00ff9daa;
+      user-select: none;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    .plan-container {
+      display: flex;
+      max-width: 900px;
+      width: 100%;
+      gap: 40px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .plan-section {
+      background: rgba(0,0,0,0.35);
+      padding: 20px;
+      border-radius: 16px;
+      flex: 1 1 350px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      min-width: 320px;
+    }
+
+    .plan-section h2 {
+      margin-top: 0;
+      text-align: center;
+      margin-bottom: 20px;
+      text-shadow: 1px 1px 6px rgba(0,0,0,0.5);
+      font-weight: 800;
+    }
+
+    .plan {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      margin-bottom: 20px;
+      padding: 15px 20px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+      transition: background 0.3s ease;
+    }
+
+    .plan:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .plan h3 {
+      margin: 0 0 6px 0;
+      font-weight: 700;
+      font-size: 22px;
+    }
+
+    .plan p {
+      margin: 6px 0;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .active-label {
+      background-color: #00cc66dd;
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 16px;
+      margin-top: 12px;
+      display: inline-block;
+      user-select: none;
+    }
+
+    .btn {
+      margin-top: 12px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+      width: 100%;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+
+    .btn:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .buy-btn {
+      background: linear-gradient(45deg, #4caf50, #388e3c);
+      color: white;
+    }
+
+    .buy-btn:hover:not(:disabled) {
+      background: linear-gradient(45deg, #66bb6a, #2e7d32);
+    }
+
+    .cancel-btn {
+      background: linear-gradient(45deg, #e74c3c, #c0392b);
+      color: white;
+      margin-top: 10px;
+      width: auto;
+      padding: 8px 20px;
+    }
+
+    .cancel-btn:hover {
+      background: linear-gradient(45deg, #ff6659, #d35400);
+    }
+
+    .days-left {
+      margin-top: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffd54f;
+      user-select: none;
+      text-align: right;
+    }
+
   </style>
 </head>
 <body>
@@ -26,178 +182,249 @@
   <div class="active-info" id="active-plan-info">Loading your plan...</div>
 
   <div class="plan-container">
-    <div class="plan-section" id="usdt-section"></div>
     <div class="plan-section" id="zmm-section"></div>
+    <div class="plan-section" id="usdt-section"></div>
   </div>
 
 <script>
-// Firebase Config
-const firebaseConfig = {
-  apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
-  authDomain: "zmmssmk.firebaseapp.com",
-  databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
-  projectId: "zmmssmk",
-  storageBucket: "zmmssmk.appspot.com",
-  messagingSenderId: "677420760492",
-  appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
-};
+  // Firebase Config
+  const firebaseConfig = {
+    apiKey: "AIzaSyBN4LbA8udE4POVTR-XlZgpHQOvuNcSMI4",
+    authDomain: "zmmssmk.firebaseapp.com",
+    databaseURL: "https://zmmssmk-default-rtdb.firebaseio.com",
+    projectId: "zmmssmk",
+    storageBucket: "zmmssmk.appspot.com",
+    messagingSenderId: "677420760492",
+    appId: "1:677420760492:web:2c27c0f0ed6490b8dfce09"
+  };
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
 
-let wallet = { usdt: 0, zmm: 0 };
-let activePlanId = "plan_free"; // Default free plan
-let currentUserId = null;
+  let wallet = { usdt: 0, zmm: 0 };
+  let activePlanId = "plan_free"; // Default free plan
+  let currentUserId = null;
+  let activePlanExpiry = null; // timestamp in ms
 
-const PLAN_CONFIG = {
-  usdt: [
-    { amount: 10, duration: 30, videoReward: 2, dailyReward: 2 },
-    { amount: 25, duration: 30, videoReward: 6, dailyReward: 4 },
-    { amount: 50, duration: 30, videoReward: 10, dailyReward: 6 },
-    { amount: 100, duration: 30, videoReward: 16, dailyReward: 12 },
-    { amount: 500, duration: null, videoReward: 22, dailyReward: 20 }
-  ],
-  zmm: [
-    { amount: 1000, duration: 30, videoReward: 2, dailyReward: 2 },
-    { amount: 2500, duration: 30, videoReward: 6, dailyReward: 4 },
-    { amount: 5000, duration: 30, videoReward: 10, dailyReward: 6 },
-    { amount: 10000, duration: 30, videoReward: 16, dailyReward: 12 },
-    { amount: 50000, duration: null, videoReward: 22, dailyReward: 20 }
-  ]
-};
+  const PLAN_CONFIG = {
+    usdt: [
+      { amount: 10, duration: 30, videoReward: 2, dailyReward: 2 },
+      { amount: 25, duration: 30, videoReward: 6, dailyReward: 4 },
+      { amount: 50, duration: 30, videoReward: 10, dailyReward: 6 },
+      { amount: 100, duration: 30, videoReward: 16, dailyReward: 12 },
+      { amount: 500, duration: null, videoReward: 22, dailyReward: 20 }
+    ],
+    zmm: [
+      { amount: 1000, duration: 30, videoReward: 2, dailyReward: 2 },
+      { amount: 2500, duration: 30, videoReward: 6, dailyReward: 4 },
+      { amount: 5000, duration: 30, videoReward: 10, dailyReward: 6 },
+      { amount: 10000, duration: 30, videoReward: 16, dailyReward: 12 },
+      { amount: 50000, duration: null, videoReward: 22, dailyReward: 20 }
+    ]
+  };
 
-function updateBalanceUI() {
-  document.getElementById("usdt-dashboard").textContent = "$" + wallet.usdt.toFixed(2);
-  document.getElementById("zmm-dashboard").textContent = wallet.zmm.toFixed(2) + " ZMM";
-}
-
-function parseActivePlan() {
-  // اگر فری پلان ہو تو دکھائیں ورنہ پلان کی تفصیل نکالیں
-  if (!activePlanId || activePlanId === "plan_free") {
-    return { type: null, amount: null };
-  }
-  // activePlanId کی شکل ہوگی: "usdt-10" یا "zmm-1000"
-  const parts = activePlanId.split("-");
-  if (parts.length !== 2) return { type: null, amount: null };
-  return { type: parts[0], amount: Number(parts[1]) };
-}
-
-function renderActivePlanInfo() {
-  const info = document.getElementById("active-plan-info");
-  const { type, amount } = parseActivePlan();
-
-  if (!type || !amount) {
-    info.innerHTML = `🆓 <strong>Free Plan Active</strong> – Upgrade to earn more!`;
-    return;
+  function updateBalanceUI() {
+    document.getElementById("usdt-dashboard").textContent = "$" + wallet.usdt.toFixed(2);
+    document.getElementById("zmm-dashboard").textContent = wallet.zmm.toFixed(2) + " ZMM";
   }
 
-  const plan = PLAN_CONFIG[type]?.find(p => p.amount === amount);
-  if (!plan) {
-    info.textContent = "⚠️ Error loading active plan.";
-    return;
+  function parseActivePlan() {
+    if (!activePlanId || activePlanId === "plan_free") {
+      return { type: null, amount: null };
+    }
+    const parts = activePlanId.split("-");
+    if (parts.length !== 2) return { type: null, amount: null };
+    return { type: parts[0], amount: Number(parts[1]) };
   }
 
-  const time = plan.duration ? `${plan.duration} days access` : "Lifetime Access";
-  info.innerHTML = `✅ Your Active Plan: <strong>${type.toUpperCase()} ${amount}</strong> – ${time}`;
-}
+  function getDaysLeft() {
+    if (!activePlanExpiry) return null;
+    const msLeft = activePlanExpiry - Date.now();
+    if (msLeft <= 0) return 0;
+    return Math.ceil(msLeft / (1000 * 60 * 60 * 24));
+  }
 
-function renderPlans() {
-  ["usdt", "zmm"].forEach(type => {
-    const container = document.getElementById(`${type}-section`);
-    container.innerHTML = `<h2>${type === "usdt" ? "💵 USDT Plans" : "🪙 ZMM Token Plans"}</h2>`;
+  function renderActivePlanInfo() {
+    const info = document.getElementById("active-plan-info");
+    const { type, amount } = parseActivePlan();
 
-    PLAN_CONFIG[type].forEach(plan => {
-      const planId = `${type}-${plan.amount}`;
-      const div = document.createElement("div");
-      div.className = "plan";
-      div.innerHTML = `
-        <h3>${type === "usdt" ? "$" + plan.amount : plan.amount + " ZMM"}</h3>
-        <p>${plan.duration ? "1 Month Access" : "Lifetime Access"}</p>
-        <p>🎥 Video Reward: ${plan.videoReward}</p>
-        <p>⏰ Every 4 Hours: ${plan.dailyReward}</p>
-      `;
+    if (!type || !amount) {
+      info.innerHTML = `🆓 <strong>Free Plan Active</strong> – Upgrade to earn more!`;
+      return;
+    }
 
-      const isActive = activePlanId === planId;
+    const plan = PLAN_CONFIG[type]?.find(p => p.amount === amount);
+    if (!plan) {
+      info.textContent = "⚠️ Error loading active plan.";
+      return;
+    }
 
-      if (isActive) {
-        div.innerHTML += `<div class="active-label">✅ Active</div>`;
-        // اگر آپ cancel کا آپشن دینا چاہتے ہیں تو یہاں کوڈ رکھ سکتے ہیں
-      } else {
-        const btn = document.createElement("button");
-        btn.textContent = wallet[type] >= plan.amount ? "Buy" : "Insufficient Balance";
-        btn.disabled = activePlanId !== "plan_free" || wallet[type] < plan.amount;
-        btn.onclick = () => buyPlan(type, plan.amount);
-        div.appendChild(btn);
-      }
-      container.appendChild(div);
+    const daysLeft = getDaysLeft();
+    let timeText = plan.duration ? `${plan.duration} days access` : "Lifetime Access";
+    if (daysLeft !== null && daysLeft > 0 && plan.duration) {
+      timeText = `${daysLeft} day${daysLeft > 1 ? 's' : ''} remaining`;
+    } else if (daysLeft === 0 && plan.duration) {
+      // Plan expired - reset to free plan
+      resetPlanToFree();
+      return;
+    }
+
+    info.innerHTML = `
+      ✅ Your Active Plan: <strong>${type.toUpperCase()} ${amount}</strong> – ${timeText}
+      <button class="btn cancel-btn" onclick="cancelPlan()">Cancel Plan</button>
+    `;
+  }
+
+  function renderPlans() {
+    ["zmm", "usdt"].forEach(type => {
+      const container = document.getElementById(`${type}-section`);
+      container.innerHTML = `<h2>${type === "usdt" ? "💵 USDT Plans" : "🪙 ZMM Token Plans"}</h2>`;
+
+      PLAN_CONFIG[type].forEach(plan => {
+        const planId = `${type}-${plan.amount}`;
+        const div = document.createElement("div");
+        div.className = "plan";
+
+        div.innerHTML = `
+          <h3>${type === "usdt" ? "$" + plan.amount : plan.amount + " ZMM"}</h3>
+          <p>${plan.duration ? "1 Month Access" : "Lifetime Access"}</p>
+          <p>🎥 Video Reward: ${plan.videoReward}</p>
+          <p>⏰ Every 4 Hours: ${plan.dailyReward}</p>
+        `;
+
+        const isActive = activePlanId === planId;
+
+        if (isActive) {
+          div.innerHTML += `<div class="active-label">✅ Active</div>`;
+        } else {
+          const btn = document.createElement("button");
+          btn.textContent = wallet[type] >= plan.amount ? "Buy" : "Insufficient Balance";
+          btn.disabled = activePlanId !== "plan_free" || wallet[type] < plan.amount;
+          btn.className = "btn buy-btn";
+          btn.onclick = () => buyPlan(type, plan.amount);
+          div.appendChild(btn);
+        }
+        container.appendChild(div);
+      });
     });
-  });
-}
+  }
 
-async function fetchUserData(uid) {
-  currentUserId = uid;
+  async function fetchUserData(uid) {
+    currentUserId = uid;
 
-  // Wallet
-  db.ref("users/" + uid + "/wallet").on("value", snapshot => {
-    const data = snapshot.val();
-    wallet = {
-      usdt: data?.usdt || 0,
-      zmm: data?.zmm || 0
-    };
-    updateBalanceUI();
-    renderPlans();
-  });
+    // Fetch wallet & active plan
+    db.ref("users/" + uid + "/wallet").on("value", snapshot => {
+      const data = snapshot.val();
+      wallet = {
+        usdt: data?.usdt || 0,
+        zmm: data?.zmm || 0
+      };
+      updateBalanceUI();
+      renderPlans();
+    });
 
-  // Active Plan from users/{uid}/active_plan
-  db.ref("users/" + uid + "/active_plan").on("value", snapshot => {
-    const plan = snapshot.val();
-    activePlanId = plan || "plan_free";
+    db.ref("users/" + uid + "/active_plan").on("value", async snapshot => {
+      const plan = snapshot.val() || "plan_free";
+      activePlanId = plan;
+
+      // Get expiry timestamp if available
+      const expirySnapshot = await db.ref(`users/${uid}/active_plan_expiry`).once("value");
+      activePlanExpiry = expirySnapshot.val() || null;
+
+      // If expiry exists and passed, reset plan
+      if (activePlanExpiry && activePlanExpiry <= Date.now()) {
+        resetPlanToFree();
+        return;
+      }
+
+      renderActivePlanInfo();
+      renderPlans();
+    });
+  }
+
+  async function buyPlan(type, amount) {
+    const planId = `${type}-${amount}`;
+
+    if (activePlanId !== "plan_free" && activePlanId !== null) {
+      if (!confirm("⚠️ You already have an active plan. Replace it?")) return;
+    }
+
+    if (wallet[type] < amount) {
+      alert("❌ Not enough balance");
+      return;
+    }
+
+    // Calculate expiry timestamp if duration exists
+    const plan = PLAN_CONFIG[type].find(p => p.amount === amount);
+    let expiryTimestamp = null;
+    if (plan && plan.duration) {
+      expiryTimestamp = Date.now() + plan.duration * 24 * 60 * 60 * 1000;
+    }
+
+    // Deduct wallet amount
+    wallet[type] -= amount;
+
+    try {
+      // Update wallet, active_plan and expiry atomically
+      await db.ref("users/" + currentUserId + "/wallet").set(wallet);
+      await db.ref("users/" + currentUserId + "/active_plan").set(planId);
+      if (expiryTimestamp) {
+        await db.ref("users/" + currentUserId + "/active_plan_expiry").set(expiryTimestamp);
+        activePlanExpiry = expiryTimestamp;
+      } else {
+        await db.ref("users/" + currentUserId + "/active_plan_expiry").remove();
+        activePlanExpiry = null;
+      }
+
+      activePlanId = planId;
+      updateBalanceUI();
+      renderActivePlanInfo();
+      renderPlans();
+      alert("✅ Plan activated successfully!");
+    } catch (error) {
+      alert("❌ Failed to activate plan. Try again.");
+      console.error(error);
+    }
+  }
+
+  async function cancelPlan() {
+    if (!confirm("⚠️ Are you sure you want to cancel your active plan? You will be reverted to Free Plan.")) return;
+
+    try {
+      // Reset plan to free and remove expiry
+      await db.ref("users/" + currentUserId + "/active_plan").set("plan_free");
+      await db.ref("users/" + currentUserId + "/active_plan_expiry").remove();
+      activePlanId = "plan_free";
+      activePlanExpiry = null;
+      renderActivePlanInfo();
+      renderPlans();
+      alert("✅ Plan cancelled. You are now on Free Plan.");
+    } catch (error) {
+      alert("❌ Failed to cancel plan.");
+      console.error(error);
+    }
+  }
+
+  function resetPlanToFree() {
+    db.ref("users/" + currentUserId + "/active_plan").set("plan_free");
+    db.ref("users/" + currentUserId + "/active_plan_expiry").remove();
+    activePlanId = "plan_free";
+    activePlanExpiry = null;
     renderActivePlanInfo();
     renderPlans();
+    alert("⚠️ Your plan expired and reverted to Free Plan.");
+  }
+
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      fetchUserData(user.uid);
+    } else {
+      alert("⚠️ Please log in first.");
+      window.location.href = "login.html";
+    }
   });
-}
-
-async function buyPlan(type, amount) {
-  const planId = `${type}-${amount}`;
-
-  if (activePlanId !== "plan_free" && activePlanId !== null) {
-    if (!confirm("⚠️ You already have an active plan. Replace it?")) return;
-  }
-
-  if (wallet[type] < amount) {
-    alert("❌ Not enough balance");
-    return;
-  }
-
-  // Deduct wallet amount
-  wallet[type] -= amount;
-
-  try {
-    // Update wallet and active_plan atomically
-    await db.ref("users/" + currentUserId + "/wallet").set(wallet);
-    await db.ref("users/" + currentUserId + "/active_plan").set(planId);
-
-    activePlanId = planId;
-    updateBalanceUI();
-    renderActivePlanInfo();
-    renderPlans();
-    alert("✅ Plan activated successfully!");
-  } catch (error) {
-    alert("❌ Failed to activate plan. Try again.");
-    console.error(error);
-  }
-}
-
-auth.onAuthStateChanged(user => {
-  if (user) {
-    fetchUserData(user.uid);
-  } else {
-    alert("⚠️ Please log in first.");
-    window.location.href = "login.html";
-  }
-});
 </script>
 
 </body>
-  </html>
+</html>
