@@ -195,6 +195,7 @@ async function buyPlan(type, amount) {
   wallet[type] -= amount;
 
   try {
+    // صرف ایک ہی ایکٹیو پلان رکھنا
     await db.ref(`users/${currentUserId}/wallet`).set(wallet);
     await db.ref(`users/${currentUserId}/activePlan`).set(newPlan);
     activePlan = newPlan;
@@ -226,4 +227,4 @@ auth.onAuthStateChanged(user => {
 });
 </script>
 </body>
-      </html>
+  </html>
